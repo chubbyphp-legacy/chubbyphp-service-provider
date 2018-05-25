@@ -1,0 +1,34 @@
+{
+    "name": "chubbyphp/chubbyphp-service-provider",
+    "description": "Chubbyphp service provider",
+    "keywords": ["chubbyphp", "provider", "pimple"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dominik Zogg",
+            "email": "dominik.zogg@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "~7.0",
+        "psr/log": "~1.0"
+    },
+    "conflict": {
+        "doctrine/dbal": "<2.2,>=3.0",
+        "symfony/doctrine-bridge": "<2.7,>=5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5.8",
+        "pimple/pimple": "~3.0",
+        "doctrine/dbal": "^2.2",
+        "symfony/doctrine-bridge": "~2.7|~3.0|~4.0"
+    },
+    "autoload": {
+        "psr-4": { "Chubbyphp\\ServiceProvider\\": "src/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}

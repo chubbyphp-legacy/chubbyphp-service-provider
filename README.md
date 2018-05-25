@@ -24,7 +24,7 @@ Pimple service providers.
 Through [Composer](http://getcomposer.org) as [chubbyphp/chubbyphp-service-provider][1].
 
 ```sh
-composer require chubbyphp/chubbyphp-serialization "~2.1"
+composer require chubbyphp/chubbyphp-service-provider "~1.0"
 ```
 
 ## Providers

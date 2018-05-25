@@ -3,12 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Silex framework.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * (c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)
  */
 
 namespace Chubbyphp\ServiceProvider;

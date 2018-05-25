@@ -8,3 +8,33 @@
 [![Latest Stable Version](https://poser.pugx.org/chubbyphp/chubbyphp-service-provider/v/stable.png)](https://packagist.org/packages/chubbyphp/chubbyphp-service-provider)
 [![Latest Unstable Version](https://poser.pugx.org/chubbyphp/chubbyphp-service-provider/v/unstable)](https://packagist.org/packages/chubbyphp/chubbyphp-service-provider)
 
+## Description
+
+Pimple service providers.
+
+## Requirements
+
+ * php: ~7.0
+ * psr/log: ~1.0
+
+## Suggest
+
+## Installation
+
+Through [Composer](http://getcomposer.org) as [chubbyphp/chubbyphp-service-provider][1].
+
+```sh
+composer require chubbyphp/chubbyphp-serialization "~2.1"
+```
+
+## Providers
+
+* [DoctrineDbalServiceProvider][2]
+
+## Copyright
+
+Dominik Zogg 2018
+
+[1]: https://packagist.org/packages/chubbyphp/chubbyphp-service-provider
+
+[2]: doc/DoctrineDbalServiceProvider.md

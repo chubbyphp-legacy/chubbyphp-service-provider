@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Chubbyphp\ServiceProvider;
 
 use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\FingersCrossedHandler;
 use Monolog\Handler\GroupHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -25,13 +24,7 @@ final class MonologServiceProvider
 
         $container['monolog'] = function ($container) {
             $log = new Logger($container['monolog.name']);
-
-            $handler = new GroupHandler($container['monolog.handlers']);
-            if (isset($container['monolog.not_found_activation_strategy'])) {
-                $handler = new FingersCrossedHandler($handler, $container['monolog.not_found_activation_strategy']);
-            }
-
-            $log->pushHandler($handler);
+            $log->pushHandler(new GroupHandler($container['monolog.handlers']));
 
             return $log;
         };
@@ -73,7 +66,6 @@ final class MonologServiceProvider
         $container['monolog.name'] = 'app';
         $container['monolog.bubble'] = true;
         $container['monolog.permission'] = null;
-        $container['monolog.logfile'] = null;
     }
 
     /**

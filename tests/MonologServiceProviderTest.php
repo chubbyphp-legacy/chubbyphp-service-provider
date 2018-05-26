@@ -3,17 +3,23 @@
 namespace Chubbyphp\Tests\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\MonologServiceProvider;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
+use Psr\Log\LoggerInterface;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\MonologServiceProvider
  */
 class MonologServiceProviderTest extends TestCase
 {
-    public function testRegisterWithDefaults()
+    public function testRegister()
     {
         $container = new Container();
+
+        $container['monolog.logfile'] = sys_get_temp_dir().'/chubbyphp.serviceprovider.monolog.log';
 
         $serviceProvider = new MonologServiceProvider();
         $serviceProvider->register($container);
@@ -28,5 +34,17 @@ class MonologServiceProviderTest extends TestCase
         self::assertTrue($container->offsetExists('monolog.bubble'));
         self::assertTrue($container->offsetExists('monolog.permission'));
         self::assertTrue($container->offsetExists('monolog.logfile'));
+
+        self::assertInstanceOf(LoggerInterface::class, $container['logger']);
+        self::assertInstanceOf(Logger::class, $container['monolog']);
+        self::assertInstanceOf(LineFormatter::class, $container['monolog.formatter']);
+        self::assertInstanceOf(StreamHandler::class, $container['monolog.handler']);
+        self::assertInternalType('array', $container['monolog.handlers']);
+        self::assertSame(100, $container['monolog.level']);
+        self::assertSame('app', $container['monolog.name']);
+        self::assertTrue($container['monolog.bubble']);
+        self::assertNull($container['monolog.permission']);
+
+        self::assertSame($container['monolog.handler'], $container['monolog.handlers'][0]);
     }
 }

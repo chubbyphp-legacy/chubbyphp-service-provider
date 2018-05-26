@@ -4,6 +4,12 @@ The *DoctrineDbalServiceProvider* provides integration with the [Doctrine Dbal][
 for easy database access
 (Doctrine ORM integration is **not** supplied).
 
+## Install
+
+```sh
+composer require doctrine/dbal "~2.2"
+```
+
 ## Parameters
 
 * **db.options**: Array of Doctrine DBAL options.
@@ -45,9 +51,9 @@ for easy database access
 
 * **db.event_manager**: Event Manager for Doctrine.
 
-## Usage
+## Registering
 
-### One connection
+### Single connection
 
 ```php
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider(), array(
@@ -81,6 +87,20 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()
         ),
     ),
 ));
+```
+
+## Usage
+
+### Single connection
+
+```php
+$container['db']->createQueryBuilder();
+```
+
+### Multiple connections
+
+```php
+$container['dbs']['name]->createQueryBuilder();
 ```
 
 (c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)

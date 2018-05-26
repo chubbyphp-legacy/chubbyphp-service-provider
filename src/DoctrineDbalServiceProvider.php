@@ -15,11 +15,6 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\Common\EventManager;
 use Symfony\Bridge\Doctrine\Logger\DbalLogger;
 
-/**
- * Doctrine DBAL Provider.
- *
- * @author Fabien Potencier <fabien@symfony.com>
- */
 final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 {
     /**
@@ -75,7 +70,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
                     $manager = $container['dbs.event_manager'][$name];
                 }
 
-                $dbs[$name] = function ($dbs) use ($options, $config, $manager) {
+                $dbs[$name] = function () use ($options, $config, $manager) {
                     return DriverManager::getConnection($options, $config, $manager);
                 };
             }
@@ -90,15 +85,19 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
             $addLogger = isset($container['logger']) && null !== $container['logger']
                 && class_exists('Symfony\Bridge\Doctrine\Logger\DbalLogger');
             foreach ($container['dbs.options'] as $name => $options) {
-                $configs[$name] = new Configuration();
-                if ($addLogger) {
-                    $configs[$name]->setSQLLogger(
-                        new DbalLogger(
-                            $container['logger'],
-                            isset($container['stopwatch']) ? $container['stopwatch'] : null
-                        )
-                    );
-                }
+                $configs[$name] = function () use ($addLogger, $container) {
+                    $config = new Configuration();
+                    if ($addLogger) {
+                        $config->setSQLLogger(
+                            new DbalLogger(
+                                $container['logger'],
+                                isset($container['stopwatch']) ? $container['stopwatch'] : null
+                            )
+                        );
+                    }
+
+                    return $config;
+                };
             }
 
             return $configs;
@@ -109,7 +108,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             $managers = new Container();
             foreach ($container['dbs.options'] as $name => $options) {
-                $managers[$name] = new EventManager();
+                $managers[$name] = function () {
+                    return new EventManager();
+                };
             }
 
             return $managers;

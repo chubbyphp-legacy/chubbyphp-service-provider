@@ -73,11 +73,7 @@ final class MonologServiceProvider
         $container['monolog.name'] = 'app';
         $container['monolog.bubble'] = true;
         $container['monolog.permission'] = null;
-        $container['monolog.exception.logger_filter'] = null;
         $container['monolog.logfile'] = null;
-        $container['monolog.use_error_handler'] = function ($container) {
-            return !$container['debug'];
-        };
     }
 
     /**

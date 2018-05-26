@@ -58,9 +58,9 @@ composer require "monolog/monolog": "~1.0"
 ## Registering
 
 ```php
-$container->register(new Chubbyphp\ServiceProvider\MonologServiceProvider(), array(
-    'monolog.logfile' => __DIR__.'/development.log',
-));
+$container['monolog.logfile'] = __DIR__.'/development.log';
+
+$container->register(new Chubbyphp\ServiceProvider\MonologServiceProvider());
 ```
 
 ## Usage

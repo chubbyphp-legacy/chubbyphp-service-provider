@@ -56,18 +56,20 @@ composer require doctrine/dbal "~2.2"
 ### Single connection
 
 ```php
-$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider(), array(
+$container['db.options'] = array(
     'db.options' => array(
         'driver'   => 'pdo_sqlite',
         'path'     => __DIR__.'/app.db',
     ),
-));
+);
+
+$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 ```
 
 ### Multiple connections
 
 ```php
-$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider(), array(
+$container['dbs.options'] = array(
     'dbs.options' => array (
         'mysql_read' => array(
             'driver'    => 'pdo_mysql',
@@ -86,7 +88,9 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()
             'charset'   => 'utf8mb4',
         ),
     ),
-));
+);
+
+$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider());
 ```
 
 ## Usage

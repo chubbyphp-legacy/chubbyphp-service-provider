@@ -15,6 +15,7 @@
     },
     "conflict": {
         "doctrine/dbal": "<2.2,>=3.0",
+        "monolog/monolog": "<1.0,>=2.0",
         "symfony/doctrine-bridge": "<2.7,>=5.0"
     },
     "require-dev": {

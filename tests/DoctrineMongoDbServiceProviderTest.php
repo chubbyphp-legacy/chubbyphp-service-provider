@@ -30,12 +30,13 @@ class DoctrineMongoDbServiceProviderTest extends TestCase
         self::assertTrue($container->offsetExists('mongodb'));
         self::assertTrue($container->offsetExists('mongodb.config'));
         self::assertTrue($container->offsetExists('mongodb.event_manager'));
+        self::assertTrue($container->offsetExists('mongodb.logger.batch_insert_threshold'));
+        self::assertTrue($container->offsetExists('mongodb.logger.prefix'));
 
         self::assertEquals([
             'server' => 'mongodb://localhost:27017',
             'options' => [],
-        ],
-            $container['mongodb.default_options']);
+        ], $container['mongodb.default_options']);
 
         self::assertInstanceOf(\Closure::class, $container['mongodbs.options.initializer']);
 
@@ -87,6 +88,9 @@ class DoctrineMongoDbServiceProviderTest extends TestCase
         self::assertInstanceOf(EventManager::class, $container['mongodb.event_manager']);
 
         self::assertSame($container['mongodb.event_manager'], $container['mongodbs.event_manager']['default']);
+
+        self::assertSame(10, $container['mongodb.logger.batch_insert_threshold']);
+        self::assertSame('MongoDB query: ', $container['mongodb.logger.prefix']);
     }
 
     public function testRegisterWithOneConnetion()

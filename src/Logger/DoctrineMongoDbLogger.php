@@ -8,25 +8,40 @@ declare(strict_types=1);
 
 namespace Chubbyphp\ServiceProvider\Logger;
 
-use Psr\Log\LoggerInterface as PsrLogger;
+use Psr\Log\LoggerInterface;
 
 class DoctrineMongoDbLogger
 {
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
-    private $prefix;
+
+    /**
+     * @var int
+     */
     private $batchInsertThreshold;
 
-    public function __construct(PsrLogger $logger = null, $prefix = 'MongoDB query: ')
+    /**
+     * @var string
+     */
+    private $prefix;
+
+    /**
+     * @param LoggerInterface $logger
+     * @param int             $batchInsertThreshold
+     * @param string          $prefix
+     */
+    public function __construct(LoggerInterface $logger, int $batchInsertThreshold, string $prefix)
     {
         $this->logger = $logger;
+        $this->batchInsertThreshold = $batchInsertThreshold;
         $this->prefix = $prefix;
     }
 
-    public function setBatchInsertThreshold($batchInsertThreshold)
-    {
-        $this->batchInsertThreshold = $batchInsertThreshold;
-    }
-
+    /**
+     * @param array $query
+     */
     public function logQuery(array $query)
     {
         if (null === $this->logger) {

@@ -77,7 +77,11 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
                 $configs[$name] = function () use ($addLogger, $container) {
                     $config = new Configuration();
                     if ($addLogger) {
-                        $logger = new DoctrineMongoDbLogger($container['logger']);
+                        $logger = new DoctrineMongoDbLogger(
+                            $container['logger'],
+                            $container['mongodb.logger.batch_insert_threshold'],
+                            $container['mongodb.logger.prefix']
+                        );
                         $config->setLoggerCallable([$logger, 'logQuery']);
                     }
 
@@ -119,5 +123,8 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 
             return $mongodbs[$container['mongodbs.default']];
         };
+
+        $container['mongodb.logger.batch_insert_threshold'] = 10;
+        $container['mongodb.logger.prefix'] = 'MongoDB query: ';
     }
 }

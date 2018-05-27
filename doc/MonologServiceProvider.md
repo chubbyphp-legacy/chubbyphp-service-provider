@@ -10,7 +10,7 @@ even in production.
 ## Install
 
 ```sh
-composer require "monolog/monolog": "~1.0"
+composer require "monolog/monolog": "^1.4.1"
 ```
 
 ## Parameters

@@ -56,12 +56,10 @@ composer require doctrine/dbal "~2.2"
 ### Single connection
 
 ```php
-$container['db.options'] = array(
-    'db.options' => array(
-        'driver'   => 'pdo_sqlite',
-        'path'     => __DIR__.'/app.db',
-    ),
-);
+$container['db.options'] = [
+    'driver'   => 'pdo_sqlite',
+    'path'     => __DIR__.'/app.db',
+];
 
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 ```
@@ -69,26 +67,26 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()
 ### Multiple connections
 
 ```php
-$container['dbs.options'] = array(
+$container['dbs.options'] = [
     'dbs.options' => array (
-        'mysql_read' => array(
+        'mysql_read' => [
             'driver'    => 'pdo_mysql',
             'host'      => 'mysql_read.someplace.tld',
             'dbname'    => 'my_database',
             'user'      => 'my_username',
             'password'  => 'my_password',
             'charset'   => 'utf8mb4',
-        ),
-        'mysql_write' => array(
+        ],
+        'mysql_write' => [
             'driver'    => 'pdo_mysql',
             'host'      => 'mysql_write.someplace.tld',
             'dbname'    => 'my_database',
             'user'      => 'my_username',
             'password'  => 'my_password',
             'charset'   => 'utf8mb4',
-        ),
-    ),
-);
+        ],
+    ],
+];
 
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider());
 ```
@@ -98,13 +96,27 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()
 ### Single connection
 
 ```php
-$container['db']->createQueryBuilder();
+$container['db']
+    ->createQueryBuilder()
+    ->select('u')
+    ->from('users', 'u')
+    ->where($qb->expr()->eq('u.username', ':username'))
+    ->setParameter('username', 'john.doe@domain.com')
+    ->execute()
+    ->fetch(\PDO::FETCH_ASSOC);
 ```
 
 ### Multiple connections
 
 ```php
-$container['dbs']['name]->createQueryBuilder();
+$container['dbs']['name']
+    ->createQueryBuilder()
+    ->select('u')
+    ->from('users', 'u')
+    ->where($qb->expr()->eq('u.username', ':username'))
+    ->setParameter('username', 'john.doe@domain.com')
+    ->execute()
+    ->fetch(\PDO::FETCH_ASSOC);
 ```
 
 (c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)

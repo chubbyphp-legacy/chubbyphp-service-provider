@@ -81,18 +81,17 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
         $container['dbs.config'] = function ($container) {
             $container['dbs.options.initializer']();
 
-            $configs = new Container();
             $addLogger = isset($container['logger']) && null !== $container['logger']
                 && class_exists('Symfony\Bridge\Doctrine\Logger\DbalLogger');
+            $stopwatch = $container['stopwatch'] ?? null;
+
+            $configs = new Container();
             foreach ($container['dbs.options'] as $name => $options) {
-                $configs[$name] = function () use ($addLogger, $container) {
+                $configs[$name] = function () use ($addLogger, $container, $stopwatch) {
                     $config = new Configuration();
                     if ($addLogger) {
                         $config->setSQLLogger(
-                            new DbalLogger(
-                                $container['logger'],
-                                isset($container['stopwatch']) ? $container['stopwatch'] : null
-                            )
+                            new DbalLogger($container['logger'], $stopwatch)
                         );
                     }
 

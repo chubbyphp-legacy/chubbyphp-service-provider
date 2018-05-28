@@ -22,15 +22,38 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container)
     {
-        $container['db.default_options'] = [
+        $container['db.default_options'] = $this->getDbDefaultOptions();
+        $container['dbs.options.initializer'] = $this->getDbsOptionsInitializerServiceDefinition($container);
+        $container['dbs'] = $this->getDbsServiceDefinition($container);
+        $container['dbs.config'] = $this->getDbsConfigServiceDefinition($container);
+        $container['dbs.event_manager'] = $this->getDbsEventManagerServiceDefinition($container);
+        $container['db'] = $this->getDbServiceDefinition($container);
+        $container['db.config'] = $this->getDbConfigServiceDefinition($container);
+        $container['db.event_manager'] = $this->getDbEventManagerServiceDefinition($container);
+    }
+
+    /**
+     * @return array
+     */
+    private function getDbDefaultOptions(): array
+    {
+        return [
             'driver' => 'pdo_mysql',
             'dbname' => null,
             'host' => 'localhost',
             'user' => 'root',
             'password' => null,
         ];
+    }
 
-        $container['dbs.options.initializer'] = $container->protect(function () use ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getDbsOptionsInitializerServiceDefinition(Container $container): \Closure
+    {
+        return $container->protect(function () use ($container) {
             static $initialized = false;
 
             if ($initialized) {
@@ -53,10 +76,19 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
                     $container['dbs.default'] = $name;
                 }
             }
+
             $container['dbs.options'] = $tmp;
         });
+    }
 
-        $container['dbs'] = function ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getDbsServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $container['dbs.options.initializer']();
 
             $dbs = new Container();
@@ -77,8 +109,16 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             return $dbs;
         };
+    }
 
-        $container['dbs.config'] = function ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getDbsConfigServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $container['dbs.options.initializer']();
 
             $addLogger = isset($container['logger']) && null !== $container['logger']
@@ -101,8 +141,16 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             return $configs;
         };
+    }
 
-        $container['dbs.event_manager'] = function ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getDbsEventManagerServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $container['dbs.options.initializer']();
 
             $managers = new Container();
@@ -114,21 +162,41 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             return $managers;
         };
+    }
 
-        // shortcuts for the "first" DB
-        $container['db'] = function ($container) {
+    /***
+     * @param Container $container
+     * @return \Closure
+     */
+    private function getDbServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $dbs = $container['dbs'];
 
             return $dbs[$container['dbs.default']];
         };
+    }
 
-        $container['db.config'] = function ($container) {
+    /***
+     * @param Container $container
+     * @return \Closure
+     */
+    private function getDbConfigServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $dbs = $container['dbs.config'];
 
             return $dbs[$container['dbs.default']];
         };
+    }
 
-        $container['db.event_manager'] = function ($container) {
+    /***
+     * @param Container $container
+     * @return \Closure
+     */
+    private function getDbEventManagerServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $dbs = $container['dbs.event_manager'];
 
             return $dbs[$container['dbs.default']];

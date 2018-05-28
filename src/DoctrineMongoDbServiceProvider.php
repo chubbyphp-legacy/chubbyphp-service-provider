@@ -13,15 +13,43 @@ use Pimple\ServiceProviderInterface;
 
 final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 {
+    /**
+     * @param Container $container
+     */
     public function register(Container $container)
     {
-        $container['mongodb.default_options'] = [
+        $container['mongodb.default_options'] = $this->getMongoDbDefaultOptions();
+        $container['mongodbs.options.initializer'] = $this->getMongoDbsOptionsInitializerServiceDefinition($container);
+        $container['mongodbs'] = $this->getMongoDbsServiceDefinition($container);
+        $container['mongodbs.config'] = $this->getMongoDbsConfigServiceDefinition($container);
+        $container['mongodbs.event_manager'] = $this->getMongoDbsEventManagerServiceDefinition($container);
+        $container['mongodb'] = $this->getMongoDbServiceDefinition($container);
+        $container['mongodb.config'] = $this->getMongoDbConfigServiceDefinition($container);
+        $container['mongodb.event_manager'] = $this->getMongoDbEventManagerServiceDefinition($container);
+        $container['mongodb.logger.batch_insert_threshold'] = 10;
+        $container['mongodb.logger.prefix'] = 'MongoDB query: ';
+    }
+
+    /**
+     * @return array
+     */
+    private function getMongoDbDefaultOptions(): array
+    {
+        return [
             'server' => 'mongodb://localhost:27017',
             'options' => [],
             /* @link http://www.php.net/manual/en/mongoclient.construct.php */
         ];
+    }
 
-        $container['mongodbs.options.initializer'] = $container->protect(function () use ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getMongoDbsOptionsInitializerServiceDefinition(Container $container): \Closure
+    {
+        return $container->protect(function () use ($container) {
             static $initialized = false;
 
             if ($initialized) {
@@ -31,7 +59,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
             $initialized = true;
 
             if (!isset($container['mongodbs.options'])) {
-                $container['mongodbs.options'] = ['default' => isset($container['mongodb.options']) ? $container['mongodb.options'] : []];
+                $container['mongodbs.options'] = [
+                    'default' => isset($container['mongodb.options']) ? $container['mongodb.options'] : [],
+                ];
             }
 
             $tmp = $container['mongodbs.options'];
@@ -42,10 +72,19 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
                     $container['mongodbs.default'] = $name;
                 }
             }
+
             $container['mongodbs.options'] = $tmp;
         });
+    }
 
-        $container['mongodbs'] = function ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getMongoDbsServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $container['mongodbs.options.initializer']();
 
             $mongodbs = new Container();
@@ -66,8 +105,16 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 
             return $mongodbs;
         };
+    }
 
-        $container['mongodbs.config'] = function ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getMongoDbsConfigServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $container['mongodbs.options.initializer']();
 
             $configs = new Container();
@@ -91,8 +138,16 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 
             return $configs;
         };
+    }
 
-        $container['mongodbs.event_manager'] = function ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getMongoDbsEventManagerServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $container['mongodbs.options.initializer']();
 
             $managers = new Container();
@@ -104,27 +159,44 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 
             return $managers;
         };
+    }
 
-        // shortcuts for the "first" DB
-        $container['mongodb'] = function ($container) {
-            $mongodbs = $container['mongodbs'];
+    /***
+     * @param Container $container
+     * @return \Closure
+     */
+    private function getMongoDbServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            $dbs = $container['mongodbs'];
 
-            return $mongodbs[$container['mongodbs.default']];
+            return $dbs[$container['mongodbs.default']];
         };
+    }
 
-        $container['mongodb.config'] = function ($container) {
-            $mongodbs = $container['mongodbs.config'];
+    /***
+     * @param Container $container
+     * @return \Closure
+     */
+    private function getMongoDbConfigServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            $dbs = $container['mongodbs.config'];
 
-            return $mongodbs[$container['mongodbs.default']];
+            return $dbs[$container['mongodbs.default']];
         };
+    }
 
-        $container['mongodb.event_manager'] = function ($container) {
-            $mongodbs = $container['mongodbs.event_manager'];
+    /***
+     * @param Container $container
+     * @return \Closure
+     */
+    private function getMongoDbEventManagerServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            $dbs = $container['mongodbs.event_manager'];
 
-            return $mongodbs[$container['mongodbs.default']];
+            return $dbs[$container['mongodbs.default']];
         };
-
-        $container['mongodb.logger.batch_insert_threshold'] = 10;
-        $container['mongodb.logger.prefix'] = 'MongoDB query: ';
     }
 }

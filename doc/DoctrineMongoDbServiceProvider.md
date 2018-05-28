@@ -54,22 +54,20 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineMongoDbServiceProvide
 
 ```php
 $container['mongodbs.options'] = [
-    'mongodbs.options' => [
-        'mongodb_read' => [
-            'server' => 'mongodb://localhost:27017',
-            'options' => [
-                'username' => 'root',
-                'password' => 'root',
-                'db' => 'admin',
-            ],
+    'mongodb_read' => [
+        'server' => 'mongodb://localhost:27017',
+        'options' => [
+            'username' => 'root',
+            'password' => 'root',
+            'db' => 'admin',
         ],
-        'mongodb_write' => [
-            'server' => 'mongodb://localhost:27018',
-            'options' => [
-                'username' => 'root',
-                'password' => 'root',
-                'db' => 'admin',
-            ],
+    ],
+    'mongodb_write' => [
+        'server' => 'mongodb://localhost:27018',
+        'options' => [
+            'username' => 'root',
+            'password' => 'root',
+            'db' => 'admin',
         ],
     ],
 ];

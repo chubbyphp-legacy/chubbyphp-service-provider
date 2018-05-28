@@ -68,23 +68,21 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()
 
 ```php
 $container['dbs.options'] = [
-    'dbs.options' => array (
-        'mysql_read' => [
-            'driver'    => 'pdo_mysql',
-            'host'      => 'mysql_read.someplace.tld',
-            'dbname'    => 'my_database',
-            'user'      => 'my_username',
-            'password'  => 'my_password',
-            'charset'   => 'utf8mb4',
-        ],
-        'mysql_write' => [
-            'driver'    => 'pdo_mysql',
-            'host'      => 'mysql_write.someplace.tld',
-            'dbname'    => 'my_database',
-            'user'      => 'my_username',
-            'password'  => 'my_password',
-            'charset'   => 'utf8mb4',
-        ],
+    'mysql_read' => [
+        'driver'    => 'pdo_mysql',
+        'host'      => 'mysql_read.someplace.tld',
+        'dbname'    => 'my_database',
+        'user'      => 'my_username',
+        'password'  => 'my_password',
+        'charset'   => 'utf8mb4',
+    ],
+    'mysql_write' => [
+        'driver'    => 'pdo_mysql',
+        'host'      => 'mysql_write.someplace.tld',
+        'dbname'    => 'my_database',
+        'user'      => 'my_username',
+        'password'  => 'my_password',
+        'charset'   => 'utf8mb4',
     ],
 ];
 

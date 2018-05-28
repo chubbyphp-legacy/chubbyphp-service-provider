@@ -9,6 +9,7 @@ use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\MonologServiceProvider
@@ -41,7 +42,7 @@ class MonologServiceProviderTest extends TestCase
         self::assertInstanceOf(StreamHandler::class, $container['monolog.default_handler']);
         self::assertInstanceOf(StreamHandler::class, $container['monolog.handlers'][0]);
         self::assertInternalType('array', $container['monolog.handlers']);
-        self::assertSame(100, $container['monolog.level']);
+        self::assertSame(LogLevel::DEBUG, $container['monolog.level']);
         self::assertSame('app', $container['monolog.name']);
         self::assertTrue($container['monolog.bubble']);
         self::assertNull($container['monolog.permission']);

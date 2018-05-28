@@ -13,6 +13,7 @@ use Monolog\Handler\GroupHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Pimple\Container;
+use Psr\Log\LogLevel;
 
 final class MonologServiceProvider
 {
@@ -26,7 +27,7 @@ final class MonologServiceProvider
         $container['monolog.formatter'] = $this->getMonologFormatterServiceDefinition($container);
         $container['monolog.default_handler'] = $this->getMonologDefaultHandlerServiceDefinition($container);
         $container['monolog.handlers'] = $this->getMonologHandlersServiceDefinition($container);
-        $container['monolog.level'] = Logger::DEBUG;
+        $container['monolog.level'] = LogLevel::DEBUG;
         $container['monolog.name'] = 'app';
         $container['monolog.bubble'] = true;
         $container['monolog.permission'] = null;
@@ -93,7 +94,7 @@ final class MonologServiceProvider
         return function () use ($container) {
             $handler = new StreamHandler(
                 $container['monolog.logfile'],
-                MonologServiceProvider::translateLevel($container['monolog.level']),
+                $container['monolog.level'],
                 $container['monolog.bubble'],
                 $container['monolog.permission']
             );
@@ -102,35 +103,5 @@ final class MonologServiceProvider
 
             return $handler;
         };
-    }
-
-    /**
-     * @param int|string $name
-     *
-     * @return int
-     */
-    public static function translateLevel($name): int
-    {
-        // level is already translated to logger constant, return as-is
-        if (is_int($name)) {
-            return $name;
-        }
-
-        $psrLevel = Logger::toMonologLevel($name);
-
-        if (is_int($psrLevel)) {
-            return $psrLevel;
-        }
-
-        $levels = Logger::getLevels();
-        $upper = strtoupper($name);
-
-        if (!isset($levels[$upper])) {
-            throw new \InvalidArgumentException(
-                "Provided logging level '$name' does not exist. Must be a valid monolog logging level."
-            );
-        }
-
-        return $levels[$upper];
     }
 }

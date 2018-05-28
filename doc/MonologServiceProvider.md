@@ -16,16 +16,7 @@ composer require "monolog/monolog": "^1.4.1"
 ## Parameters
 
 * **monolog.logfile**: File where logs are written to.
-* **monolog.level** (optional): Level of logging, defaults
-  to ``DEBUG``. Must be one of ``Logger::DEBUG``, ``Logger::INFO``,
-  ``Logger::WARNING``, ``Logger::ERROR``. ``DEBUG`` will log
-  everything, ``INFO`` will log everything except ``DEBUG``,
-  etc.
-
-  In addition to the ``Logger::`` constants, it is also possible to supply the
-  level in string form, for example: ``"DEBUG"``, ``"INFO"``, ``"WARNING"``,
-  ``"ERROR"``.
-
+* **monolog.level** (optional): Level of logging, defaults to ``DEBUG``.
   PSR-3 log levels from ``\Psr\Log\LogLevel::`` constants are also supported.
 
 * **monolog.name** (optional): Name of the monolog channel,

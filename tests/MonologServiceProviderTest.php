@@ -27,7 +27,7 @@ class MonologServiceProviderTest extends TestCase
         self::assertTrue($container->offsetExists('logger'));
         self::assertTrue($container->offsetExists('monolog'));
         self::assertTrue($container->offsetExists('monolog.formatter'));
-        self::assertTrue($container->offsetExists('monolog.handler'));
+        self::assertTrue($container->offsetExists('monolog.default_handler'));
         self::assertTrue($container->offsetExists('monolog.handlers'));
         self::assertTrue($container->offsetExists('monolog.level'));
         self::assertTrue($container->offsetExists('monolog.name'));
@@ -38,13 +38,14 @@ class MonologServiceProviderTest extends TestCase
         self::assertInstanceOf(LoggerInterface::class, $container['logger']);
         self::assertInstanceOf(Logger::class, $container['monolog']);
         self::assertInstanceOf(LineFormatter::class, $container['monolog.formatter']);
-        self::assertInstanceOf(StreamHandler::class, $container['monolog.handler']);
+        self::assertInstanceOf(StreamHandler::class, $container['monolog.default_handler']);
+        self::assertInstanceOf(StreamHandler::class, $container['monolog.handlers'][0]);
         self::assertInternalType('array', $container['monolog.handlers']);
         self::assertSame(100, $container['monolog.level']);
         self::assertSame('app', $container['monolog.name']);
         self::assertTrue($container['monolog.bubble']);
         self::assertNull($container['monolog.permission']);
 
-        self::assertSame($container['monolog.handler'], $container['monolog.handlers'][0]);
+        self::assertSame($container['monolog.default_handler'], $container['monolog.handlers'][0]);
     }
 }

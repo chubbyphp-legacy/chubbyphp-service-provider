@@ -16,9 +16,6 @@ composer require "monolog/monolog": "^1.4.1"
 ## Parameters
 
 * **monolog.logfile**: File where logs are written to.
-* **monolog.bubble** (optional): Whether the messages that are handled can bubble up the stack or not.
-* **monolog.permission** (optional): File permissions default (null), nothing change.
-
 * **monolog.level** (optional): Level of logging, defaults
   to ``DEBUG``. Must be one of ``Logger::DEBUG``, ``Logger::INFO``,
   ``Logger::WARNING``, ``Logger::ERROR``. ``DEBUG`` will log
@@ -34,16 +31,8 @@ composer require "monolog/monolog": "^1.4.1"
 * **monolog.name** (optional): Name of the monolog channel,
   defaults to ``myapp``.
 
-* **monolog.exception.logger_filter** (optional): An anonymous function that
-  returns an error level for on uncaught exception that should be logged.
-
-* **monolog.use_error_handler** (optional): Whether errors and uncaught exceptions
-  should be handled by the Monolog ``ErrorHandler`` class and added to the log.
-  By default the error handler is enabled unless the application ``debug`` parameter
-  is set to true.
-
-  Please note that enabling the error handler may silence some errors,
-  ignoring the PHP ``display_errors`` configuration setting.
+* **monolog.bubble** (optional): Whether the messages that are handled can bubble up the stack or not.
+* **monolog.permission** (optional): File permissions default (null), nothing change.
 
 ## Services
 

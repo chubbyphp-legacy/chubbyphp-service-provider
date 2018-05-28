@@ -16,29 +16,84 @@ use Pimple\Container;
 
 final class MonologServiceProvider
 {
+    /**
+     * @param Container $container
+     */
     public function register(Container $container)
     {
-        $container['logger'] = function () use ($container) {
+        $container['logger'] = $this->getLoggerServiceDefinition($container);
+        $container['monolog'] = $this->getMonologServiceDefinition($container);
+        $container['monolog.formatter'] = $this->getMonologFormatterServiceDefinition($container);
+        $container['monolog.default_handler'] = $this->getMonologDefaultHandlerServiceDefinition($container);
+        $container['monolog.handlers'] = $this->getMonologHandlersServiceDefinition($container);
+        $container['monolog.level'] = Logger::DEBUG;
+        $container['monolog.name'] = 'app';
+        $container['monolog.bubble'] = true;
+        $container['monolog.permission'] = null;
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getLoggerServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             return $container['monolog'];
         };
+    }
 
-        $container['monolog'] = function ($container) {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getMonologServiceDefinition(Container $container): \Closure
+    {
+        return function ($container) {
             $log = new Logger($container['monolog.name']);
             $log->pushHandler(new GroupHandler($container['monolog.handlers']));
 
             return $log;
         };
+    }
 
-        $container['monolog.formatter'] = function () {
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getMonologFormatterServiceDefinition(Container $container): \Closure
+    {
+        return function () {
             return new LineFormatter();
         };
+    }
 
-        $container['monolog.handler'] = $defaultHandler = function () use ($container) {
-            $level = MonologServiceProvider::translateLevel($container['monolog.level']);
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getMonologHandlersServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            return [$container['monolog.default_handler']];
+        };
+    }
 
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getMonologDefaultHandlerServiceDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
             $handler = new StreamHandler(
                 $container['monolog.logfile'],
-                $level,
+                MonologServiceProvider::translateLevel($container['monolog.level']),
                 $container['monolog.bubble'],
                 $container['monolog.permission']
             );
@@ -47,25 +102,6 @@ final class MonologServiceProvider
 
             return $handler;
         };
-
-        $container['monolog.handlers'] = function () use ($container, $defaultHandler) {
-            $handlers = [];
-
-            // enables the default handler if a logfile was set or the monolog.handler service was redefined
-            if ($container['monolog.logfile'] || $defaultHandler !== $container->raw('monolog.handler')) {
-                $handlers[] = $container['monolog.handler'];
-            }
-
-            return $handlers;
-        };
-
-        $container['monolog.level'] = function () {
-            return Logger::DEBUG;
-        };
-
-        $container['monolog.name'] = 'app';
-        $container['monolog.bubble'] = true;
-        $container['monolog.permission'] = null;
     }
 
     /**

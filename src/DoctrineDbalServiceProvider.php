@@ -23,13 +23,13 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     public function register(Container $container)
     {
         $container['db.default_options'] = $this->getDbDefaultOptions();
-        $container['dbs.options.initializer'] = $this->getDbsOptionsInitializerServiceDefinition($container);
-        $container['dbs'] = $this->getDbsServiceDefinition($container);
-        $container['dbs.config'] = $this->getDbsConfigServiceDefinition($container);
-        $container['dbs.event_manager'] = $this->getDbsEventManagerServiceDefinition($container);
-        $container['db'] = $this->getDbServiceDefinition($container);
-        $container['db.config'] = $this->getDbConfigServiceDefinition($container);
-        $container['db.event_manager'] = $this->getDbEventManagerServiceDefinition($container);
+        $container['dbs.options.initializer'] = $this->getDbsOptionsInitializerDefinition($container);
+        $container['dbs'] = $this->getDbsDefinition($container);
+        $container['dbs.config'] = $this->getDbsConfigDefinition($container);
+        $container['dbs.event_manager'] = $this->getDbsEventManagerDefinition($container);
+        $container['db'] = $this->getDbDefinition($container);
+        $container['db.config'] = $this->getDbConfigDefinition($container);
+        $container['db.event_manager'] = $this->getDbEventManagerDefinition($container);
     }
 
     /**
@@ -51,7 +51,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getDbsOptionsInitializerServiceDefinition(Container $container): \Closure
+    private function getDbsOptionsInitializerDefinition(Container $container): \Closure
     {
         return $container->protect(function () use ($container) {
             static $initialized = false;
@@ -86,7 +86,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getDbsServiceDefinition(Container $container): \Closure
+    private function getDbsDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $container['dbs.options.initializer']();
@@ -116,7 +116,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getDbsConfigServiceDefinition(Container $container): \Closure
+    private function getDbsConfigDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $container['dbs.options.initializer']();
@@ -148,7 +148,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getDbsEventManagerServiceDefinition(Container $container): \Closure
+    private function getDbsEventManagerDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $container['dbs.options.initializer']();
@@ -168,7 +168,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      * @param Container $container
      * @return \Closure
      */
-    private function getDbServiceDefinition(Container $container): \Closure
+    private function getDbDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $dbs = $container['dbs'];
@@ -181,7 +181,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      * @param Container $container
      * @return \Closure
      */
-    private function getDbConfigServiceDefinition(Container $container): \Closure
+    private function getDbConfigDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $dbs = $container['dbs.config'];
@@ -194,7 +194,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      * @param Container $container
      * @return \Closure
      */
-    private function getDbEventManagerServiceDefinition(Container $container): \Closure
+    private function getDbEventManagerDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $dbs = $container['dbs.event_manager'];

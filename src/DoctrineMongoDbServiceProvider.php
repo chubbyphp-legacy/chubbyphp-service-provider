@@ -19,13 +19,13 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     public function register(Container $container)
     {
         $container['mongodb.default_options'] = $this->getMongoDbDefaultOptions();
-        $container['mongodbs.options.initializer'] = $this->getMongoDbsOptionsInitializerServiceDefinition($container);
-        $container['mongodbs'] = $this->getMongoDbsServiceDefinition($container);
-        $container['mongodbs.config'] = $this->getMongoDbsConfigServiceDefinition($container);
-        $container['mongodbs.event_manager'] = $this->getMongoDbsEventManagerServiceDefinition($container);
-        $container['mongodb'] = $this->getMongoDbServiceDefinition($container);
-        $container['mongodb.config'] = $this->getMongoDbConfigServiceDefinition($container);
-        $container['mongodb.event_manager'] = $this->getMongoDbEventManagerServiceDefinition($container);
+        $container['mongodbs.options.initializer'] = $this->getMongoDbsOptionsInitializerDefinition($container);
+        $container['mongodbs'] = $this->getMongoDbsDefinition($container);
+        $container['mongodbs.config'] = $this->getMongoDbsConfigDefinition($container);
+        $container['mongodbs.event_manager'] = $this->getMongoDbsEventManagerDefinition($container);
+        $container['mongodb'] = $this->getMongoDbDefinition($container);
+        $container['mongodb.config'] = $this->getMongoDbConfigDefinition($container);
+        $container['mongodb.event_manager'] = $this->getMongoDbEventManagerDefinition($container);
         $container['mongodb.logger.batch_insert_threshold'] = 10;
         $container['mongodb.logger.prefix'] = 'MongoDB query: ';
     }
@@ -47,7 +47,7 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getMongoDbsOptionsInitializerServiceDefinition(Container $container): \Closure
+    private function getMongoDbsOptionsInitializerDefinition(Container $container): \Closure
     {
         return $container->protect(function () use ($container) {
             static $initialized = false;
@@ -82,7 +82,7 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getMongoDbsServiceDefinition(Container $container): \Closure
+    private function getMongoDbsDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $container['mongodbs.options.initializer']();
@@ -112,7 +112,7 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getMongoDbsConfigServiceDefinition(Container $container): \Closure
+    private function getMongoDbsConfigDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $container['mongodbs.options.initializer']();
@@ -145,7 +145,7 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getMongoDbsEventManagerServiceDefinition(Container $container): \Closure
+    private function getMongoDbsEventManagerDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $container['mongodbs.options.initializer']();
@@ -165,7 +165,7 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
      * @param Container $container
      * @return \Closure
      */
-    private function getMongoDbServiceDefinition(Container $container): \Closure
+    private function getMongoDbDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $dbs = $container['mongodbs'];
@@ -178,7 +178,7 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
      * @param Container $container
      * @return \Closure
      */
-    private function getMongoDbConfigServiceDefinition(Container $container): \Closure
+    private function getMongoDbConfigDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $dbs = $container['mongodbs.config'];
@@ -191,7 +191,7 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
      * @param Container $container
      * @return \Closure
      */
-    private function getMongoDbEventManagerServiceDefinition(Container $container): \Closure
+    private function getMongoDbEventManagerDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $dbs = $container['mongodbs.event_manager'];

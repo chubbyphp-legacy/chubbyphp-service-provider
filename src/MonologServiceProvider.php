@@ -22,11 +22,11 @@ final class MonologServiceProvider
      */
     public function register(Container $container)
     {
-        $container['logger'] = $this->getLoggerServiceDefinition($container);
-        $container['monolog'] = $this->getMonologServiceDefinition($container);
-        $container['monolog.formatter'] = $this->getMonologFormatterServiceDefinition($container);
-        $container['monolog.default_handler'] = $this->getMonologDefaultHandlerServiceDefinition($container);
-        $container['monolog.handlers'] = $this->getMonologHandlersServiceDefinition($container);
+        $container['logger'] = $this->getLoggerDefinition($container);
+        $container['monolog'] = $this->getMonologDefinition($container);
+        $container['monolog.formatter'] = $this->getMonologFormatterDefinition($container);
+        $container['monolog.default_handler'] = $this->getMonologDefaultHandlerDefinition($container);
+        $container['monolog.handlers'] = $this->getMonologHandlersDefinition($container);
         $container['monolog.level'] = LogLevel::DEBUG;
         $container['monolog.name'] = 'app';
         $container['monolog.bubble'] = true;
@@ -38,7 +38,7 @@ final class MonologServiceProvider
      *
      * @return \Closure
      */
-    private function getLoggerServiceDefinition(Container $container): \Closure
+    private function getLoggerDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             return $container['monolog'];
@@ -50,7 +50,7 @@ final class MonologServiceProvider
      *
      * @return \Closure
      */
-    private function getMonologServiceDefinition(Container $container): \Closure
+    private function getMonologDefinition(Container $container): \Closure
     {
         return function ($container) {
             $log = new Logger($container['monolog.name']);
@@ -65,7 +65,7 @@ final class MonologServiceProvider
      *
      * @return \Closure
      */
-    private function getMonologFormatterServiceDefinition(Container $container): \Closure
+    private function getMonologFormatterDefinition(Container $container): \Closure
     {
         return function () {
             return new LineFormatter();
@@ -77,7 +77,7 @@ final class MonologServiceProvider
      *
      * @return \Closure
      */
-    private function getMonologHandlersServiceDefinition(Container $container): \Closure
+    private function getMonologHandlersDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             return [$container['monolog.default_handler']];
@@ -89,7 +89,7 @@ final class MonologServiceProvider
      *
      * @return \Closure
      */
-    private function getMonologDefaultHandlerServiceDefinition(Container $container): \Closure
+    private function getMonologDefaultHandlerDefinition(Container $container): \Closure
     {
         return function () use ($container) {
             $handler = new StreamHandler(

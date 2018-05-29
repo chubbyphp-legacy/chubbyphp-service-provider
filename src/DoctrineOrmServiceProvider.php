@@ -16,7 +16,6 @@ use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\XcacheCache;
 use Doctrine\Common\Cache\RedisCache;
-use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\DBAL\Types\Type;
@@ -46,10 +45,11 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     {
         $container['orm.em.default_options'] = $this->getOrmEmDefaultOptions();
         $container['orm.ems.options.initializer'] = $this->getOrmEmsOptionsInitializerDefinition($container);
-        $container['orm.em_name_from_param_key'] = $this->getOrmEmNameFromParamKeyDefinition($container);
         $container['orm.ems'] = $this->getOrmEmsDefinition($container);
         $container['orm.ems.config'] = $this->getOrmEmsConfigServiceProvider($container);
-        $container['orm.cache.configurer'] = $this->getOrmCacheLocatorDefinition($container);
+        $container['orm.cache.configurer'] = $this->getOrmCacheConfigurerDefinition($container);
+        $container['orm.cache.locator'] = $this->getOrmCacheLocatorDefinition($container);
+        $container['orm.cache.factory'] = $this->getOrmCacheFactoryDefinition($container);
         $container['orm.cache.factory.apcu'] = $this->getOrmCacheFactoryApcuDefinition($container);
         $container['orm.cache.factory.array'] = $this->getOrmCacheFactoryArrayDefinition($container);
         $container['orm.cache.factory.filesystem'] = $this->getOrmCacheFactoryFilesystemDefinition($container);
@@ -57,60 +57,24 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['orm.cache.factory.memcached'] = $this->getOrmCacheFactoryMemcachedDefinition($container);
         $container['orm.cache.factory.redis'] = $this->getOrmCacheFactoryRedisDefinition($container);
         $container['orm.cache.factory.xcache'] = $this->getOrmCacheFactoryXCacheDefinition($container);
-        $container['orm.cache.factory'] = $this->getOrmCacheFactoryDefinition($container);
-        $container['orm.mapping_driver_chain.locator'] = $this->getOrmMappingDriverChainLocatorDefinition($container);
-        $container['orm.mapping_driver_chain.factory'] = $this->getOrmMappingDriverChainFactoryDefinition($container);
-
-        $container['orm.add_mapping_driver'] = $container->protect(function (MappingDriver $mappingDriver, $namespace, $name = null) use ($container) {
-            $container['orm.ems.options.initializer']();
-
-            if (null === $name) {
-                $name = $container['orm.ems.default'];
-            }
-
-            /** @var MappingDriverChain $driverChain */
-            $driverChain = $container['orm.mapping_driver_chain.locator']($name);
-            $driverChain->addDriver($mappingDriver, $namespace);
-        });
-
-        $container['orm.strategy.naming'] = function ($container) {
-            return new DefaultNamingStrategy();
-        };
-
-        $container['orm.strategy.quote'] = function ($container) {
-            return new DefaultQuoteStrategy();
-        };
-
-        $container['orm.entity_listener_resolver'] = function ($container) {
-            return new DefaultEntityListenerResolver();
-        };
-
-        $container['orm.repository_factory'] = function ($container) {
-            return new DefaultRepositoryFactory();
-        };
-
-        $container['orm.em'] = function ($container) {
-            $ems = $container['orm.ems'];
-
-            return $ems[$container['orm.ems.default']];
-        };
-
-        $container['orm.em.config'] = function ($container) {
-            $configs = $container['orm.ems.config'];
-
-            return $configs[$container['orm.ems.default']];
-        };
-
+        $container['orm.default_cache'] = ['driver' => 'array'];
         $container['orm.proxies_dir'] = sys_get_temp_dir();
         $container['orm.proxies_namespace'] = 'DoctrineProxy';
         $container['orm.auto_generate_proxies'] = true;
-        $container['orm.default_cache'] = ['driver' => 'array'];
         $container['orm.custom.functions.string'] = [];
         $container['orm.custom.functions.numeric'] = [];
         $container['orm.custom.functions.datetime'] = [];
         $container['orm.custom.hydration_modes'] = [];
         $container['orm.class_metadata_factory_name'] = ClassMetadataFactory::class;
         $container['orm.default_repository_class'] = EntityRepository::class;
+        $container['orm.entity_listener_resolver'] = $this->getOrmEntityListenerResolverDefinition($container);
+        $container['orm.repository_factory'] = $this->getOrmRepositoryFactoryDefinition($container);
+        $container['orm.strategy.naming'] = $this->getOrmNamingStrategyDefinition($container);
+        $container['orm.strategy.quote'] = $this->getOrmQuoteStrategyDefinition($container);
+        $container['orm.mapping_driver_chain.locator'] = $this->getOrmMappingDriverChainLocatorDefinition($container);
+        $container['orm.mapping_driver_chain.factory'] = $this->getOrmMappingDriverChainFactoryDefinition($container);
+        $container['orm.em'] = $this->getOrmEmDefinition($container);
+        $container['orm.em.config'] = $this->getOrmEmConfigDefinition($container);
     }
 
     /**
@@ -165,24 +129,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getOrmEmNameFromParamKeyDefinition(Container $container): \Closure
-    {
-        return $container->protect(function ($paramKey) use ($container) {
-            $container['orm.ems.options.initializer']();
-
-            if (isset($container[$paramKey])) {
-                return $container[$paramKey];
-            }
-
-            return $container['orm.ems.default'];
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return \Closure
-     */
     private function getOrmEmsDefinition(Container $container): \Closure
     {
         return function () use ($container) {
@@ -197,7 +143,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                     $config = $container['orm.ems.config'][$name];
                 }
 
-                $ems[$name] = function ($ems) use ($container, $options, $config) {
+                $ems[$name] = function () use ($container, $options, $config) {
                     return EntityManager::create(
                         $container['dbs'][$options['connection']],
                         $config,
@@ -222,93 +168,115 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             $configs = new Container();
             foreach ($container['orm.ems.options'] as $name => $options) {
-                $config = new Configuration();
-
-                $container['orm.cache.configurer']($name, $config, $options);
-
-                $config->setProxyDir($container['orm.proxies_dir']);
-                $config->setProxyNamespace($container['orm.proxies_namespace']);
-                $config->setAutoGenerateProxyClasses($container['orm.auto_generate_proxies']);
-
-                $config->setCustomStringFunctions($container['orm.custom.functions.string']);
-                $config->setCustomNumericFunctions($container['orm.custom.functions.numeric']);
-                $config->setCustomDatetimeFunctions($container['orm.custom.functions.datetime']);
-                $config->setCustomHydrationModes($container['orm.custom.hydration_modes']);
-
-                $config->setClassMetadataFactoryName($container['orm.class_metadata_factory_name']);
-                $config->setDefaultRepositoryClassName($container['orm.default_repository_class']);
-
-                $config->setEntityListenerResolver($container['orm.entity_listener_resolver']);
-                $config->setRepositoryFactory($container['orm.repository_factory']);
-
-                $config->setNamingStrategy($container['orm.strategy.naming']);
-                $config->setQuoteStrategy($container['orm.strategy.quote']);
-
-                /** @var MappingDriverChain $chain */
-                $chain = $container['orm.mapping_driver_chain.locator']($name);
-
-                foreach ((array) $options['mappings'] as $entity) {
-                    if (!is_array($entity)) {
-                        throw new \InvalidArgumentException(
-                            "The 'orm.em.options' option 'mappings' should be an array of arrays."
-                        );
-                    }
-
-                    if (isset($entity['alias'])) {
-                        $config->addEntityNamespace($entity['alias'], $entity['namespace']);
-                    }
-
-                    switch ($entity['type']) {
-                        case 'annotation':
-                            $useSimpleAnnotationReader = $entity['use_simple_annotation_reader'] ?? true;
-                            $driver = $config->newDefaultAnnotationDriver(
-                                (array) $entity['path'],
-                                $useSimpleAnnotationReader
-                            );
-                            $chain->addDriver($driver, $entity['namespace']);
-                            break;
-                        case 'yml':
-                            $driver = new YamlDriver($entity['path']);
-                            $chain->addDriver($driver, $entity['namespace']);
-                            break;
-                        case 'simple_yml':
-                            $driver = new SimplifiedYamlDriver([$entity['path'] => $entity['namespace']]);
-                            $chain->addDriver($driver, $entity['namespace']);
-                            break;
-                        case 'xml':
-                            $driver = new XmlDriver($entity['path']);
-                            $chain->addDriver($driver, $entity['namespace']);
-                            break;
-                        case 'simple_xml':
-                            $driver = new SimplifiedXmlDriver([$entity['path'] => $entity['namespace']]);
-                            $chain->addDriver($driver, $entity['namespace']);
-                            break;
-                        case 'php':
-                            $driver = new StaticPHPDriver($entity['path']);
-                            $chain->addDriver($driver, $entity['namespace']);
-                            break;
-                        default:
-                            throw new \InvalidArgumentException(
-                                sprintf('"%s" is not a recognized driver', $entity['type'])
-                            );
-                            break;
-                    }
-                }
-
-                $config->setMetadataDriverImpl($chain);
-
-                foreach ((array) $options['types'] as $typeName => $typeClass) {
-                    if (Type::hasType($typeName)) {
-                        Type::overrideType($typeName, $typeClass);
-                    } else {
-                        Type::addType($typeName, $typeClass);
-                    }
-                }
-
-                $configs[$name] = $config;
+                $configs[$name] = $this->getOrmEmConfigByNameAndOptionsDefinition($container, $name, $options);
             }
 
             return $configs;
+        };
+    }
+
+    /**
+     * @param Container $container
+     * @param string    $name
+     * @param array     $options
+     *
+     * @return \Closure
+     */
+    private function getOrmEmConfigByNameAndOptionsDefinition(
+        Container $container,
+        string $name,
+        array $options
+    ): \Closure {
+        return function () use ($container, $name, $options) {
+            $config = new Configuration();
+
+            $container['orm.cache.configurer']($name, $config, $options);
+
+            $config->setProxyDir($container['orm.proxies_dir']);
+            $config->setProxyNamespace($container['orm.proxies_namespace']);
+            $config->setAutoGenerateProxyClasses($container['orm.auto_generate_proxies']);
+
+            $config->setCustomStringFunctions($container['orm.custom.functions.string']);
+            $config->setCustomNumericFunctions($container['orm.custom.functions.numeric']);
+            $config->setCustomDatetimeFunctions($container['orm.custom.functions.datetime']);
+            $config->setCustomHydrationModes($container['orm.custom.hydration_modes']);
+
+            $config->setClassMetadataFactoryName($container['orm.class_metadata_factory_name']);
+            $config->setDefaultRepositoryClassName($container['orm.default_repository_class']);
+
+            $config->setEntityListenerResolver($container['orm.entity_listener_resolver']);
+            $config->setRepositoryFactory($container['orm.repository_factory']);
+
+            $config->setNamingStrategy($container['orm.strategy.naming']);
+            $config->setQuoteStrategy($container['orm.strategy.quote']);
+
+            /** @var MappingDriverChain $chain */
+            $chain = $container['orm.mapping_driver_chain.locator']($name);
+
+            foreach ((array) $options['mappings'] as $entity) {
+                if (!is_array($entity)) {
+                    throw new \InvalidArgumentException(
+                        "The 'orm.em.options' option 'mappings' should be an array of arrays."
+                    );
+                }
+
+                if (isset($entity['alias'])) {
+                    $config->addEntityNamespace($entity['alias'], $entity['namespace']);
+                }
+
+                switch ($entity['type']) {
+                    case 'annotation':
+                        $useSimpleAnnotationReader = $entity['use_simple_annotation_reader'] ?? true;
+                        $driver = $config->newDefaultAnnotationDriver(
+                            (array) $entity['path'],
+                            $useSimpleAnnotationReader
+                        );
+                        $chain->addDriver($driver, $entity['namespace']);
+
+                        break;
+                    case 'yml':
+                        $driver = new YamlDriver($entity['path']);
+                        $chain->addDriver($driver, $entity['namespace']);
+
+                        break;
+                    case 'simple_yml':
+                        $driver = new SimplifiedYamlDriver([$entity['path'] => $entity['namespace']]);
+                        $chain->addDriver($driver, $entity['namespace']);
+
+                        break;
+                    case 'xml':
+                        $driver = new XmlDriver($entity['path']);
+                        $chain->addDriver($driver, $entity['namespace']);
+
+                        break;
+                    case 'simple_xml':
+                        $driver = new SimplifiedXmlDriver([$entity['path'] => $entity['namespace']]);
+                        $chain->addDriver($driver, $entity['namespace']);
+
+                        break;
+                    case 'php':
+                        $driver = new StaticPHPDriver($entity['path']);
+                        $chain->addDriver($driver, $entity['namespace']);
+
+                        break;
+                    default:
+                        throw new \InvalidArgumentException(
+                            sprintf('"%s" is not a recognized driver', $entity['type'])
+                        );
+                }
+            }
+
+            $config->setMetadataDriverImpl($chain);
+
+            foreach ((array) $options['types'] as $typeName => $typeClass) {
+                if (Type::hasType($typeName)) {
+                    Type::overrideType($typeName, $typeClass);
+                } else {
+                    Type::addType($typeName, $typeClass);
+                }
+            }
+
+            return $config;
         };
     }
 
@@ -547,5 +515,81 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         return $container->protect(function () use ($container) {
             return new MappingDriverChain();
         });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmNamingStrategyDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            return new DefaultNamingStrategy();
+        };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmQuoteStrategyDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            return new DefaultQuoteStrategy();
+        };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmEntityListenerResolverDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            return new DefaultEntityListenerResolver();
+        };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmRepositoryFactoryDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            return new DefaultRepositoryFactory();
+        };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmEmDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            $ems = $container['orm.ems'];
+
+            return $ems[$container['orm.ems.default']];
+        };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmEmConfigDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            $configs = $container['orm.ems.config'];
+
+            return $configs[$container['orm.ems.default']];
+        };
     }
 }

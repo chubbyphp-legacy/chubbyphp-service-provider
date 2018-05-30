@@ -75,6 +75,35 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['orm.mapping_driver_chain.factory'] = $this->getOrmMappingDriverChainFactoryDefinition($container);
         $container['orm.em'] = $this->getOrmEmDefinition($container);
         $container['orm.em.config'] = $this->getOrmEmConfigDefinition($container);
+
+        $container['orm.mapping_driver.factory.annotation'] = $container->protect(function (array $entity, Configuration $config) {
+            $useSimpleAnnotationReader = $entity['use_simple_annotation_reader'] ?? true;
+
+            return $config->newDefaultAnnotationDriver(
+                (array) $entity['path'],
+                $useSimpleAnnotationReader
+            );
+        });
+
+        $container['orm.mapping_driver.factory.yml'] = $container->protect(function (array $entity) {
+            return new YamlDriver($entity['path']);
+        });
+
+        $container['orm.mapping_driver.factory.simple_yml'] = $container->protect(function (array $entity) {
+            return new SimplifiedYamlDriver([$entity['path'] => $entity['namespace']]);
+        });
+
+        $container['orm.mapping_driver.factory.xml'] = $container->protect(function (array $entity) {
+            return new XmlDriver($entity['path']);
+        });
+
+        $container['orm.mapping_driver.factory.simple_xml'] = $container->protect(function (array $entity) {
+            return new SimplifiedXmlDriver([$entity['path'] => $entity['namespace']]);
+        });
+
+        $container['orm.mapping_driver.factory.php'] = $container->protect(function (array $entity) {
+            return new StaticPHPDriver($entity['path']);
+        });
     }
 
     /**
@@ -224,46 +253,14 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                     $config->addEntityNamespace($entity['alias'], $entity['namespace']);
                 }
 
-                switch ($entity['type']) {
-                    case 'annotation':
-                        $useSimpleAnnotationReader = $entity['use_simple_annotation_reader'] ?? true;
-                        $driver = $config->newDefaultAnnotationDriver(
-                            (array) $entity['path'],
-                            $useSimpleAnnotationReader
-                        );
-                        $chain->addDriver($driver, $entity['namespace']);
-
-                        break;
-                    case 'yml':
-                        $driver = new YamlDriver($entity['path']);
-                        $chain->addDriver($driver, $entity['namespace']);
-
-                        break;
-                    case 'simple_yml':
-                        $driver = new SimplifiedYamlDriver([$entity['path'] => $entity['namespace']]);
-                        $chain->addDriver($driver, $entity['namespace']);
-
-                        break;
-                    case 'xml':
-                        $driver = new XmlDriver($entity['path']);
-                        $chain->addDriver($driver, $entity['namespace']);
-
-                        break;
-                    case 'simple_xml':
-                        $driver = new SimplifiedXmlDriver([$entity['path'] => $entity['namespace']]);
-                        $chain->addDriver($driver, $entity['namespace']);
-
-                        break;
-                    case 'php':
-                        $driver = new StaticPHPDriver($entity['path']);
-                        $chain->addDriver($driver, $entity['namespace']);
-
-                        break;
-                    default:
-                        throw new \InvalidArgumentException(
-                            sprintf('"%s" is not a recognized driver', $entity['type'])
-                        );
+                $factoryKey = sprintf('orm.mapping_driver.factory.%s', $entity['type']);
+                if (!isset($container[$factoryKey])) {
+                    throw new \InvalidArgumentException(
+                        sprintf('There is no driver factory for type "%s"', $entity['type'])
+                    );
                 }
+
+                $chain->addDriver($container[$factoryKey]($entity, $config), $entity['namespace']);
             }
 
             $config->setMetadataDriverImpl($chain);

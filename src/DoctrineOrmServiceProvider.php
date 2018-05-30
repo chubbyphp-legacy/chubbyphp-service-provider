@@ -251,10 +251,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         return $container->protect(function (string $name, Configuration $config, array $mappings) use ($container) {
             $container['orm.ems.options.initializer']();
 
-            if (null === $name) {
-                $name = $container['orm.ems.default'];
-            }
-
             $cacheInstanceKey = 'orm.mapping_driver_chain.instances.'.$name;
             if (isset($container[$cacheInstanceKey])) {
                 return $container[$cacheInstanceKey];

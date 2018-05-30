@@ -202,32 +202,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             $config->setProxyDir($container['orm.proxies_dir']);
             $config->setAutoGenerateProxyClasses($container['orm.auto_generate_proxies']);
             $config->setProxyNamespace($container['orm.proxies_namespace']);
-
-            /** @var MappingDriverChain $chain */
-            $chain = $container['orm.mapping_driver_chain']($name);
-            foreach ((array) $options['mappings'] as $entity) {
-                if (!is_array($entity)) {
-                    throw new \InvalidArgumentException(
-                        "The 'orm.em.options' option 'mappings' should be an array of arrays."
-                    );
-                }
-
-                if (isset($entity['alias'])) {
-                    $config->addEntityNamespace($entity['alias'], $entity['namespace']);
-                }
-
-                $factoryKey = sprintf('orm.mapping_driver.factory.%s', $entity['type']);
-                if (!isset($container[$factoryKey])) {
-                    throw new \InvalidArgumentException(
-                        sprintf('There is no driver factory for type "%s"', $entity['type'])
-                    );
-                }
-
-                $chain->addDriver($container[$factoryKey]($entity, $config), $entity['namespace']);
-            }
-
-            $config->setMetadataDriverImpl($chain);
-
+            $config->setMetadataDriverImpl(
+                $container['orm.mapping_driver_chain']($name, $config, (array) $options['mappings'])
+            );
             $config->setQueryCacheImpl($container['orm.cache.locator']($name, 'query', $options));
             $config->setHydrationCacheImpl($container['orm.cache.locator']($name, 'hydration', $options));
             $config->setMetadataCacheImpl($container['orm.cache.locator']($name, 'metadata', $options));
@@ -271,7 +248,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverChainDefinition(Container $container): \Closure
     {
-        return $container->protect(function (string $name = null) use ($container) {
+        return $container->protect(function (string $name, Configuration $config, array $mappings) use ($container) {
             $container['orm.ems.options.initializer']();
 
             if (null === $name) {
@@ -283,7 +260,30 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                 return $container[$cacheInstanceKey];
             }
 
-            return $container[$cacheInstanceKey] = $container['orm.mapping_driver_chain.factory']($name);
+            /** @var MappingDriverChain $chain */
+            $chain = $container['orm.mapping_driver_chain.factory']();
+            foreach ($mappings as $entity) {
+                if (!is_array($entity)) {
+                    throw new \InvalidArgumentException(
+                        "The 'orm.em.options' option 'mappings' should be an array of arrays."
+                    );
+                }
+
+                if (isset($entity['alias'])) {
+                    $config->addEntityNamespace($entity['alias'], $entity['namespace']);
+                }
+
+                $factoryKey = sprintf('orm.mapping_driver.factory.%s', $entity['type']);
+                if (!isset($container[$factoryKey])) {
+                    throw new \InvalidArgumentException(
+                        sprintf('There is no driver factory for type "%s"', $entity['type'])
+                    );
+                }
+
+                $chain->addDriver($container[$factoryKey]($entity, $config), $entity['namespace']);
+            }
+
+            return $container[$cacheInstanceKey] = $chain;
         });
     }
 
@@ -294,7 +294,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverChainFactoryDefinition(Container $container): \Closure
     {
-        return $container->protect(function (string $name) use ($container) {
+        return $container->protect(function () use ($container) {
             return new MappingDriverChain();
         });
     }

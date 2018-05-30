@@ -7,7 +7,7 @@ for easy database access
 ## Install
 
 ```sh
-composer require doctrine/dbal "^2.4"
+composer require doctrine/dbal "^2.5"
 ```
 
 ## Parameters

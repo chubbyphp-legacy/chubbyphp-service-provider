@@ -19,6 +19,7 @@ use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Cache\CacheConfiguration;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -47,7 +48,17 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['orm.ems.options.initializer'] = $this->getOrmEmsOptionsInitializerDefinition($container);
         $container['orm.ems'] = $this->getOrmEmsDefinition($container);
         $container['orm.ems.config'] = $this->getOrmEmsConfigServiceProvider($container);
-        $container['orm.cache.configurer'] = $this->getOrmCacheConfigurerDefinition($container);
+        $container['orm.proxies_dir'] = sys_get_temp_dir();
+        $container['orm.auto_generate_proxies'] = true;
+        $container['orm.proxies_namespace'] = 'DoctrineProxy';
+        $container['orm.mapping_driver_chain'] = $this->getOrmMappingDriverChainDefinition($container);
+        $container['orm.mapping_driver_chain.factory'] = $this->getOrmMappingDriverChainFactoryDefinition($container);
+        $container['orm.mapping_driver.factory.annotation'] = $this->getOrmMappingDriverFactoryAnnotation($container);
+        $container['orm.mapping_driver.factory.yml'] = $this->getOrmMappingDriverFactoryYaml($container);
+        $container['orm.mapping_driver.factory.simple_yml'] = $this->getOrmMappingDriverFactorySimpleYaml($container);
+        $container['orm.mapping_driver.factory.xml'] = $this->getOrmMappingDriverFactoryXml($container);
+        $container['orm.mapping_driver.factory.simple_xml'] = $this->getOrmMappingDriverFactorySimpleXml($container);
+        $container['orm.mapping_driver.factory.php'] = $this->getOrmMappingDriverFactoryPhp($container);
         $container['orm.cache.locator'] = $this->getOrmCacheLocatorDefinition($container);
         $container['orm.cache.factory'] = $this->getOrmCacheFactoryDefinition($container);
         $container['orm.cache.factory.apcu'] = $this->getOrmCacheFactoryApcuDefinition($container);
@@ -58,52 +69,21 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['orm.cache.factory.redis'] = $this->getOrmCacheFactoryRedisDefinition($container);
         $container['orm.cache.factory.xcache'] = $this->getOrmCacheFactoryXCacheDefinition($container);
         $container['orm.default_cache'] = ['driver' => 'array'];
-        $container['orm.proxies_dir'] = sys_get_temp_dir();
-        $container['orm.proxies_namespace'] = 'DoctrineProxy';
-        $container['orm.auto_generate_proxies'] = true;
         $container['orm.custom.functions.string'] = [];
         $container['orm.custom.functions.numeric'] = [];
         $container['orm.custom.functions.datetime'] = [];
         $container['orm.custom.hydration_modes'] = [];
         $container['orm.class_metadata_factory_name'] = ClassMetadataFactory::class;
         $container['orm.default_repository_class'] = EntityRepository::class;
-        $container['orm.entity_listener_resolver'] = $this->getOrmEntityListenerResolverDefinition($container);
-        $container['orm.repository_factory'] = $this->getOrmRepositoryFactoryDefinition($container);
         $container['orm.strategy.naming'] = $this->getOrmNamingStrategyDefinition($container);
         $container['orm.strategy.quote'] = $this->getOrmQuoteStrategyDefinition($container);
-        $container['orm.mapping_driver_chain.locator'] = $this->getOrmMappingDriverChainLocatorDefinition($container);
-        $container['orm.mapping_driver_chain.factory'] = $this->getOrmMappingDriverChainFactoryDefinition($container);
+        $container['orm.entity_listener_resolver'] = $this->getOrmEntityListenerResolverDefinition($container);
+        $container['orm.repository_factory'] = $this->getOrmRepositoryFactoryDefinition($container);
+        $container['orm.second_level_cache.enabled'] = false;
+        $container['orm.second_level_cache.configuration'] = $this->getOrmSecondLevelCacheConfigurationDefinition($container);
+        $container['orm.default.query_hints'] = [];
         $container['orm.em'] = $this->getOrmEmDefinition($container);
         $container['orm.em.config'] = $this->getOrmEmConfigDefinition($container);
-
-        $container['orm.mapping_driver.factory.annotation'] = $container->protect(function (array $entity, Configuration $config) {
-            $useSimpleAnnotationReader = $entity['use_simple_annotation_reader'] ?? true;
-
-            return $config->newDefaultAnnotationDriver(
-                (array) $entity['path'],
-                $useSimpleAnnotationReader
-            );
-        });
-
-        $container['orm.mapping_driver.factory.yml'] = $container->protect(function (array $entity) {
-            return new YamlDriver($entity['path']);
-        });
-
-        $container['orm.mapping_driver.factory.simple_yml'] = $container->protect(function (array $entity) {
-            return new SimplifiedYamlDriver([$entity['path'] => $entity['namespace']]);
-        });
-
-        $container['orm.mapping_driver.factory.xml'] = $container->protect(function (array $entity) {
-            return new XmlDriver($entity['path']);
-        });
-
-        $container['orm.mapping_driver.factory.simple_xml'] = $container->protect(function (array $entity) {
-            return new SimplifiedXmlDriver([$entity['path'] => $entity['namespace']]);
-        });
-
-        $container['orm.mapping_driver.factory.php'] = $container->protect(function (array $entity) {
-            return new StaticPHPDriver($entity['path']);
-        });
     }
 
     /**
@@ -219,29 +199,12 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         return function () use ($container, $name, $options) {
             $config = new Configuration();
 
-            $container['orm.cache.configurer']($name, $config, $options);
-
             $config->setProxyDir($container['orm.proxies_dir']);
-            $config->setProxyNamespace($container['orm.proxies_namespace']);
             $config->setAutoGenerateProxyClasses($container['orm.auto_generate_proxies']);
-
-            $config->setCustomStringFunctions($container['orm.custom.functions.string']);
-            $config->setCustomNumericFunctions($container['orm.custom.functions.numeric']);
-            $config->setCustomDatetimeFunctions($container['orm.custom.functions.datetime']);
-            $config->setCustomHydrationModes($container['orm.custom.hydration_modes']);
-
-            $config->setClassMetadataFactoryName($container['orm.class_metadata_factory_name']);
-            $config->setDefaultRepositoryClassName($container['orm.default_repository_class']);
-
-            $config->setEntityListenerResolver($container['orm.entity_listener_resolver']);
-            $config->setRepositoryFactory($container['orm.repository_factory']);
-
-            $config->setNamingStrategy($container['orm.strategy.naming']);
-            $config->setQuoteStrategy($container['orm.strategy.quote']);
+            $config->setProxyNamespace($container['orm.proxies_namespace']);
 
             /** @var MappingDriverChain $chain */
-            $chain = $container['orm.mapping_driver_chain.locator']($name);
-
+            $chain = $container['orm.mapping_driver_chain']($name);
             foreach ((array) $options['mappings'] as $entity) {
                 if (!is_array($entity)) {
                     throw new \InvalidArgumentException(
@@ -265,6 +228,11 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             $config->setMetadataDriverImpl($chain);
 
+            $config->setQueryCacheImpl($container['orm.cache.locator']($name, 'query', $options));
+            $config->setHydrationCacheImpl($container['orm.cache.locator']($name, 'hydration', $options));
+            $config->setMetadataCacheImpl($container['orm.cache.locator']($name, 'metadata', $options));
+            $config->setResultCacheImpl($container['orm.cache.locator']($name, 'result', $options));
+
             foreach ((array) $options['types'] as $typeName => $typeClass) {
                 if (Type::hasType($typeName)) {
                     Type::overrideType($typeName, $typeClass);
@@ -272,6 +240,25 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                     Type::addType($typeName, $typeClass);
                 }
             }
+
+            $config->setCustomStringFunctions($container['orm.custom.functions.string']);
+            $config->setCustomNumericFunctions($container['orm.custom.functions.numeric']);
+            $config->setCustomDatetimeFunctions($container['orm.custom.functions.datetime']);
+            $config->setCustomHydrationModes($container['orm.custom.hydration_modes']);
+
+            $config->setClassMetadataFactoryName($container['orm.class_metadata_factory_name']);
+            $config->setDefaultRepositoryClassName($container['orm.default_repository_class']);
+
+            $config->setNamingStrategy($container['orm.strategy.naming']);
+            $config->setQuoteStrategy($container['orm.strategy.quote']);
+
+            $config->setEntityListenerResolver($container['orm.entity_listener_resolver']);
+            $config->setRepositoryFactory($container['orm.repository_factory']);
+
+            $config->setSecondLevelCacheEnabled($container['orm.second_level_cache.enabled']);
+            $config->setSecondLevelCacheConfiguration($container['orm.second_level_cache.configuration']);
+
+            $config->setDefaultQueryHints($container['orm.default.query_hints']);
 
             return $config;
         };
@@ -282,13 +269,110 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
-    private function getOrmCacheConfigurerDefinition(Container $container): \Closure
+    private function getOrmMappingDriverChainDefinition(Container $container): \Closure
     {
-        return $container->protect(function ($name, Configuration $config, $options) use ($container) {
-            $config->setMetadataCacheImpl($container['orm.cache.locator']($name, 'metadata', $options));
-            $config->setQueryCacheImpl($container['orm.cache.locator']($name, 'query', $options));
-            $config->setResultCacheImpl($container['orm.cache.locator']($name, 'result', $options));
-            $config->setHydrationCacheImpl($container['orm.cache.locator']($name, 'hydration', $options));
+        return $container->protect(function (string $name = null) use ($container) {
+            $container['orm.ems.options.initializer']();
+
+            if (null === $name) {
+                $name = $container['orm.ems.default'];
+            }
+
+            $cacheInstanceKey = 'orm.mapping_driver_chain.instances.'.$name;
+            if (isset($container[$cacheInstanceKey])) {
+                return $container[$cacheInstanceKey];
+            }
+
+            return $container[$cacheInstanceKey] = $container['orm.mapping_driver_chain.factory']($name);
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmMappingDriverChainFactoryDefinition(Container $container): \Closure
+    {
+        return $container->protect(function (string $name) use ($container) {
+            return new MappingDriverChain();
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmMappingDriverFactoryAnnotation(Container $container): \Closure
+    {
+        return $container->protect(function (array $entity, Configuration $config) {
+            $useSimpleAnnotationReader = $entity['use_simple_annotation_reader'] ?? true;
+
+            return $config->newDefaultAnnotationDriver(
+                (array) $entity['path'],
+                $useSimpleAnnotationReader
+            );
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmMappingDriverFactoryYaml(Container $container): \Closure
+    {
+        return $container->protect(function (array $entity, Configuration $config) {
+            return new YamlDriver($entity['path']);
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmMappingDriverFactorySimpleYaml(Container $container): \Closure
+    {
+        return $container->protect(function (array $entity, Configuration $config) {
+            return new SimplifiedYamlDriver([$entity['path'] => $entity['namespace']]);
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmMappingDriverFactoryXml(Container $container): \Closure
+    {
+        return $container->protect(function (array $entity, Configuration $config) {
+            return new XmlDriver($entity['path']);
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmMappingDriverFactorySimpleXml(Container $container): \Closure
+    {
+        return $container->protect(function (array $entity, Configuration $config) {
+            return new SimplifiedXmlDriver([$entity['path'] => $entity['namespace']]);
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmMappingDriverFactoryPhp(Container $container): \Closure
+    {
+        return $container->protect(function (array $entity, Configuration $config) {
+            return new StaticPHPDriver($entity['path']);
         });
     }
 
@@ -299,7 +383,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmCacheLocatorDefinition(Container $container): \Closure
     {
-        return $container->protect(function ($name, $cacheName, $options) use ($container) {
+        return $container->protect(function (string $name, string $cacheName, array $options) use ($container) {
             $cacheNameKey = $cacheName.'_cache';
 
             if (!isset($options[$cacheNameKey])) {
@@ -338,9 +422,28 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      *
      * @return \Closure
      */
+    private function getOrmCacheFactoryDefinition(Container $container): \Closure
+    {
+        return $container->protect(function (string $driver, array $cacheOptions) use ($container) {
+            $cacheFactoryKey = 'orm.cache.factory.'.$driver;
+            if (!isset($container[$cacheFactoryKey])) {
+                throw new \RuntimeException(
+                    sprintf('Factory "%s" for cache type "%s" not defined', $cacheFactoryKey, $driver)
+                );
+            }
+
+            return $container[$cacheFactoryKey]($cacheOptions);
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
     private function getOrmCacheFactoryApcuDefinition(Container $container): \Closure
     {
-        return $container->protect(function () use ($container) {
+        return $container->protect(function (array $cacheOptions) use ($container) {
             return new ApcuCache();
         });
     }
@@ -352,7 +455,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmCacheFactoryArrayDefinition(Container $container): \Closure
     {
-        return $container->protect(function () use ($container) {
+        return $container->protect(function (array $cacheOptions) use ($container) {
             return new ArrayCache();
         });
     }
@@ -364,7 +467,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmCacheFactoryFilesystemDefinition(Container $container): \Closure
     {
-        return $container->protect(function ($cacheOptions) {
+        return $container->protect(function (array $cacheOptions) {
             if (empty($cacheOptions['path'])) {
                 throw new \RuntimeException('FilesystemCache path not defined');
             }
@@ -385,7 +488,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmCacheFactoryMemcacheDefinition(Container $container): \Closure
     {
-        return $container->protect(function ($cacheOptions) use ($container) {
+        return $container->protect(function (array $cacheOptions) use ($container) {
             if (empty($cacheOptions['host']) || empty($cacheOptions['port'])) {
                 throw new \RuntimeException('Host and port options need to be specified for memcache cache');
             }
@@ -407,7 +510,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmCacheFactoryMemcachedDefinition(Container $container): \Closure
     {
-        return $container->protect(function ($cacheOptions) use ($container) {
+        return $container->protect(function (array $cacheOptions) use ($container) {
             if (empty($cacheOptions['host']) || empty($cacheOptions['port'])) {
                 throw new \RuntimeException('Host and port options need to be specified for memcached cache');
             }
@@ -429,7 +532,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmCacheFactoryRedisDefinition(Container $container): \Closure
     {
-        return $container->protect(function ($cacheOptions) use ($container) {
+        return $container->protect(function (array $cacheOptions) use ($container) {
             if (empty($cacheOptions['host']) || empty($cacheOptions['port'])) {
                 throw new \RuntimeException('Host and port options need to be specified for redis cache');
             }
@@ -455,62 +558,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmCacheFactoryXCacheDefinition(Container $container): \Closure
     {
-        return $container->protect(function () use ($container) {
+        return $container->protect(function (array $cacheOptions) use ($container) {
             return new XcacheCache();
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return \Closure
-     */
-    private function getOrmCacheFactoryDefinition(Container $container): \Closure
-    {
-        return $container->protect(function ($driver, $cacheOptions) use ($container) {
-            $cacheFactoryKey = 'orm.cache.factory.'.$driver;
-            if (!isset($container[$cacheFactoryKey])) {
-                throw new \RuntimeException(
-                    sprintf('Factory "%s" for cache type "%s" not defined', $cacheFactoryKey, $driver)
-                );
-            }
-
-            return $container[$cacheFactoryKey]($cacheOptions);
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return \Closure
-     */
-    private function getOrmMappingDriverChainLocatorDefinition(Container $container): \Closure
-    {
-        return $container->protect(function ($name = null) use ($container) {
-            $container['orm.ems.options.initializer']();
-
-            if (null === $name) {
-                $name = $container['orm.ems.default'];
-            }
-
-            $cacheInstanceKey = 'orm.mapping_driver_chain.instances.'.$name;
-            if (isset($container[$cacheInstanceKey])) {
-                return $container[$cacheInstanceKey];
-            }
-
-            return $container[$cacheInstanceKey] = $container['orm.mapping_driver_chain.factory']($name);
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return \Closure
-     */
-    private function getOrmMappingDriverChainFactoryDefinition(Container $container): \Closure
-    {
-        return $container->protect(function () use ($container) {
-            return new MappingDriverChain();
         });
     }
 
@@ -559,6 +608,18 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     {
         return function () use ($container) {
             return new DefaultRepositoryFactory();
+        };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return \Closure
+     */
+    private function getOrmSecondLevelCacheConfigurationDefinition(Container $container): \Closure
+    {
+        return function () use ($container) {
+            return new CacheConfiguration();
         };
     }
 

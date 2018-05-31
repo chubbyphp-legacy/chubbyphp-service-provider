@@ -21,7 +21,9 @@ matrix:
       env: dependencies=highest
 
 before_script:
+  - echo 'extension=memcached.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/memcached.ini
   - echo 'extension=mongodb.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/mongodb.ini
+  - echo 'extension=redis.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/redis.ini
   - echo 'Europe/Zurich' | sudo tee /etc/timezone
   - echo 'date.timezone = "Europe/Zurich"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - composer self-update -q
@@ -32,6 +34,6 @@ before_script:
 script: vendor/bin/phpunit --coverage-text --verbose
 
 services:
-  - mongodb
   - memcached
+  - mongodb
   - redis-server

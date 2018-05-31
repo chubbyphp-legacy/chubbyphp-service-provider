@@ -5,7 +5,9 @@ build:
             version: '7.0'
             ini:
                 'date.timezone': 'Europe/Zurich'
+        memcached: true
         mongodb: true
+        redis: true
     tests:
         override:
             -

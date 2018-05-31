@@ -4,6 +4,7 @@ namespace Chubbyphp\Tests\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
@@ -36,6 +37,22 @@ class DoctrineOrmServiceProviderTest extends TestCase
         ];
 
         $container['orm.em.options'] = [
+            'query_cache' => 'apcu',
+            'metadata_cache' => [
+                'driver' => 'filesystem',
+                'path' => sys_get_temp_dir(),
+            ],
+            'result_cache' => [
+                'driver' => 'memcached',
+                'host' => '127.0.0.1',
+                'port' => 11211,
+            ],
+            'hydration_cache' => [
+                'driver' => 'redis',
+                'host' => '127.0.0.1',
+                'port' => 6379,
+                'password' => 'password',
+            ],
             'mappings' => [
                 [
                     'type' => 'annotation',
@@ -68,6 +85,10 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     'path' => __DIR__.'/src/Six/Entities',
                 ],
             ],
+            'types' => [
+                Type::STRING => \stdClass::class,
+                'aotherTyoe' => \stdClass::class,
+            ],
         ];
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
@@ -97,6 +118,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $container['orm.ems.options'] = [
             'sqlite_read' => [
                 'connection' => 'sqlite_read',
+                'query_cache' => 'xcache',
                 'mappings' => [
                     [
                         'type' => 'annotation',

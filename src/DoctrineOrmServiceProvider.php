@@ -12,7 +12,6 @@ use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\Common\Cache\FilesystemCache;
-use Doctrine\Common\Cache\MemcacheCache;
 use Doctrine\Common\Cache\MemcachedCache;
 use Doctrine\Common\Cache\XcacheCache;
 use Doctrine\Common\Cache\RedisCache;
@@ -64,7 +63,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['orm.cache.factory.apcu'] = $this->getOrmCacheFactoryApcuDefinition($container);
         $container['orm.cache.factory.array'] = $this->getOrmCacheFactoryArrayDefinition($container);
         $container['orm.cache.factory.filesystem'] = $this->getOrmCacheFactoryFilesystemDefinition($container);
-        $container['orm.cache.factory.memcache'] = $this->getOrmCacheFactoryMemcacheDefinition($container);
         $container['orm.cache.factory.memcached'] = $this->getOrmCacheFactoryMemcachedDefinition($container);
         $container['orm.cache.factory.redis'] = $this->getOrmCacheFactoryRedisDefinition($container);
         $container['orm.cache.factory.xcache'] = $this->getOrmCacheFactoryXCacheDefinition($container);
@@ -474,28 +472,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             ];
 
             return new FilesystemCache($cacheOptions['path'], $cacheOptions['extension'], $cacheOptions['umask']);
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return \Closure
-     */
-    private function getOrmCacheFactoryMemcacheDefinition(Container $container): \Closure
-    {
-        return $container->protect(function (array $cacheOptions) use ($container) {
-            if (empty($cacheOptions['host']) || empty($cacheOptions['port'])) {
-                throw new \RuntimeException('Host and port options need to be specified for memcache cache');
-            }
-
-            $memcache = new \Memcache();
-            $memcache->connect($cacheOptions['host'], $cacheOptions['port']);
-
-            $cache = new MemcacheCache();
-            $cache->setMemcache($memcache);
-
-            return $cache;
         });
     }
 

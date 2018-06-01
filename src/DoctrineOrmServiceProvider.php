@@ -249,11 +249,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         return $container->protect(function (string $name, Configuration $config, array $mappings) use ($container) {
             $container['orm.ems.options.initializer']();
 
-            $cacheInstanceKey = 'orm.mapping_driver_chain.instances.'.$name;
-            if (isset($container[$cacheInstanceKey])) {
-                return $container[$cacheInstanceKey];
-            }
-
             /** @var MappingDriverChain $chain */
             $chain = $container['orm.mapping_driver_chain.factory']();
             foreach ($mappings as $entity) {
@@ -277,7 +272,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                 $chain->addDriver($container[$factoryKey]($entity, $config), $entity['namespace']);
             }
 
-            return $container[$cacheInstanceKey] = $chain;
+            return $container['orm.mapping_driver_chain.instances.'.$name] = $chain;
         });
     }
 
@@ -396,18 +391,13 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             $driver = $options[$cacheNameKey]['driver'];
 
-            $cacheInstanceKey = 'orm.cache.instances.'.$name.'.'.$cacheName;
-            if (isset($container[$cacheInstanceKey])) {
-                return $container[$cacheInstanceKey];
-            }
-
             $cache = $container['orm.cache.factory']($driver, $options[$cacheNameKey]);
 
             if (isset($options['cache_namespace']) && $cache instanceof CacheProvider) {
                 $cache->setNamespace($options['cache_namespace']);
             }
 
-            return $container[$cacheInstanceKey] = $cache;
+            return $container['orm.cache.instances.'.$name.'.'.$cacheName] = $cache;
         });
     }
 

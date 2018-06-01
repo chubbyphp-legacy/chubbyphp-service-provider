@@ -119,10 +119,12 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'sqlite_read' => [
                 'connection' => 'sqlite_read',
                 'query_cache' => 'xcache',
+                'cache_namespace' => 'prefix-',
                 'mappings' => [
                     [
                         'type' => 'annotation',
                         'namespace' => 'One\Entities',
+                        'alias' => 'One',
                         'path' => __DIR__.'/src/One/Entities',
                     ],
                     [

@@ -36,9 +36,9 @@ final class MonologServiceProvider
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getLoggerDefinition(Container $container): \Closure
+    private function getLoggerDefinition(Container $container): callable
     {
         return function () use ($container) {
             return $container['monolog'];
@@ -48,9 +48,9 @@ final class MonologServiceProvider
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getMonologDefinition(Container $container): \Closure
+    private function getMonologDefinition(Container $container): callable
     {
         return function ($container) {
             $log = new Logger($container['monolog.name']);
@@ -63,9 +63,9 @@ final class MonologServiceProvider
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getMonologFormatterDefinition(Container $container): \Closure
+    private function getMonologFormatterDefinition(Container $container): callable
     {
         return function () {
             return new LineFormatter();
@@ -75,9 +75,9 @@ final class MonologServiceProvider
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getMonologHandlersDefinition(Container $container): \Closure
+    private function getMonologHandlersDefinition(Container $container): callable
     {
         return function () use ($container) {
             return [$container['monolog.default_handler']];
@@ -87,9 +87,9 @@ final class MonologServiceProvider
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getMonologDefaultHandlerDefinition(Container $container): \Closure
+    private function getMonologDefaultHandlerDefinition(Container $container): callable
     {
         return function () use ($container) {
             $handler = new StreamHandler(

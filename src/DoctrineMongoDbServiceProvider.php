@@ -45,9 +45,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getMongoDbsOptionsInitializerDefinition(Container $container): \Closure
+    private function getMongoDbsOptionsInitializerDefinition(Container $container): callable
     {
         return $container->protect(function () use ($container) {
             static $initialized = false;
@@ -80,9 +80,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getMongoDbsDefinition(Container $container): \Closure
+    private function getMongoDbsDefinition(Container $container): callable
     {
         return function () use ($container) {
             $container['mongodbs.options.initializer']();
@@ -110,9 +110,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getMongoDbsConfigDefinition(Container $container): \Closure
+    private function getMongoDbsConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
             $container['mongodbs.options.initializer']();
@@ -143,9 +143,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getMongoDbsEventManagerDefinition(Container $container): \Closure
+    private function getMongoDbsEventManagerDefinition(Container $container): callable
     {
         return function () use ($container) {
             $container['mongodbs.options.initializer']();
@@ -163,9 +163,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 
     /***
      * @param Container $container
-     * @return \Closure
+     * @return callable
      */
-    private function getMongoDbDefinition(Container $container): \Closure
+    private function getMongoDbDefinition(Container $container): callable
     {
         return function () use ($container) {
             $dbs = $container['mongodbs'];
@@ -176,9 +176,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 
     /***
      * @param Container $container
-     * @return \Closure
+     * @return callable
      */
-    private function getMongoDbConfigDefinition(Container $container): \Closure
+    private function getMongoDbConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
             $dbs = $container['mongodbs.config'];
@@ -189,9 +189,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 
     /***
      * @param Container $container
-     * @return \Closure
+     * @return callable
      */
-    private function getMongoDbEventManagerDefinition(Container $container): \Closure
+    private function getMongoDbEventManagerDefinition(Container $container): callable
     {
         return function () use ($container) {
             $dbs = $container['mongodbs.event_manager'];

@@ -99,9 +99,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmEmsOptionsInitializerDefinition(Container $container): \Closure
+    private function getOrmEmsOptionsInitializerDefinition(Container $container): callable
     {
         return $container->protect(function () use ($container) {
             static $initialized = false;
@@ -134,9 +134,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmEmsDefinition(Container $container): \Closure
+    private function getOrmEmsDefinition(Container $container): callable
     {
         return function () use ($container) {
             $container['orm.ems.options.initializer']();
@@ -166,9 +166,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmEmsConfigServiceProvider(Container $container): \Closure
+    private function getOrmEmsConfigServiceProvider(Container $container): callable
     {
         return function () use ($container) {
             $container['orm.ems.options.initializer']();
@@ -187,13 +187,13 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      * @param string    $name
      * @param array     $options
      *
-     * @return \Closure
+     * @return callable
      */
     private function getOrmEmConfigByNameAndOptionsDefinition(
         Container $container,
         string $name,
         array $options
-    ): \Closure {
+    ): callable {
         return function () use ($container, $name, $options) {
             $config = new Configuration();
 
@@ -242,9 +242,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmMappingDriverChainDefinition(Container $container): \Closure
+    private function getOrmMappingDriverChainDefinition(Container $container): callable
     {
         return $container->protect(function (string $name, Configuration $config, array $mappings) use ($container) {
             $container['orm.ems.options.initializer']();
@@ -279,9 +279,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmMappingDriverChainFactoryDefinition(Container $container): \Closure
+    private function getOrmMappingDriverChainFactoryDefinition(Container $container): callable
     {
         return $container->protect(function () use ($container) {
             return new MappingDriverChain();
@@ -291,9 +291,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmMappingDriverFactoryAnnotation(Container $container): \Closure
+    private function getOrmMappingDriverFactoryAnnotation(Container $container): callable
     {
         return $container->protect(function (array $entity, Configuration $config) {
             $useSimpleAnnotationReader = $entity['use_simple_annotation_reader'] ?? true;
@@ -308,9 +308,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmMappingDriverFactoryYaml(Container $container): \Closure
+    private function getOrmMappingDriverFactoryYaml(Container $container): callable
     {
         return $container->protect(function (array $entity, Configuration $config) {
             return new YamlDriver($entity['path']);
@@ -320,9 +320,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmMappingDriverFactorySimpleYaml(Container $container): \Closure
+    private function getOrmMappingDriverFactorySimpleYaml(Container $container): callable
     {
         return $container->protect(function (array $entity, Configuration $config) {
             return new SimplifiedYamlDriver([$entity['path'] => $entity['namespace']]);
@@ -332,9 +332,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmMappingDriverFactoryXml(Container $container): \Closure
+    private function getOrmMappingDriverFactoryXml(Container $container): callable
     {
         return $container->protect(function (array $entity, Configuration $config) {
             return new XmlDriver($entity['path']);
@@ -344,9 +344,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmMappingDriverFactorySimpleXml(Container $container): \Closure
+    private function getOrmMappingDriverFactorySimpleXml(Container $container): callable
     {
         return $container->protect(function (array $entity, Configuration $config) {
             return new SimplifiedXmlDriver([$entity['path'] => $entity['namespace']]);
@@ -356,9 +356,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmMappingDriverFactoryPhp(Container $container): \Closure
+    private function getOrmMappingDriverFactoryPhp(Container $container): callable
     {
         return $container->protect(function (array $entity, Configuration $config) {
             return new StaticPHPDriver($entity['path']);
@@ -368,9 +368,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmCacheLocatorDefinition(Container $container): \Closure
+    private function getOrmCacheLocatorDefinition(Container $container): callable
     {
         return $container->protect(function (string $name, string $cacheName, array $options) use ($container) {
             $cacheNameKey = $cacheName.'_cache';
@@ -404,9 +404,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmCacheFactoryDefinition(Container $container): \Closure
+    private function getOrmCacheFactoryDefinition(Container $container): callable
     {
         return $container->protect(function (string $driver, array $cacheOptions) use ($container) {
             $cacheFactoryKey = 'orm.cache.factory.'.$driver;
@@ -423,9 +423,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmCacheFactoryApcuDefinition(Container $container): \Closure
+    private function getOrmCacheFactoryApcuDefinition(Container $container): callable
     {
         return $container->protect(function (array $cacheOptions) use ($container) {
             return new ApcuCache();
@@ -435,9 +435,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmCacheFactoryArrayDefinition(Container $container): \Closure
+    private function getOrmCacheFactoryArrayDefinition(Container $container): callable
     {
         return $container->protect(function (array $cacheOptions) use ($container) {
             return new ArrayCache();
@@ -447,9 +447,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmCacheFactoryFilesystemDefinition(Container $container): \Closure
+    private function getOrmCacheFactoryFilesystemDefinition(Container $container): callable
     {
         return $container->protect(function (array $cacheOptions) {
             if (empty($cacheOptions['path'])) {
@@ -468,9 +468,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmCacheFactoryMemcachedDefinition(Container $container): \Closure
+    private function getOrmCacheFactoryMemcachedDefinition(Container $container): callable
     {
         return $container->protect(function (array $cacheOptions) use ($container) {
             if (empty($cacheOptions['host']) || empty($cacheOptions['port'])) {
@@ -490,9 +490,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmCacheFactoryRedisDefinition(Container $container): \Closure
+    private function getOrmCacheFactoryRedisDefinition(Container $container): callable
     {
         return $container->protect(function (array $cacheOptions) use ($container) {
             if (empty($cacheOptions['host']) || empty($cacheOptions['port'])) {
@@ -516,9 +516,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmCacheFactoryXCacheDefinition(Container $container): \Closure
+    private function getOrmCacheFactoryXCacheDefinition(Container $container): callable
     {
         return $container->protect(function (array $cacheOptions) use ($container) {
             return new XcacheCache();
@@ -528,9 +528,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmNamingStrategyDefinition(Container $container): \Closure
+    private function getOrmNamingStrategyDefinition(Container $container): callable
     {
         return function () use ($container) {
             return new DefaultNamingStrategy();
@@ -540,9 +540,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmQuoteStrategyDefinition(Container $container): \Closure
+    private function getOrmQuoteStrategyDefinition(Container $container): callable
     {
         return function () use ($container) {
             return new DefaultQuoteStrategy();
@@ -552,9 +552,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmEntityListenerResolverDefinition(Container $container): \Closure
+    private function getOrmEntityListenerResolverDefinition(Container $container): callable
     {
         return function () use ($container) {
             return new DefaultEntityListenerResolver();
@@ -564,9 +564,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmRepositoryFactoryDefinition(Container $container): \Closure
+    private function getOrmRepositoryFactoryDefinition(Container $container): callable
     {
         return function () use ($container) {
             return new DefaultRepositoryFactory();
@@ -576,9 +576,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmSecondLevelCacheConfigurationDefinition(Container $container): \Closure
+    private function getOrmSecondLevelCacheConfigurationDefinition(Container $container): callable
     {
         return function () use ($container) {
             return new CacheConfiguration();
@@ -588,9 +588,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmEmDefinition(Container $container): \Closure
+    private function getOrmEmDefinition(Container $container): callable
     {
         return function () use ($container) {
             $ems = $container['orm.ems'];
@@ -602,9 +602,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getOrmEmConfigDefinition(Container $container): \Closure
+    private function getOrmEmConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
             $configs = $container['orm.ems.config'];

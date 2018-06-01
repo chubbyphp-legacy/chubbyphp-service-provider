@@ -49,9 +49,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getDbsOptionsInitializerDefinition(Container $container): \Closure
+    private function getDbsOptionsInitializerDefinition(Container $container): callable
     {
         return $container->protect(function () use ($container) {
             static $initialized = false;
@@ -84,9 +84,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getDbsDefinition(Container $container): \Closure
+    private function getDbsDefinition(Container $container): callable
     {
         return function () use ($container) {
             $container['dbs.options.initializer']();
@@ -114,9 +114,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getDbsConfigDefinition(Container $container): \Closure
+    private function getDbsConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
             $container['dbs.options.initializer']();
@@ -146,9 +146,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     /**
      * @param Container $container
      *
-     * @return \Closure
+     * @return callable
      */
-    private function getDbsEventManagerDefinition(Container $container): \Closure
+    private function getDbsEventManagerDefinition(Container $container): callable
     {
         return function () use ($container) {
             $container['dbs.options.initializer']();
@@ -166,9 +166,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
     /***
      * @param Container $container
-     * @return \Closure
+     * @return callable
      */
-    private function getDbDefinition(Container $container): \Closure
+    private function getDbDefinition(Container $container): callable
     {
         return function () use ($container) {
             $dbs = $container['dbs'];
@@ -179,9 +179,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
     /***
      * @param Container $container
-     * @return \Closure
+     * @return callable
      */
-    private function getDbConfigDefinition(Container $container): \Closure
+    private function getDbConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
             $dbs = $container['dbs.config'];
@@ -192,9 +192,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
     /***
      * @param Container $container
-     * @return \Closure
+     * @return callable
      */
-    private function getDbEventManagerDefinition(Container $container): \Closure
+    private function getDbEventManagerDefinition(Container $container): callable
     {
         return function () use ($container) {
             $dbs = $container['dbs.event_manager'];

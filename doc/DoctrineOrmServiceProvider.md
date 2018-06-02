@@ -106,6 +106,9 @@ composer require doctrine/orm "^2.5"
 
 * **doctrine.orm.em.config**: Configuration object for Doctrine. Defaults to
   an empty ``Doctrine\ORM\Configuration``.
+  
+* **doctrine.orm.manager_registry**: The manager registry, instance of
+  ``Doctrine\Common\Persistence\ManagerRegistry``.
 
 ## Registering
 

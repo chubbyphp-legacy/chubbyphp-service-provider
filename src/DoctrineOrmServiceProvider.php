@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Chubbyphp\ServiceProvider;
 
+use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\DBAL\Types\Type;
@@ -67,6 +68,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['doctrine.orm.default.query_hints'] = [];
         $container['doctrine.orm.em'] = $this->getOrmEmDefinition($container);
         $container['doctrine.orm.em.config'] = $this->getOrmEmConfigDefinition($container);
+        $container['doctrine.orm.manager_registry'] = $this->getOrmManagerRegistryDefintion($container);
     }
 
     /**
@@ -443,6 +445,18 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             $configs = $container['doctrine.orm.ems.config'];
 
             return $configs[$container['doctrine.orm.ems.default']];
+        };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return callable
+     */
+    private function getOrmManagerRegistryDefintion(Container $container): callable
+    {
+        return function ($container) {
+            return new DoctrineOrmManagerRegistry($container);
         };
     }
 }

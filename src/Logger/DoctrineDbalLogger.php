@@ -11,7 +11,7 @@ namespace Chubbyphp\ServiceProvider\Logger;
 use Psr\Log\LoggerInterface;
 use Doctrine\DBAL\Logging\SQLLogger;
 
-class DoctrineDbalLogger implements SQLLogger
+final class DoctrineDbalLogger implements SQLLogger
 {
     const MAX_STRING_LENGTH = 32;
     const BINARY_DATA_VALUE = '(binary value)';
@@ -19,7 +19,7 @@ class DoctrineDbalLogger implements SQLLogger
     /**
      * @var LoggerInterface
      */
-    protected $logger;
+    private $logger;
 
     /**
      * @param LoggerInterface $logger

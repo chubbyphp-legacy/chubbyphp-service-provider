@@ -8,9 +8,7 @@ return [
         'vendor/doctrine',
         'vendor/monolog/monolog',
         'vendor/pimple/pimple',
-        'vendor/psr/container',
         'vendor/psr/log',
-        'vendor/symfony/doctrine-bridge'
     ],
     "exclude_analysis_directory_list" => [
         'vendor/'

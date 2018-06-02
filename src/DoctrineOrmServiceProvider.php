@@ -8,13 +8,6 @@ declare(strict_types=1);
 
 namespace Chubbyphp\ServiceProvider;
 
-use Doctrine\Common\Cache\ApcuCache;
-use Doctrine\Common\Cache\ArrayCache;
-use Doctrine\Common\Cache\CacheProvider;
-use Doctrine\Common\Cache\FilesystemCache;
-use Doctrine\Common\Cache\MemcachedCache;
-use Doctrine\Common\Cache\XcacheCache;
-use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\DBAL\Types\Type;
@@ -58,14 +51,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['doctrine.orm.mapping_driver.factory.xml'] = $this->getOrmMappingDriverFactoryXml($container);
         $container['doctrine.orm.mapping_driver.factory.simple_xml'] = $this->getOrmMappingDriverFactorySimpleXml($container);
         $container['doctrine.orm.mapping_driver.factory.php'] = $this->getOrmMappingDriverFactoryPhp($container);
-        $container['doctrine.orm.cache.locator'] = $this->getOrmCacheLocatorDefinition($container);
-        $container['doctrine.orm.cache.factory'] = $this->getOrmCacheFactoryDefinition($container);
-        $container['doctrine.orm.cache.factory.apcu'] = $this->getOrmCacheFactoryApcuDefinition($container);
-        $container['doctrine.orm.cache.factory.array'] = $this->getOrmCacheFactoryArrayDefinition($container);
-        $container['doctrine.orm.cache.factory.filesystem'] = $this->getOrmCacheFactoryFilesystemDefinition($container);
-        $container['doctrine.orm.cache.factory.memcached'] = $this->getOrmCacheFactoryMemcachedDefinition($container);
-        $container['doctrine.orm.cache.factory.redis'] = $this->getOrmCacheFactoryRedisDefinition($container);
-        $container['doctrine.orm.cache.factory.xcache'] = $this->getOrmCacheFactoryXCacheDefinition($container);
         $container['doctrine.orm.default_cache'] = ['driver' => 'array'];
         $container['doctrine.orm.custom.functions.string'] = [];
         $container['doctrine.orm.custom.functions.numeric'] = [];
@@ -203,10 +188,18 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             $config->setMetadataDriverImpl(
                 $container['doctrine.orm.mapping_driver_chain']($name, $config, (array) $options['mappings'])
             );
-            $config->setQueryCacheImpl($container['doctrine.orm.cache.locator']($name, 'query', $options));
-            $config->setHydrationCacheImpl($container['doctrine.orm.cache.locator']($name, 'hydration', $options));
-            $config->setMetadataCacheImpl($container['doctrine.orm.cache.locator']($name, 'metadata', $options));
-            $config->setResultCacheImpl($container['doctrine.orm.cache.locator']($name, 'result', $options));
+
+            foreach (['query', 'hydration', 'metadata', 'query'] as $cacheType) {
+                $setMethod = sprintf('set%sCacheImpl', ucfirst($cacheType));
+                $cacheOptions = $options[sprintf('%s_cache', $cacheType)] ?? $container['doctrine.orm.default_cache'];
+                if (is_string($cacheOptions)) {
+                    $cacheOptions = ['driver' => $cacheOptions];
+                }
+
+                $config->$setMethod(
+                    $container['doctrine.cache.locator'](sprintf('%s_%s', $name, $cacheType), $cacheOptions)
+                );
+            }
 
             foreach ((array) $options['types'] as $typeName => $typeClass) {
                 if (Type::hasType($typeName)) {
@@ -362,166 +355,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     {
         return $container->protect(function (array $entity, Configuration $config) {
             return new StaticPHPDriver($entity['path']);
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmCacheLocatorDefinition(Container $container): callable
-    {
-        return $container->protect(function (string $name, string $cacheName, array $options) use ($container) {
-            $cacheNameKey = $cacheName.'_cache';
-
-            if (!isset($options[$cacheNameKey])) {
-                $options[$cacheNameKey] = $container['doctrine.orm.default_cache'];
-            }
-
-            if (isset($options[$cacheNameKey]) && !is_array($options[$cacheNameKey])) {
-                $options[$cacheNameKey] = [
-                    'driver' => $options[$cacheNameKey],
-                ];
-            }
-
-            if (!isset($options[$cacheNameKey]['driver'])) {
-                throw new \RuntimeException("No driver specified for '$cacheName'");
-            }
-
-            $driver = $options[$cacheNameKey]['driver'];
-
-            $cache = $container['doctrine.orm.cache.factory']($driver, $options[$cacheNameKey]);
-
-            if (isset($options['cache_namespace']) && $cache instanceof CacheProvider) {
-                $cache->setNamespace($options['cache_namespace']);
-            }
-
-            return $container['doctrine.orm.cache.instances.'.$name.'.'.$cacheName] = $cache;
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmCacheFactoryDefinition(Container $container): callable
-    {
-        return $container->protect(function (string $driver, array $cacheOptions) use ($container) {
-            $cacheFactoryKey = 'doctrine.orm.cache.factory.'.$driver;
-            if (!isset($container[$cacheFactoryKey])) {
-                throw new \RuntimeException(
-                    sprintf('Factory "%s" for cache type "%s" not defined', $cacheFactoryKey, $driver)
-                );
-            }
-
-            return $container[$cacheFactoryKey]($cacheOptions);
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmCacheFactoryApcuDefinition(Container $container): callable
-    {
-        return $container->protect(function (array $cacheOptions) use ($container) {
-            return new ApcuCache();
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmCacheFactoryArrayDefinition(Container $container): callable
-    {
-        return $container->protect(function (array $cacheOptions) use ($container) {
-            return new ArrayCache();
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmCacheFactoryFilesystemDefinition(Container $container): callable
-    {
-        return $container->protect(function (array $cacheOptions) {
-            if (empty($cacheOptions['path'])) {
-                throw new \RuntimeException('FilesystemCache path not defined');
-            }
-
-            $cacheOptions += [
-                'extension' => FilesystemCache::EXTENSION,
-                'umask' => 0002,
-            ];
-
-            return new FilesystemCache($cacheOptions['path'], $cacheOptions['extension'], $cacheOptions['umask']);
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmCacheFactoryMemcachedDefinition(Container $container): callable
-    {
-        return $container->protect(function (array $cacheOptions) use ($container) {
-            if (empty($cacheOptions['host']) || empty($cacheOptions['port'])) {
-                throw new \RuntimeException('Host and port options need to be specified for memcached cache');
-            }
-
-            $memcached = new \Memcached();
-            $memcached->addServer($cacheOptions['host'], $cacheOptions['port']);
-
-            $cache = new MemcachedCache();
-            $cache->setMemcached($memcached);
-
-            return $cache;
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmCacheFactoryRedisDefinition(Container $container): callable
-    {
-        return $container->protect(function (array $cacheOptions) use ($container) {
-            if (empty($cacheOptions['host']) || empty($cacheOptions['port'])) {
-                throw new \RuntimeException('Host and port options need to be specified for redis cache');
-            }
-
-            $redis = new \Redis();
-            $redis->connect($cacheOptions['host'], $cacheOptions['port']);
-
-            if (isset($cacheOptions['password'])) {
-                $redis->auth($cacheOptions['password']);
-            }
-
-            $cache = new RedisCache();
-            $cache->setRedis($redis);
-
-            return $cache;
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmCacheFactoryXCacheDefinition(Container $container): callable
-    {
-        return $container->protect(function (array $cacheOptions) use ($container) {
-            return new XcacheCache();
         });
     }
 

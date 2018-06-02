@@ -2,6 +2,7 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
+use Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
 use Doctrine\DBAL\Types\Type;
@@ -20,6 +21,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
+
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
 
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
@@ -93,6 +97,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
+
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
 
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
@@ -193,6 +200,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
+
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
 
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);

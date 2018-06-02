@@ -95,8 +95,13 @@ composer require doctrine/orm "^2.5"
    * **hydration_modes**: Hydrator class names, indexed by hydration mode name.
      Classes are subclasses of `Doctrine\ORM\Internal\Hydration\AbstractHydrator`.
 
-
 ## Services
+
+* **doctrine.orm.em**: The entity manager, instance of
+  ``Doctrine\ORM\EntityManager``.
+
+* **doctrine.orm.em.config**: Configuration object for Doctrine. Defaults to
+  an empty ``Doctrine\ORM\Configuration``.
 
 ## Registering
 
@@ -110,16 +115,76 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider(
 $container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider()));
 
 $container['doctrine.dbal.db.options'] = [
-    'driver'   => 'pdo_sqlite',
-    'path'     => __DIR__.'/app.db',
+    'driver'    => 'pdo_mysql',
+    'host'      => 'mysql.someplace.tld',
+    'dbname'    => 'my_database',
+    'user'      => 'my_username',
+    'password'  => 'my_password',
+    'charset'   => 'utf8mb4',
 ];
 
+$container['doctrine.orm.em.options'] = [
+    'mappings' => [
+        [
+            'type' => 'annotation',
+            'namespace' => 'One\Entities',
+            'path' => __DIR__.'/src/One/Entities',
+        ]
+    ]
+];
 ```
 
 ### Multiple connections
 
 ```php
+$container = new Container();
 
+$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
+$container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
+$container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider()));
+
+$container['doctrine.dbal.dbs.options'] = [
+    'mysql_read' => [
+        'driver'    => 'pdo_mysql',
+        'host'      => 'mysql_read.someplace.tld',
+        'dbname'    => 'my_database',
+        'user'      => 'my_username',
+        'password'  => 'my_password',
+        'charset'   => 'utf8mb4',
+    ],
+    'mysql_write' => [
+        'driver'    => 'pdo_mysql',
+        'host'      => 'mysql_write.someplace.tld',
+        'dbname'    => 'my_database',
+        'user'      => 'my_username',
+        'password'  => 'my_password',
+        'charset'   => 'utf8mb4',
+    ],
+];
+
+$container['doctrine.orm.ems.options'] = [
+    'mysql_read' => [
+        'connection' => 'mysql_read',
+        'mappings' => [
+            [
+                'type' => 'annotation',
+                'namespace' => 'One\Entities',
+                'alias' => 'One',
+                'path' => __DIR__.'/src/One/Entities',
+            ],
+        ],
+    ],
+    'mysql_write' => [
+        'connection' => 'mysql_write',
+        'mappings' => [
+            [
+                'type' => 'annotation',
+                'namespace' => 'One\Entities',
+                'path' => __DIR__.'/src/One/Entities',
+            ],
+        ],
+    ],
+];
 ```
 
 ## Usage
@@ -127,13 +192,17 @@ $container['doctrine.dbal.db.options'] = [
 ### Single connection
 
 ```php
-
+$container['doctrine.orm.em']
+    ->getRepository(User::class)
+    ->findOneBy(['username' => 'john.doe@domain.com']);
 ```
 
 ### Multiple connections
 
 ```php
-
+$container['doctrine.orm.ems']['name']
+    ->getRepository(User::class)
+    ->findOneBy(['username' => 'john.doe@domain.com']);
 ```
 
 (c) Beau Simensen <beau@dflydev.com> (https://github.com/dflydev/dflydev-doctrine-orm-service-provider)

@@ -45,8 +45,12 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider->register($container);
 
         $container['doctrine.dbal.db.options'] = [
-            'driver' => 'pdo_sqlite',
-            'path' => '/tmp/app.db',
+            'driver' => 'pdo_mysql',
+            'host' => 'mysql_read.someplace.tld',
+            'dbname' => 'my_database',
+            'user' => 'my_username',
+            'password' => 'my_password',
+            'charset' => 'utf8mb4',
         ];
 
         $container['doctrine.orm.em.options'] = [
@@ -121,19 +125,27 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider->register($container);
 
         $container['doctrine.dbal.dbs.options'] = [
-            'sqlite_read' => [
-                'driver' => 'pdo_sqlite',
-                'path' => '/tmp/app_read.db',
+            'mysql_read' => [
+                'driver' => 'pdo_mysql',
+                'host' => 'mysql_read.someplace.tld',
+                'dbname' => 'my_database',
+                'user' => 'my_username',
+                'password' => 'my_password',
+                'charset' => 'utf8mb4',
             ],
-            'sqlite_write' => [
-                'driver' => 'pdo_sqlite',
-                'path' => '/tmp/app_write.db',
+            'mysql_write' => [
+                'driver' => 'pdo_mysql',
+                'host' => 'mysql_write.someplace.tld',
+                'dbname' => 'my_database',
+                'user' => 'my_username',
+                'password' => 'my_password',
+                'charset' => 'utf8mb4',
             ],
         ];
 
         $container['doctrine.orm.ems.options'] = [
-            'sqlite_read' => [
-                'connection' => 'sqlite_read',
+            'mysql_read' => [
+                'connection' => 'mysql_read',
                 'query_cache' => 'xcache',
                 'cache_namespace' => 'prefix-',
                 'mappings' => [
@@ -170,8 +182,8 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     ],
                 ],
             ],
-            'sqlite_write' => [
-                'connection' => 'sqlite_read',
+            'mysql_write' => [
+                'connection' => 'mysql_read',
                 'mappings' => [
                     [
                         'type' => 'annotation',

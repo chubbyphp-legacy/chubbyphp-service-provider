@@ -61,8 +61,12 @@ $container = new Container();
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 
 $container['doctrine.dbal.db.options'] = [
-    'driver'   => 'pdo_sqlite',
-    'path'     => __DIR__.'/app.db',
+    'driver'    => 'pdo_mysql',
+    'host'      => 'mysql.someplace.tld',
+    'dbname'    => 'my_database',
+    'user'      => 'my_username',
+    'password'  => 'my_password',
+    'charset'   => 'utf8mb4',
 ];
 ```
 

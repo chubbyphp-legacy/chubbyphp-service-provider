@@ -109,19 +109,23 @@ class DoctrineDbalServiceProviderTest extends TestCase
         };
 
         $container['doctrine.dbal.db.options'] = [
-            'driver' => 'pdo_sqlite',
-            'path' => '/tmp/app.db',
+            'driver' => 'pdo_mysql',
+            'host' => 'mysql_read.someplace.tld',
+            'dbname' => 'my_database',
+            'user' => 'my_username',
+            'password' => 'my_password',
+            'charset' => 'utf8mb4',
         ];
 
         $db = $container['doctrine.dbal.db'];
 
         self::assertEquals([
-            'driver' => 'pdo_sqlite',
-            'dbname' => null,
-            'host' => 'localhost',
-            'user' => 'root',
-            'password' => null,
-            'path' => '/tmp/app.db',
+            'driver' => 'pdo_mysql',
+            'host' => 'mysql_read.someplace.tld',
+            'dbname' => 'my_database',
+            'user' => 'my_username',
+            'password' => 'my_password',
+            'charset' => 'utf8mb4',
         ], $db->getParams());
     }
 

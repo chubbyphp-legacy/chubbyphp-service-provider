@@ -17,7 +17,7 @@ composer require doctrine/orm "^2.5"
    These options are available:
    * **connection** (Default: default):
      String defining which database connection to use. Used when using
-     named databases via **dbs**.
+     named databases via **doctrine.orm.dbs**.
    * **mappings**:
      Array of mapping definitions.
 
@@ -94,6 +94,10 @@ composer require doctrine/orm "^2.5"
      Classes are subclasses of `Doctrine\ORM\Query\AST\Functions\FunctionNode`.
    * **hydration_modes**: Hydrator class names, indexed by hydration mode name.
      Classes are subclasses of `Doctrine\ORM\Internal\Hydration\AbstractHydrator`.
+ * **doctrine.orm.second_level_cache**:
+   * **enabled**: `true` if you want to use the second level cache, default: `false`
+   * **configuration**: Cache configuration, instance `Doctrine\ORM\Cache\CacheConfiguration`.
+ * **doctrine.orm.default.query_hints**: array of query hints [Query hints][2]
 
 ## Services
 
@@ -208,4 +212,5 @@ $container['doctrine.orm.ems']['name']
 (c) Beau Simensen <beau@dflydev.com> (https://github.com/dflydev/dflydev-doctrine-orm-service-provider)
 
 [1]: https://www.doctrine-project.org/projects/orm
+[2]: https://www.doctrine-project.org/projects/doctrine-orm/en/latest/reference/dql-doctrine-query-language.html#query-hints
 

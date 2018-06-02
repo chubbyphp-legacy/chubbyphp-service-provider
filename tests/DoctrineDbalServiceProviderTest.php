@@ -101,6 +101,9 @@ class DoctrineDbalServiceProviderTest extends TestCase
     {
         $container = new Container();
 
+        $serviceProvider = new DoctrineDbalServiceProvider();
+        $serviceProvider->register($container);
+
         $container['logger'] = function () {
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
         };
@@ -109,9 +112,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'driver' => 'pdo_sqlite',
             'path' => '/tmp/app.db',
         ];
-
-        $serviceProvider = new DoctrineDbalServiceProvider();
-        $serviceProvider->register($container);
 
         $db = $container['doctrine.dbal.db'];
 
@@ -128,6 +128,9 @@ class DoctrineDbalServiceProviderTest extends TestCase
     public function testRegisterWithMultipleConnetions()
     {
         $container = new Container();
+
+        $serviceProvider = new DoctrineDbalServiceProvider();
+        $serviceProvider->register($container);
 
         $container['logger'] = function () {
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
@@ -151,9 +154,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
                 'charset' => 'utf8mb4',
             ],
         ];
-
-        $serviceProvider = new DoctrineDbalServiceProvider();
-        $serviceProvider->register($container);
 
         self::assertFalse($container['doctrine.dbal.dbs']->offsetExists('default'));
         self::assertTrue($container['doctrine.dbal.dbs']->offsetExists('mysql_read'));

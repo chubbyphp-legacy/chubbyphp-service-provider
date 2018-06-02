@@ -38,6 +38,10 @@ composer require doctrine/mongodb "^1.1"
 ### Single connection
 
 ```php
+$container = new Container():
+
+$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider()));
+
 $container['doctrine.mongo.db.options'] = [
     'server' => 'mongodb://localhost:27017',
     'options' => [
@@ -46,13 +50,15 @@ $container['doctrine.mongo.db.options'] = [
         'db' => 'admin',
     ],
 ];
-
-$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider()));
 ```
 
 ### Multiple connections
 
 ```php
+$container = new Container():
+
+$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider());
+
 $container['doctrine.mongo.dbs.options'] = [
     'doctrine.mongo.db_read' => [
         'server' => 'mongodb://localhost:27017',
@@ -71,8 +77,6 @@ $container['doctrine.mongo.dbs.options'] = [
         ],
     ],
 ];
-
-$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider());
 ```
 
 ## Usage

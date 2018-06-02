@@ -97,6 +97,9 @@ class DoctrineMongoServiceProviderTest extends TestCase
     {
         $container = new Container();
 
+        $serviceProvider = new DoctrineMongoServiceProvider();
+        $serviceProvider->register($container);
+
         $container['logger'] = function () {
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
         };
@@ -110,9 +113,6 @@ class DoctrineMongoServiceProviderTest extends TestCase
             ],
         ];
 
-        $serviceProvider = new DoctrineMongoServiceProvider();
-        $serviceProvider->register($container);
-
         $mongodb = $container['doctrine.mongo.db'];
 
         self::assertSame('mongodb://localhost:27017', $mongodb->getServer());
@@ -121,6 +121,9 @@ class DoctrineMongoServiceProviderTest extends TestCase
     public function testRegisterWithMultipleConnetions()
     {
         $container = new Container();
+
+        $serviceProvider = new DoctrineMongoServiceProvider();
+        $serviceProvider->register($container);
 
         $container['logger'] = function () {
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
@@ -144,9 +147,6 @@ class DoctrineMongoServiceProviderTest extends TestCase
                 ],
             ],
         ];
-
-        $serviceProvider = new DoctrineMongoServiceProvider();
-        $serviceProvider->register($container);
 
         self::assertFalse($container['doctrine.mongo.dbs']->offsetExists('default'));
         self::assertTrue($container['doctrine.mongo.dbs']->offsetExists('doctrine.mongo.db_read'));

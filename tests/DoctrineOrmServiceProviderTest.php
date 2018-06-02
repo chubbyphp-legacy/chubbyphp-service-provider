@@ -35,6 +35,15 @@ class DoctrineOrmServiceProviderTest extends TestCase
     {
         $container = new Container();
 
+        $dbalServiceProvider = new DoctrineDbalServiceProvider();
+        $dbalServiceProvider->register($container);
+
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
+
+        $ormServiceProvider = new DoctrineOrmServiceProvider();
+        $ormServiceProvider->register($container);
+
         $container['doctrine.dbal.db.options'] = [
             'driver' => 'pdo_sqlite',
             'path' => '/tmp/app.db',
@@ -95,6 +104,13 @@ class DoctrineOrmServiceProviderTest extends TestCase
             ],
         ];
 
+        self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
+    }
+
+    public function testRegisterWithMultipleConnections()
+    {
+        $container = new Container();
+
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
 
@@ -103,13 +119,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
-
-        self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
-    }
-
-    public function testRegisterWithMultipleConnections()
-    {
-        $container = new Container();
 
         $container['doctrine.dbal.dbs.options'] = [
             'sqlite_read' => [
@@ -197,15 +206,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
                 ],
             ],
         ];
-
-        $dbalServiceProvider = new DoctrineDbalServiceProvider();
-        $dbalServiceProvider->register($container);
-
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
-
-        $ormServiceProvider = new DoctrineOrmServiceProvider();
-        $ormServiceProvider->register($container);
 
         self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
     }

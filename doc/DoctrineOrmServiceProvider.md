@@ -103,6 +103,16 @@ composer require doctrine/orm "^2.5"
 ### Single connection
 
 ```php
+$container = new Container();
+
+$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
+$container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
+$container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider()));
+
+$container['doctrine.dbal.db.options'] = [
+    'driver'   => 'pdo_sqlite',
+    'path'     => __DIR__.'/app.db',
+];
 
 ```
 

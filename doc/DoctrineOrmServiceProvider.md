@@ -112,6 +112,8 @@ composer require doctrine/orm "^2.5"
 ### Single connection
 
 ```php
+AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
+
 $container = new Container();
 
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
@@ -133,6 +135,7 @@ $container['doctrine.orm.em.options'] = [
             'type' => 'annotation',
             'namespace' => 'One\Entities',
             'path' => __DIR__.'/src/One/Entities',
+            'use_simple_annotation_reader' => false
         ]
     ]
 ];
@@ -141,6 +144,8 @@ $container['doctrine.orm.em.options'] = [
 ### Multiple connections
 
 ```php
+AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
+
 $container = new Container();
 
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
@@ -175,6 +180,7 @@ $container['doctrine.orm.ems.options'] = [
                 'namespace' => 'One\Entities',
                 'alias' => 'One',
                 'path' => __DIR__.'/src/One/Entities',
+                'use_simple_annotation_reader' => false,
             ],
         ],
     ],
@@ -185,6 +191,7 @@ $container['doctrine.orm.ems.options'] = [
                 'type' => 'annotation',
                 'namespace' => 'One\Entities',
                 'path' => __DIR__.'/src/One/Entities',
+                'use_simple_annotation_reader' => false,
             ],
         ],
     ],

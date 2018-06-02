@@ -31,7 +31,7 @@ composer require chubbyphp/chubbyphp-service-provider "~1.0"
 
  * [DoctrineDbalServiceProvider][2]
  * [DoctrineOrmServiceProvider][3]
- * [DoctrineMongoDbServiceProvider][4]
+ * [DoctrineMongoServiceProvider][4]
  * [MonologServiceProvider][5]
 
 ## Copyright
@@ -42,5 +42,5 @@ Dominik Zogg 2018
 
 [2]: doc/DoctrineDbalServiceProvider.md
 [3]: doc/DoctrineOrmServiceProvider.md
-[4]: doc/DoctrineMongoDbServiceProvider.md
+[4]: doc/DoctrineMongoServiceProvider.md
 [5]: doc/MonologServiceProvider.md

@@ -8,12 +8,12 @@ declare(strict_types=1);
 
 namespace Chubbyphp\ServiceProvider;
 
+use Chubbyphp\ServiceProvider\Logger\DoctrineDbalLogger;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\Common\EventManager;
-use Symfony\Bridge\Doctrine\Logger\DbalLogger;
 
 final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 {
@@ -64,7 +64,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             if (!isset($container['doctrine.dbal.dbs.options'])) {
                 $container['doctrine.dbal.dbs.options'] = [
-                    'default' => isset($container['doctrine.dbal.db.options']) ? $container['doctrine.dbal.db.options'] : [],
+                    'default' => $container['doctrine.dbal.db.options'] ?? [],
                 ];
             }
 
@@ -121,18 +121,14 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
         return function () use ($container) {
             $container['doctrine.dbal.dbs.options.initializer']();
 
-            $addLogger = isset($container['logger']) && null !== $container['logger']
-                && class_exists('Symfony\Bridge\Doctrine\Logger\DbalLogger');
-            $stopwatch = $container['stopwatch'] ?? null;
+            $addLogger = $container['logger'] ?? false;
 
             $configs = new Container();
             foreach ($container['doctrine.dbal.dbs.options'] as $name => $options) {
-                $configs[$name] = function () use ($addLogger, $container, $stopwatch) {
+                $configs[$name] = function () use ($addLogger, $container) {
                     $config = new Configuration();
                     if ($addLogger) {
-                        $config->setSQLLogger(
-                            new DbalLogger($container['logger'], $stopwatch)
-                        );
+                        $config->setSQLLogger(new DoctrineDbalLogger($container['logger']));
                     }
 
                     return $config;

@@ -1,6 +1,6 @@
-# DoctrineMongoDbServiceProvider
+# DoctrineMongoServiceProvider
 
-The *DoctrineMongoDbServiceProvider* provides integration with the [Doctrine MongoDb][1]
+The *DoctrineMongoServiceProvider* provides integration with the [Doctrine MongoDb][1]
 for easy database access
 (Doctrine ODM integration is **not** supplied).
 
@@ -47,7 +47,7 @@ $container['doctrine.mongo.db.options'] = [
     ],
 ];
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoDbServiceProvider()));
+$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider()));
 ```
 
 ### Multiple connections
@@ -72,7 +72,7 @@ $container['doctrine.mongo.dbs.options'] = [
     ],
 ];
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoDbServiceProvider());
+$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider());
 ```
 
 ## Usage

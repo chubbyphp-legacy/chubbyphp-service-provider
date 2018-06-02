@@ -2,13 +2,13 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
-use Chubbyphp\ServiceProvider\Logger\DoctrineMongoDbLogger;
+use Chubbyphp\ServiceProvider\Logger\DoctrineMongoLogger;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * @covers \Chubbyphp\ServiceProvider\Logger\DoctrineMongoDbLogger
+ * @covers \Chubbyphp\ServiceProvider\Logger\DoctrineMongoLogger
  */
 class DoctrineMongoDbLoggerTest extends TestCase
 {
@@ -24,7 +24,7 @@ class DoctrineMongoDbLoggerTest extends TestCase
         $binary = $this->getMockBuilder(\MongoBinData::class)->disableOriginalConstructor()->getMock();
         $binary->bin = 'abcdefgh';
 
-        $doctrineLogger = new DoctrineMongoDbLogger($logger, 2, 'Alternative prefix: ');
+        $doctrineLogger = new DoctrineMongoLogger($logger, 2, 'Alternative prefix: ');
         $doctrineLogger->logQuery([
             'data' => [
                 ['binary' => $binary, 'posInfinite' => INF, 'negInfinite' => -INF],
@@ -40,7 +40,7 @@ class DoctrineMongoDbLoggerTest extends TestCase
             ->method('debug')
             ->with('Alternative prefix: {"batchInsert":true,"num":1,"data":[{"key":"value"}]}');
 
-        $doctrineLogger = new DoctrineMongoDbLogger($logger, 2, 'Alternative prefix: ');
+        $doctrineLogger = new DoctrineMongoLogger($logger, 2, 'Alternative prefix: ');
         $doctrineLogger->logQuery([
             'batchInsert' => true,
             'num' => 1,
@@ -58,7 +58,7 @@ class DoctrineMongoDbLoggerTest extends TestCase
             ->method('debug')
             ->with('Alternative prefix: {"batchInsert":true,"num":2,"data":"**2 item(s)**"}');
 
-        $doctrineLogger = new DoctrineMongoDbLogger($logger, 1, 'Alternative prefix: ');
+        $doctrineLogger = new DoctrineMongoLogger($logger, 1, 'Alternative prefix: ');
         $doctrineLogger->logQuery([
             'batchInsert' => true,
             'num' => 2,

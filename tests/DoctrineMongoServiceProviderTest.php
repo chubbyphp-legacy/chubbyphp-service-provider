@@ -2,7 +2,7 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
-use Chubbyphp\ServiceProvider\DoctrineMongoDbServiceProvider;
+use Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider;
 use Doctrine\Common\EventManager;
 use Doctrine\MongoDB\Configuration;
 use Doctrine\MongoDB\Connection;
@@ -11,15 +11,15 @@ use Pimple\Container;
 use Psr\Log\LoggerInterface;
 
 /**
- * @covers \Chubbyphp\ServiceProvider\DoctrineMongoDbServiceProvider
+ * @covers \Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider
  */
-class DoctrineMongoDbServiceProviderTest extends TestCase
+class DoctrineMongoServiceProviderTest extends TestCase
 {
     public function testRegisterWithDefaults()
     {
         $container = new Container();
 
-        $serviceProvider = new DoctrineMongoDbServiceProvider();
+        $serviceProvider = new DoctrineMongoServiceProvider();
         $serviceProvider->register($container);
 
         self::assertTrue($container->offsetExists('doctrine.mongo.db.default_options'));
@@ -110,7 +110,7 @@ class DoctrineMongoDbServiceProviderTest extends TestCase
             ],
         ];
 
-        $serviceProvider = new DoctrineMongoDbServiceProvider();
+        $serviceProvider = new DoctrineMongoServiceProvider();
         $serviceProvider->register($container);
 
         $mongodb = $container['doctrine.mongo.db'];
@@ -145,7 +145,7 @@ class DoctrineMongoDbServiceProviderTest extends TestCase
             ],
         ];
 
-        $serviceProvider = new DoctrineMongoDbServiceProvider();
+        $serviceProvider = new DoctrineMongoServiceProvider();
         $serviceProvider->register($container);
 
         self::assertFalse($container['doctrine.mongo.dbs']->offsetExists('default'));

@@ -10,7 +10,7 @@ namespace Chubbyphp\ServiceProvider\Logger;
 
 use Psr\Log\LoggerInterface;
 
-class DoctrineMongoDbLogger
+class DoctrineMongoLogger
 {
     /**
      * @var LoggerInterface

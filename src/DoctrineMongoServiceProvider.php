@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Chubbyphp\ServiceProvider;
 
-use Chubbyphp\ServiceProvider\Logger\DoctrineMongoDbLogger;
+use Chubbyphp\ServiceProvider\Logger\DoctrineMongoLogger;
 use Doctrine\Common\EventManager;
 use Doctrine\MongoDB\Configuration;
 use Doctrine\MongoDB\Connection;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
-final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
+final class DoctrineMongoServiceProvider implements ServiceProviderInterface
 {
     /**
      * @param Container $container
@@ -117,14 +117,14 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
         return function () use ($container) {
             $container['doctrine.mongo.dbs.options.initializer']();
 
-            $configs = new Container();
+            $addLogger = $container['logger'] ?? false;
 
-            $addLogger = isset($container['logger']) && null !== $container['logger'];
+            $configs = new Container();
             foreach ($container['doctrine.mongo.dbs.options'] as $name => $options) {
                 $configs[$name] = function () use ($addLogger, $container) {
                     $config = new Configuration();
                     if ($addLogger) {
-                        $logger = new DoctrineMongoDbLogger(
+                        $logger = new DoctrineMongoLogger(
                             $container['logger'],
                             $container['doctrine.mongo.db.logger.batch_insert_threshold'],
                             $container['doctrine.mongo.db.logger.prefix']

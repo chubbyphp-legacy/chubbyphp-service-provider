@@ -24,7 +24,7 @@ class DoctrineDbalLogger implements SQLLogger
     /**
      * @param LoggerInterface $logger
      */
-    public function __construct(LoggerInterface $logger = null)
+    public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Chubbyphp\ServiceProvider\Registry;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -20,7 +22,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     private $container;
 
     /**
-     * @var Connection[]
+     * @var Container|Connection[]
      */
     private $connections;
 
@@ -30,7 +32,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     private $defaultConnectionName;
 
     /**
-     * @var EntityManager[]
+     * @var Container|EntityManager[]
      */
     private $originalManagers;
 
@@ -108,7 +110,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getConnectionNames(): array
     {
@@ -142,9 +144,9 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     /**
      * @param string|null $name
      *
-     * @return EntityManager
+     * @return EntityManager|ObjectManager
      */
-    public function getManager($name = null): EntityManager
+    public function getManager($name = null): ObjectManager
     {
         $this->loadManagers();
         $name = $this->validateManagerName($name);
@@ -168,8 +170,8 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
 
     /**
      * @param array       $data
-     * @param string      $default
      * @param string|null $name
+     * @param string      $default
      *
      * @return string
      *
@@ -189,7 +191,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     }
 
     /**
-     * @return EntityManager[]
+     * @return EntityManager[]|ObjectManager[]
      */
     public function getManagers(): array
     {
@@ -222,6 +224,8 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
 
     /**
      * @param string|null $name
+     *
+     * @return EntityManager|ObjectManager
      */
     public function resetManager($name = null)
     {
@@ -229,6 +233,8 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
         $name = $this->validateManagerName($name);
 
         $this->resetManagers[$name] = $this->container['doctrine.orm.ems.factory'][$name]();
+
+        return $this->resetManagers[$name];
     }
 
     private function loadManagers()
@@ -262,9 +268,9 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
      * @param string $persistentObject
      * @param null   $persistentManagerName
      *
-     * @return EntityRepository
+     * @return EntityRepository|ObjectRepository
      */
-    public function getRepository($persistentObject, $persistentManagerName = null): EntityRepository
+    public function getRepository($persistentObject, $persistentManagerName = null): ObjectRepository
     {
         return $this->getManager($persistentManagerName)->getRepository($persistentObject);
     }
@@ -272,7 +278,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     /**
      * @param string $class
      *
-     * @return EntityManager|null
+     * @return EntityManager|ObjectManager|null
      */
     public function getManagerForClass($class)
     {

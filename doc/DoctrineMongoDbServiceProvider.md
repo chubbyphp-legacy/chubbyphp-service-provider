@@ -13,7 +13,7 @@ composer require doctrine/mongodb "^1.1"
 
 ## Parameters
 
-* **mongodb.options**: Array of Doctrine DBAL options.
+* **doctrine.mongo.db.options**: Array of Doctrine DBAL options.
 
   These options are available:
 
@@ -25,20 +25,20 @@ composer require doctrine/mongodb "^1.1"
 
 ## Services
 
-* **mongodb**: The database connection, instance of
+* **doctrine.mongo.db**: The database connection, instance of
   ``Doctrine\MongoDB\Connection``.
 
-* **mongodb.config**: Configuration object for Doctrine. Defaults to
+* **doctrine.mongo.db.config**: Configuration object for Doctrine. Defaults to
   an empty ``Doctrine\MongoDB\Configuration``.
 
-* **mongodb.event_manager**: Event Manager for Doctrine.
+* **doctrine.mongo.db.event_manager**: Event Manager for Doctrine.
 
 ## Registering
 
 ### Single connection
 
 ```php
-$container['mongodb.options'] = [
+$container['doctrine.mongo.db.options'] = [
     'server' => 'mongodb://localhost:27017',
     'options' => [
         'username' => 'root',
@@ -53,8 +53,8 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineMongoDbServiceProvide
 ### Multiple connections
 
 ```php
-$container['mongodbs.options'] = [
-    'mongodb_read' => [
+$container['doctrine.mongo.dbs.options'] = [
+    'doctrine.mongo.db_read' => [
         'server' => 'mongodb://localhost:27017',
         'options' => [
             'username' => 'root',
@@ -62,7 +62,7 @@ $container['mongodbs.options'] = [
             'db' => 'admin',
         ],
     ],
-    'mongodb_write' => [
+    'doctrine.mongo.db_write' => [
         'server' => 'mongodb://localhost:27018',
         'options' => [
             'username' => 'root',
@@ -80,7 +80,7 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineMongoDbServiceProvide
 ### Single connection
 
 ```php
-$container['mongodb']
+$container['doctrine.mongo.db']
     ->selectCollection('users')
     ->findOne(['username' => 'john.doe@domain.com']);
 ```
@@ -88,7 +88,7 @@ $container['mongodb']
 ### Multiple connections
 
 ```php
-$container['mongodbs']['name']
+$container['doctrine.mongo.dbs']['name']
     ->selectCollection('users')
     ->findOne(['username' => 'john.doe@domain.com']);
 ```

@@ -12,7 +12,7 @@ composer require doctrine/dbal "^2.5"
 
 ## Parameters
 
-* **db.options**: Array of Doctrine DBAL options.
+* **doctrine.dbal.db.options**: Array of Doctrine DBAL options.
 
   These options are available:
 
@@ -43,20 +43,20 @@ composer require doctrine/dbal "^2.5"
 
 ## Services
 
-* **db**: The database connection, instance of
+* **doctrine.dbal.db**: The database connection, instance of
   ``Doctrine\DBAL\Connection``.
 
-* **db.config**: Configuration object for Doctrine. Defaults to
+* **doctrine.dbal.db.config**: Configuration object for Doctrine. Defaults to
   an empty ``Doctrine\DBAL\Configuration``.
 
-* **db.event_manager**: Event Manager for Doctrine.
+* **doctrine.dbal.db.event_manager**: Event Manager for Doctrine.
 
 ## Registering
 
 ### Single connection
 
 ```php
-$container['db.options'] = [
+$container['doctrine.dbal.db.options'] = [
     'driver'   => 'pdo_sqlite',
     'path'     => __DIR__.'/app.db',
 ];
@@ -67,7 +67,7 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()
 ### Multiple connections
 
 ```php
-$container['dbs.options'] = [
+$container['doctrine.dbal.dbs.options'] = [
     'mysql_read' => [
         'driver'    => 'pdo_mysql',
         'host'      => 'mysql_read.someplace.tld',
@@ -94,7 +94,7 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()
 ### Single connection
 
 ```php
-$container['db']
+$container['doctrine.dbal.db']
     ->createQueryBuilder()
     ->select('u')
     ->from('users', 'u')
@@ -107,7 +107,7 @@ $container['db']
 ### Multiple connections
 
 ```php
-$container['dbs']['name']
+$container['doctrine.dbal.dbs']['name']
     ->createQueryBuilder()
     ->select('u')
     ->from('users', 'u')

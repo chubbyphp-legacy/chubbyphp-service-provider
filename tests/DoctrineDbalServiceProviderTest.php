@@ -22,14 +22,14 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $serviceProvider = new DoctrineDbalServiceProvider();
         $serviceProvider->register($container);
 
-        self::assertTrue($container->offsetExists('db.default_options'));
-        self::assertTrue($container->offsetExists('dbs.options.initializer'));
-        self::assertTrue($container->offsetExists('dbs'));
-        self::assertTrue($container->offsetExists('dbs.config'));
-        self::assertTrue($container->offsetExists('dbs.event_manager'));
-        self::assertTrue($container->offsetExists('db'));
-        self::assertTrue($container->offsetExists('db.config'));
-        self::assertTrue($container->offsetExists('db.event_manager'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.db.default_options'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.dbs.options.initializer'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.dbs'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.dbs.config'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.dbs.event_manager'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.db'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.db.config'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.db.event_manager'));
 
         self::assertEquals([
             'driver' => 'pdo_mysql',
@@ -37,15 +37,15 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'host' => 'localhost',
             'user' => 'root',
             'password' => null,
-        ], $container['db.default_options']);
+        ], $container['doctrine.dbal.db.default_options']);
 
-        self::assertInstanceOf(\Closure::class, $container['dbs.options.initializer']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.dbal.dbs.options.initializer']);
 
         // start: dbs
-        self::assertInstanceOf(Container::class, $container['dbs']);
+        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs']);
 
         /** @var Container $dbs */
-        $dbs = $container['dbs'];
+        $dbs = $container['doctrine.dbal.dbs'];
 
         self::assertTrue($dbs->offsetExists('default'));
 
@@ -54,10 +54,10 @@ class DoctrineDbalServiceProviderTest extends TestCase
         // end: dbs
 
         // start: dbs.config
-        self::assertInstanceOf(Container::class, $container['dbs.config']);
+        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.config']);
 
         /** @var Container $dbsConfig */
-        $dbsConfig = $container['dbs.config'];
+        $dbsConfig = $container['doctrine.dbal.dbs.config'];
 
         self::assertTrue($dbsConfig->offsetExists('default'));
 
@@ -66,17 +66,17 @@ class DoctrineDbalServiceProviderTest extends TestCase
         // end: dbs.config
 
         // start: dbs.event_manager
-        self::assertInstanceOf(Container::class, $container['dbs.event_manager']);
+        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.event_manager']);
 
         /** @var Container $dbsEventManager */
-        $dbsEventManager = $container['dbs.event_manager'];
+        $dbsEventManager = $container['doctrine.dbal.dbs.event_manager'];
 
         self::assertTrue($dbsEventManager->offsetExists('default'));
 
         self::assertInstanceOf(EventManager::class, $dbsEventManager['default']);
         // end: dbs.event_manager
 
-        self::assertInstanceOf(Connection::class, $container['db']);
+        self::assertInstanceOf(Connection::class, $container['doctrine.dbal.db']);
 
         self::assertEquals([
             'driver' => 'pdo_mysql',
@@ -84,17 +84,17 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'host' => 'localhost',
             'user' => 'root',
             'password' => null,
-        ], $container['db']->getParams());
+        ], $container['doctrine.dbal.db']->getParams());
 
-        self::assertSame($container['db'], $container['dbs']['default']);
+        self::assertSame($container['doctrine.dbal.db'], $container['doctrine.dbal.dbs']['default']);
 
-        self::assertInstanceOf(Configuration::class, $container['db.config']);
+        self::assertInstanceOf(Configuration::class, $container['doctrine.dbal.db.config']);
 
-        self::assertSame($container['db.config'], $container['dbs.config']['default']);
+        self::assertSame($container['doctrine.dbal.db.config'], $container['doctrine.dbal.dbs.config']['default']);
 
-        self::assertInstanceOf(EventManager::class, $container['db.event_manager']);
+        self::assertInstanceOf(EventManager::class, $container['doctrine.dbal.db.event_manager']);
 
-        self::assertSame($container['db.event_manager'], $container['dbs.event_manager']['default']);
+        self::assertSame($container['doctrine.dbal.db.event_manager'], $container['doctrine.dbal.dbs.event_manager']['default']);
     }
 
     public function testRegisterWithOneConnetion()
@@ -105,7 +105,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
         };
 
-        $container['db.options'] = [
+        $container['doctrine.dbal.db.options'] = [
             'driver' => 'pdo_sqlite',
             'path' => '/tmp/app.db',
         ];
@@ -113,7 +113,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $serviceProvider = new DoctrineDbalServiceProvider();
         $serviceProvider->register($container);
 
-        $db = $container['db'];
+        $db = $container['doctrine.dbal.db'];
 
         self::assertEquals([
             'driver' => 'pdo_sqlite',
@@ -133,7 +133,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
         };
 
-        $container['dbs.options'] = [
+        $container['doctrine.dbal.dbs.options'] = [
             'mysql_read' => [
                 'driver' => 'pdo_mysql',
                 'host' => 'mysql_read.someplace.tld',
@@ -155,15 +155,15 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $serviceProvider = new DoctrineDbalServiceProvider();
         $serviceProvider->register($container);
 
-        self::assertFalse($container['dbs']->offsetExists('default'));
-        self::assertTrue($container['dbs']->offsetExists('mysql_read'));
-        self::assertTrue($container['dbs']->offsetExists('mysql_write'));
+        self::assertFalse($container['doctrine.dbal.dbs']->offsetExists('default'));
+        self::assertTrue($container['doctrine.dbal.dbs']->offsetExists('mysql_read'));
+        self::assertTrue($container['doctrine.dbal.dbs']->offsetExists('mysql_write'));
 
         /** @var Connection $dbRead */
-        $dbRead = $container['dbs']['mysql_read'];
+        $dbRead = $container['doctrine.dbal.dbs']['mysql_read'];
 
         /** @var Connection $dbWrite */
-        $dbWrite = $container['dbs']['mysql_write'];
+        $dbWrite = $container['doctrine.dbal.dbs']['mysql_write'];
 
         self::assertEquals([
             'driver' => 'pdo_mysql',

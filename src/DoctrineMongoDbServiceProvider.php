@@ -18,16 +18,16 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container)
     {
-        $container['mongodb.default_options'] = $this->getMongoDbDefaultOptions();
-        $container['mongodbs.options.initializer'] = $this->getMongoDbsOptionsInitializerDefinition($container);
-        $container['mongodbs'] = $this->getMongoDbsDefinition($container);
-        $container['mongodbs.config'] = $this->getMongoDbsConfigDefinition($container);
-        $container['mongodbs.event_manager'] = $this->getMongoDbsEventManagerDefinition($container);
-        $container['mongodb'] = $this->getMongoDbDefinition($container);
-        $container['mongodb.config'] = $this->getMongoDbConfigDefinition($container);
-        $container['mongodb.event_manager'] = $this->getMongoDbEventManagerDefinition($container);
-        $container['mongodb.logger.batch_insert_threshold'] = 10;
-        $container['mongodb.logger.prefix'] = 'MongoDB query: ';
+        $container['doctrine.mongo.db.default_options'] = $this->getMongoDbDefaultOptions();
+        $container['doctrine.mongo.dbs.options.initializer'] = $this->getMongoDbsOptionsInitializerDefinition($container);
+        $container['doctrine.mongo.dbs'] = $this->getMongoDbsDefinition($container);
+        $container['doctrine.mongo.dbs.config'] = $this->getMongoDbsConfigDefinition($container);
+        $container['doctrine.mongo.dbs.event_manager'] = $this->getMongoDbsEventManagerDefinition($container);
+        $container['doctrine.mongo.db'] = $this->getMongoDbDefinition($container);
+        $container['doctrine.mongo.db.config'] = $this->getMongoDbConfigDefinition($container);
+        $container['doctrine.mongo.db.event_manager'] = $this->getMongoDbEventManagerDefinition($container);
+        $container['doctrine.mongo.db.logger.batch_insert_threshold'] = 10;
+        $container['doctrine.mongo.db.logger.prefix'] = 'MongoDB query: ';
     }
 
     /**
@@ -58,22 +58,22 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
 
             $initialized = true;
 
-            if (!isset($container['mongodbs.options'])) {
-                $container['mongodbs.options'] = [
-                    'default' => isset($container['mongodb.options']) ? $container['mongodb.options'] : [],
+            if (!isset($container['doctrine.mongo.dbs.options'])) {
+                $container['doctrine.mongo.dbs.options'] = [
+                    'default' => isset($container['doctrine.mongo.db.options']) ? $container['doctrine.mongo.db.options'] : [],
                 ];
             }
 
-            $tmp = $container['mongodbs.options'];
+            $tmp = $container['doctrine.mongo.dbs.options'];
             foreach ($tmp as $name => &$options) {
-                $options = array_replace_recursive($container['mongodb.default_options'], $options);
+                $options = array_replace_recursive($container['doctrine.mongo.db.default_options'], $options);
 
-                if (!isset($container['mongodbs.default'])) {
-                    $container['mongodbs.default'] = $name;
+                if (!isset($container['doctrine.mongo.dbs.default'])) {
+                    $container['doctrine.mongo.dbs.default'] = $name;
                 }
             }
 
-            $container['mongodbs.options'] = $tmp;
+            $container['doctrine.mongo.dbs.options'] = $tmp;
         });
     }
 
@@ -85,17 +85,17 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     private function getMongoDbsDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $container['mongodbs.options.initializer']();
+            $container['doctrine.mongo.dbs.options.initializer']();
 
             $mongodbs = new Container();
-            foreach ($container['mongodbs.options'] as $name => $options) {
-                if ($container['mongodbs.default'] === $name) {
+            foreach ($container['doctrine.mongo.dbs.options'] as $name => $options) {
+                if ($container['doctrine.mongo.dbs.default'] === $name) {
                     // we use shortcuts here in case the default has been overridden
-                    $config = $container['mongodb.config'];
-                    $manager = $container['mongodb.event_manager'];
+                    $config = $container['doctrine.mongo.db.config'];
+                    $manager = $container['doctrine.mongo.db.event_manager'];
                 } else {
-                    $config = $container['mongodbs.config'][$name];
-                    $manager = $container['mongodbs.event_manager'][$name];
+                    $config = $container['doctrine.mongo.dbs.config'][$name];
+                    $manager = $container['doctrine.mongo.dbs.event_manager'][$name];
                 }
 
                 $mongodbs[$name] = function () use ($options, $config, $manager) {
@@ -115,19 +115,19 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     private function getMongoDbsConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $container['mongodbs.options.initializer']();
+            $container['doctrine.mongo.dbs.options.initializer']();
 
             $configs = new Container();
 
             $addLogger = isset($container['logger']) && null !== $container['logger'];
-            foreach ($container['mongodbs.options'] as $name => $options) {
+            foreach ($container['doctrine.mongo.dbs.options'] as $name => $options) {
                 $configs[$name] = function () use ($addLogger, $container) {
                     $config = new Configuration();
                     if ($addLogger) {
                         $logger = new DoctrineMongoDbLogger(
                             $container['logger'],
-                            $container['mongodb.logger.batch_insert_threshold'],
-                            $container['mongodb.logger.prefix']
+                            $container['doctrine.mongo.db.logger.batch_insert_threshold'],
+                            $container['doctrine.mongo.db.logger.prefix']
                         );
                         $config->setLoggerCallable([$logger, 'logQuery']);
                     }
@@ -148,10 +148,10 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     private function getMongoDbsEventManagerDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $container['mongodbs.options.initializer']();
+            $container['doctrine.mongo.dbs.options.initializer']();
 
             $managers = new Container();
-            foreach ($container['mongodbs.options'] as $name => $options) {
+            foreach ($container['doctrine.mongo.dbs.options'] as $name => $options) {
                 $managers[$name] = function () {
                     return new EventManager();
                 };
@@ -168,9 +168,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     private function getMongoDbDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $dbs = $container['mongodbs'];
+            $dbs = $container['doctrine.mongo.dbs'];
 
-            return $dbs[$container['mongodbs.default']];
+            return $dbs[$container['doctrine.mongo.dbs.default']];
         };
     }
 
@@ -181,9 +181,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     private function getMongoDbConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $dbs = $container['mongodbs.config'];
+            $dbs = $container['doctrine.mongo.dbs.config'];
 
-            return $dbs[$container['mongodbs.default']];
+            return $dbs[$container['doctrine.mongo.dbs.default']];
         };
     }
 
@@ -194,9 +194,9 @@ final class DoctrineMongoDbServiceProvider implements ServiceProviderInterface
     private function getMongoDbEventManagerDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $dbs = $container['mongodbs.event_manager'];
+            $dbs = $container['doctrine.mongo.dbs.event_manager'];
 
-            return $dbs[$container['mongodbs.default']];
+            return $dbs[$container['doctrine.mongo.dbs.default']];
         };
     }
 }

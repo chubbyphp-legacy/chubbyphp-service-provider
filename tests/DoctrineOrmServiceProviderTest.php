@@ -24,19 +24,19 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
 
-        self::assertInstanceOf(EntityManager::class, $container['orm.em']);
+        self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
     }
 
     public function testRegisterWithOneConnection()
     {
         $container = new Container();
 
-        $container['db.options'] = [
+        $container['doctrine.dbal.db.options'] = [
             'driver' => 'pdo_sqlite',
             'path' => '/tmp/app.db',
         ];
 
-        $container['orm.em.options'] = [
+        $container['doctrine.orm.em.options'] = [
             'query_cache' => 'apcu',
             'metadata_cache' => [
                 'driver' => 'filesystem',
@@ -97,14 +97,14 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
 
-        self::assertInstanceOf(EntityManager::class, $container['orm.em']);
+        self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
     }
 
     public function testRegisterWithMultipleConnections()
     {
         $container = new Container();
 
-        $container['dbs.options'] = [
+        $container['doctrine.dbal.dbs.options'] = [
             'sqlite_read' => [
                 'driver' => 'pdo_sqlite',
                 'path' => '/tmp/app_read.db',
@@ -115,7 +115,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
             ],
         ];
 
-        $container['orm.ems.options'] = [
+        $container['doctrine.orm.ems.options'] = [
             'sqlite_read' => [
                 'connection' => 'sqlite_read',
                 'query_cache' => 'xcache',
@@ -197,6 +197,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
 
-        self::assertInstanceOf(EntityManager::class, $container['orm.em']);
+        self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
     }
 }

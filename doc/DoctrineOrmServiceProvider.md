@@ -11,7 +11,7 @@ composer require doctrine/orm "^2.5"
 
 ## Parameters
 
- * **orm.em.options**:
+ * **doctrine.orm.em.options**:
    Array of Entity Manager options.
 
    These options are available:
@@ -55,27 +55,27 @@ composer require doctrine/orm "^2.5"
      String or array describing hydration cache implementation.
    * **types**
      An array of custom types in the format of 'typeName' => 'Namespace\To\Type\Class'
- * **orm.ems.options**:
+ * **doctrine.orm.ems.options**:
    Array of Entity Manager configuration sets indexed by each Entity Manager's
-   name. Each value should look like **orm.em.options**.
- * **orm.ems.default** (Default: first Entity Manager processed):
+   name. Each value should look like **doctrine.orm.em.options**.
+ * **doctrine.orm.ems.default** (Default: first Entity Manager processed):
    String defining the name of the default Entity Manager.
- * **orm.proxies_dir**:
+ * **doctrine.orm.proxies_dir**:
    String defining path to where Doctrine generated proxies should be located.
- * **orm.proxies_namespace** (Default: DoctrineProxy):
+ * **doctrine.orm.proxies_namespace** (Default: DoctrineProxy):
    String defining namespace in which Doctrine generated proxies should reside.
- * **orm.auto_generate_proxies**:
+ * **doctrine.orm.auto_generate_proxies**:
    Boolean defining whether or not proxies should be generated automatically.
- * **orm.class_metadata_factory_name**: Class name of class metadata factory.
+ * **doctrine.orm.class_metadata_factory_name**: Class name of class metadata factory.
    Class implements `Doctrine\Common\Persistence\Mapping\ClassMetadataFactory`.
- * **orm.default_repository_class**: Class name of default repository.
+ * **doctrine.orm.default_repository_class**: Class name of default repository.
    Class implements `Doctrine\Common\Persistence\ObjectRepository`.
- * **orm.repository_factory**: Repository factory, instance `Doctrine\ORM\Repository\RepositoryFactory`.
- * **orm.entity_listener_resolver**: Entity listener resolver, instance
+ * **doctrine.orm.repository_factory**: Repository factory, instance `Doctrine\ORM\Repository\RepositoryFactory`.
+ * **doctrine.orm.entity_listener_resolver**: Entity listener resolver, instance
    `Doctrine\ORM\Mapping\EntityListenerResolver`.
- * **orm.default_cache**:
+ * **doctrine.orm.default_cache**:
    String or array describing default cache implementation.
- * **orm.add_mapping_driver**:
+ * **doctrine.orm.add_mapping_driver**:
    Function providing the ability to add a mapping driver to an Entity Manager.
 
    These params are available:
@@ -86,10 +86,10 @@ composer require doctrine/orm "^2.5"
       Namespace to be mapped by `$mappingDriver`, string.
     * **$name**:
       Name of Entity Manager to add mapping to, string, default `null`.
- * **orm.strategy**:
+ * **doctrine.orm.strategy**:
    * **naming**: Naming strategy, instance `Doctrine\ORM\Mapping\NamingStrategy`.
    * **quote**: Quote strategy, instance `Doctrine\ORM\Mapping\QuoteStrategy`.
- * **orm.custom.functions**:
+ * **doctrine.orm.custom.functions**:
    * **string**, **numeric**, **datetime**: Custom DQL functions, array of class names indexed by DQL function name.
      Classes are subclasses of `Doctrine\ORM\Query\AST\Functions\FunctionNode`.
    * **hydration_modes**: Hydrator class names, indexed by hydration mode name.

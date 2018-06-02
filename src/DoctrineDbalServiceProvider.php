@@ -22,14 +22,14 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container)
     {
-        $container['db.default_options'] = $this->getDbDefaultOptions();
-        $container['dbs.options.initializer'] = $this->getDbsOptionsInitializerDefinition($container);
-        $container['dbs'] = $this->getDbsDefinition($container);
-        $container['dbs.config'] = $this->getDbsConfigDefinition($container);
-        $container['dbs.event_manager'] = $this->getDbsEventManagerDefinition($container);
-        $container['db'] = $this->getDbDefinition($container);
-        $container['db.config'] = $this->getDbConfigDefinition($container);
-        $container['db.event_manager'] = $this->getDbEventManagerDefinition($container);
+        $container['doctrine.dbal.db.default_options'] = $this->getDbDefaultOptions();
+        $container['doctrine.dbal.dbs.options.initializer'] = $this->getDbsOptionsInitializerDefinition($container);
+        $container['doctrine.dbal.dbs'] = $this->getDbsDefinition($container);
+        $container['doctrine.dbal.dbs.config'] = $this->getDbsConfigDefinition($container);
+        $container['doctrine.dbal.dbs.event_manager'] = $this->getDbsEventManagerDefinition($container);
+        $container['doctrine.dbal.db'] = $this->getDbDefinition($container);
+        $container['doctrine.dbal.db.config'] = $this->getDbConfigDefinition($container);
+        $container['doctrine.dbal.db.event_manager'] = $this->getDbEventManagerDefinition($container);
     }
 
     /**
@@ -62,22 +62,22 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             $initialized = true;
 
-            if (!isset($container['dbs.options'])) {
-                $container['dbs.options'] = [
-                    'default' => isset($container['db.options']) ? $container['db.options'] : [],
+            if (!isset($container['doctrine.dbal.dbs.options'])) {
+                $container['doctrine.dbal.dbs.options'] = [
+                    'default' => isset($container['doctrine.dbal.db.options']) ? $container['doctrine.dbal.db.options'] : [],
                 ];
             }
 
-            $tmp = $container['dbs.options'];
+            $tmp = $container['doctrine.dbal.dbs.options'];
             foreach ($tmp as $name => &$options) {
-                $options = array_replace($container['db.default_options'], $options);
+                $options = array_replace($container['doctrine.dbal.db.default_options'], $options);
 
-                if (!isset($container['dbs.default'])) {
-                    $container['dbs.default'] = $name;
+                if (!isset($container['doctrine.dbal.dbs.default'])) {
+                    $container['doctrine.dbal.dbs.default'] = $name;
                 }
             }
 
-            $container['dbs.options'] = $tmp;
+            $container['doctrine.dbal.dbs.options'] = $tmp;
         });
     }
 
@@ -89,17 +89,17 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     private function getDbsDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $container['dbs.options.initializer']();
+            $container['doctrine.dbal.dbs.options.initializer']();
 
             $dbs = new Container();
-            foreach ($container['dbs.options'] as $name => $options) {
-                if ($container['dbs.default'] === $name) {
+            foreach ($container['doctrine.dbal.dbs.options'] as $name => $options) {
+                if ($container['doctrine.dbal.dbs.default'] === $name) {
                     // we use shortcuts here in case the default has been overridden
-                    $config = $container['db.config'];
-                    $manager = $container['db.event_manager'];
+                    $config = $container['doctrine.dbal.db.config'];
+                    $manager = $container['doctrine.dbal.db.event_manager'];
                 } else {
-                    $config = $container['dbs.config'][$name];
-                    $manager = $container['dbs.event_manager'][$name];
+                    $config = $container['doctrine.dbal.dbs.config'][$name];
+                    $manager = $container['doctrine.dbal.dbs.event_manager'][$name];
                 }
 
                 $dbs[$name] = function () use ($options, $config, $manager) {
@@ -119,14 +119,14 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     private function getDbsConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $container['dbs.options.initializer']();
+            $container['doctrine.dbal.dbs.options.initializer']();
 
             $addLogger = isset($container['logger']) && null !== $container['logger']
                 && class_exists('Symfony\Bridge\Doctrine\Logger\DbalLogger');
             $stopwatch = $container['stopwatch'] ?? null;
 
             $configs = new Container();
-            foreach ($container['dbs.options'] as $name => $options) {
+            foreach ($container['doctrine.dbal.dbs.options'] as $name => $options) {
                 $configs[$name] = function () use ($addLogger, $container, $stopwatch) {
                     $config = new Configuration();
                     if ($addLogger) {
@@ -151,10 +151,10 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     private function getDbsEventManagerDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $container['dbs.options.initializer']();
+            $container['doctrine.dbal.dbs.options.initializer']();
 
             $managers = new Container();
-            foreach ($container['dbs.options'] as $name => $options) {
+            foreach ($container['doctrine.dbal.dbs.options'] as $name => $options) {
                 $managers[$name] = function () {
                     return new EventManager();
                 };
@@ -171,9 +171,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     private function getDbDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $dbs = $container['dbs'];
+            $dbs = $container['doctrine.dbal.dbs'];
 
-            return $dbs[$container['dbs.default']];
+            return $dbs[$container['doctrine.dbal.dbs.default']];
         };
     }
 
@@ -184,9 +184,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     private function getDbConfigDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $dbs = $container['dbs.config'];
+            $dbs = $container['doctrine.dbal.dbs.config'];
 
-            return $dbs[$container['dbs.default']];
+            return $dbs[$container['doctrine.dbal.dbs.default']];
         };
     }
 
@@ -197,9 +197,9 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     private function getDbEventManagerDefinition(Container $container): callable
     {
         return function () use ($container) {
-            $dbs = $container['dbs.event_manager'];
+            $dbs = $container['doctrine.dbal.dbs.event_manager'];
 
-            return $dbs[$container['dbs.default']];
+            return $dbs[$container['doctrine.dbal.dbs.default']];
         };
     }
 }

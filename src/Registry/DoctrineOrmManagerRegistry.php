@@ -231,7 +231,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     {
         $this->loadManagers();
         $name = $this->validateManagerName($name);
-
+        // todo: define factory!!!
         $this->resetManagers[$name] = $this->container['doctrine.orm.ems.factory'][$name]();
 
         return $this->resetManagers[$name];

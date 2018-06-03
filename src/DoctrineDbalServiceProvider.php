@@ -26,7 +26,6 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
         $container['doctrine.dbal.dbs.options.initializer'] = $this->getDbsOptionsInitializerDefinition($container);
         $container['doctrine.dbal.dbs'] = $this->getDbsDefinition($container);
         $container['doctrine.dbal.dbs.config'] = $this->getDbsConfigDefinition($container);
-        $container['doctrine.dbal.default_cache'] = ['driver' => 'array'];
         $container['doctrine.dbal.dbs.event_manager'] = $this->getDbsEventManagerDefinition($container);
         $container['doctrine.dbal.db'] = $this->getDbDefinition($container);
         $container['doctrine.dbal.db.config'] = $this->getDbConfigDefinition($container);

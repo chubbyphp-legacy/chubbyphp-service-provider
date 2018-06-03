@@ -33,7 +33,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.options.initializer'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.config'));
-        self::assertTrue($container->offsetExists('doctrine.dbal.default_cache'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.event_manager'));
         self::assertTrue($container->offsetExists('doctrine.dbal.db'));
         self::assertTrue($container->offsetExists('doctrine.dbal.db.config'));
@@ -77,8 +76,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
         self::assertTrue($dbsConfig->offsetExists('default'));
 
         self::assertInstanceOf(Configuration::class, $dbsConfig['default']);
-
-        self::assertEquals(['driver' => 'array'], $container['doctrine.dbal.default_cache']);
 
         // end: dbs.config
 

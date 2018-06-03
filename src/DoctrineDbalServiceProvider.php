@@ -176,6 +176,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
             foreach ($container['doctrine.dbal.dbs.options'] as $name => $options) {
                 $managers[$name] = function () {
                     return new EventManager();
+                    // todo: check for set/add methods to implement
                 };
             }
 

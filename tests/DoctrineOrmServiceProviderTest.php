@@ -5,8 +5,17 @@ namespace Chubbyphp\Tests\ServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
+use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Cache\CacheConfiguration;
+use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\Mapping\DefaultEntityListenerResolver;
+use Doctrine\ORM\Mapping\DefaultNamingStrategy;
+use Doctrine\ORM\Mapping\DefaultQuoteStrategy;
+use Doctrine\ORM\Repository\DefaultRepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
@@ -28,7 +37,80 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
 
+        self::assertArrayHasKey('doctrine.orm.em.default_options', $container);
+        self::assertArrayHasKey('doctrine.orm.ems.options.initializer', $container);
+        self::assertArrayHasKey('doctrine.orm.ems', $container);
+        self::assertArrayHasKey('doctrine.orm.ems.config', $container);
+        self::assertArrayHasKey('doctrine.orm.proxies_dir', $container);
+        self::assertArrayHasKey('doctrine.orm.auto_generate_proxies', $container);
+        self::assertArrayHasKey('doctrine.orm.proxies_namespace', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver_chain', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver_chain.factory', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.annotation', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.yml', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_yml', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.xml', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_xml', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.php', $container);
+        self::assertArrayHasKey('doctrine.orm.default_cache', $container);
+        self::assertArrayHasKey('doctrine.orm.custom.functions.string', $container);
+        self::assertArrayHasKey('doctrine.orm.custom.functions.numeric', $container);
+        self::assertArrayHasKey('doctrine.orm.custom.functions.datetime', $container);
+        self::assertArrayHasKey('doctrine.orm.custom.hydration_modes', $container);
+        self::assertArrayHasKey('doctrine.orm.class_metadata_factory_name', $container);
+        self::assertArrayHasKey('doctrine.orm.default_repository_class', $container);
+        self::assertArrayHasKey('doctrine.orm.strategy.naming', $container);
+        self::assertArrayHasKey('doctrine.orm.strategy.quote', $container);
+        self::assertArrayHasKey('doctrine.orm.entity_listener_resolver', $container);
+        self::assertArrayHasKey('doctrine.orm.repository_factory', $container);
+        self::assertArrayHasKey('doctrine.orm.second_level_cache.enabled', $container);
+        self::assertArrayHasKey('doctrine.orm.second_level_cache.configuration', $container);
+        self::assertArrayHasKey('doctrine.orm.default.query_hints', $container);
+        self::assertArrayHasKey('doctrine.orm.em', $container);
+        self::assertArrayHasKey('doctrine.orm.em.config', $container);
+        self::assertArrayHasKey('doctrine.orm.manager_registry', $container);
+
+        self::assertEquals([
+            'connection' => 'default',
+            'mappings' => [],
+            'types' => [],
+        ], $container['doctrine.orm.em.default_options']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.ems.options.initializer']);
+        self::assertInstanceOf(Container::class, $container['doctrine.orm.ems']);
+        self::assertInstanceOf(Container::class, $container['doctrine.orm.ems.config']);
+        self::assertSame(sys_get_temp_dir(), $container['doctrine.orm.proxies_dir']);
+        self::assertTrue($container['doctrine.orm.auto_generate_proxies']);
+        self::assertSame('DoctrineProxy', $container['doctrine.orm.proxies_namespace']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver_chain']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver_chain.factory']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.annotation']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.yml']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_yml']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.xml']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_xml']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.php']);
+        self::assertEquals(['driver' => 'array'], $container['doctrine.orm.default_cache']);
+        self::assertEquals([], $container['doctrine.orm.custom.functions.string']);
+        self::assertEquals([], $container['doctrine.orm.custom.functions.numeric']);
+        self::assertEquals([], $container['doctrine.orm.custom.functions.datetime']);
+        self::assertEquals([], $container['doctrine.orm.custom.hydration_modes']);
+        self::assertSame(ClassMetadataFactory::class, $container['doctrine.orm.class_metadata_factory_name']);
+        self::assertSame(EntityRepository::class, $container['doctrine.orm.default_repository_class']);
+        self::assertInstanceOf(DefaultNamingStrategy::class, $container['doctrine.orm.strategy.naming']);
+        self::assertInstanceOf(DefaultQuoteStrategy::class, $container['doctrine.orm.strategy.quote']);
+        self::assertInstanceOf(DefaultEntityListenerResolver::class, $container['doctrine.orm.entity_listener_resolver']);
+        self::assertInstanceOf(DefaultRepositoryFactory::class, $container['doctrine.orm.repository_factory']);
+        self::assertFalse($container['doctrine.orm.second_level_cache.enabled']);
+        self::assertInstanceOf(CacheConfiguration::class, $container['doctrine.orm.second_level_cache.configuration']);
+        self::assertEquals([], $container['doctrine.orm.default.query_hints']);
         self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
+        self::assertInstanceOf(Configuration::class, $container['doctrine.orm.em.config']);
+        self::assertInstanceOf(DoctrineOrmManagerRegistry::class, $container['doctrine.orm.manager_registry']);
+
+        /** @var EntityManager $entityManager */
+        $entityManager = $container['doctrine.orm.em'];
+
+        $entityManager->getConfiguration()->getAutoCommit();
     }
 
     public function testRegisterWithOneConnection()

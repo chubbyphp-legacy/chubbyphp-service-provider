@@ -191,7 +191,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                 $container['doctrine.orm.mapping_driver_chain']($name, $config, (array) $options['mappings'])
             );
 
-            foreach (['query', 'hydration', 'metadata', 'query'] as $cacheType) {
+            foreach (['query', 'hydration', 'metadata', 'result'] as $cacheType) {
                 $setMethod = sprintf('set%sCacheImpl', ucfirst($cacheType));
                 $cacheOptions = $options[sprintf('%s_cache', $cacheType)] ?? $container['doctrine.orm.default_cache'];
                 if (is_string($cacheOptions)) {

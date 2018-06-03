@@ -151,7 +151,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
         $this->loadManagers();
         $name = $this->validateManagerName($name);
 
-        return isset($this->resetManagers[$name]) ? $this->resetManagers[$name] : $this->originalManagers[$name];
+        return $this->resetManagers[$name] ?? $this->originalManagers[$name];
     }
 
     /**
@@ -231,8 +231,14 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     {
         $this->loadManagers();
         $name = $this->validateManagerName($name);
-        // todo: define factory!!!
-        $this->resetManagers[$name] = $this->container['doctrine.orm.ems.factory'][$name]();
+
+        $originalManager = $this->originalManagers[$name];
+
+        $this->resetManagers[$name] = EntityManager::create(
+            $originalManager->getConnection(),
+            $originalManager->getConfiguration(),
+            $originalManager->getEventManager()
+        );
 
         return $this->resetManagers[$name];
     }

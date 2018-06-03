@@ -6,6 +6,7 @@ for easy database access
 ## Install
 
 ```sh
+composer require doctrine/cache "^1.6"
 composer require doctrine/orm "^2.5"
 ```
 
@@ -45,13 +46,13 @@ composer require doctrine/orm "^2.5"
        Note that if set to `false`, the `AnnotationRegistry` will probably
        need to be configured correctly so that it can load your Annotations
        classes.
-   * **query_cache** (Default: setting specified by orm.default_cache):
+   * **query_cache** (Default: setting specified by doctrine.orm.default_cache):
      String or array describing query cache implementation.
-   * **metadata_cache** (Default: setting specified by orm.default_cache):
+   * **metadata_cache** (Default: setting specified by doctrine.orm.default_cache):
      String or array describing metadata cache implementation.
-   * **result_cache** (Default: setting specified by orm.default_cache):
+   * **result_cache** (Default: setting specified by doctrine.orm.default_cache):
      String or array describing result cache implementation.
-   * **hydration_cache** (Default: setting specified by orm.default_cache):
+   * **hydration_cache** (Default: setting specified by doctrine.orm.default_cache):
      String or array describing hydration cache implementation.
    * **types**
      An array of custom types in the format of 'typeName' => 'Namespace\To\Type\Class'
@@ -119,8 +120,8 @@ AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
 
 $container = new Container();
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
+$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider()));
 
 $container['doctrine.dbal.db.options'] = [
@@ -151,8 +152,8 @@ AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
 
 $container = new Container();
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
+$container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider()));
 
 $container['doctrine.dbal.dbs.options'] = [

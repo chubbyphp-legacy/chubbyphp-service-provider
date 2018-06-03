@@ -26,6 +26,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
         $container['doctrine.dbal.dbs.options.initializer'] = $this->getDbsOptionsInitializerDefinition($container);
         $container['doctrine.dbal.dbs'] = $this->getDbsDefinition($container);
         $container['doctrine.dbal.dbs.config'] = $this->getDbsConfigDefinition($container);
+        $container['doctrine.dbal.default_cache'] = ['driver' => 'array'];
         $container['doctrine.dbal.dbs.event_manager'] = $this->getDbsEventManagerDefinition($container);
         $container['doctrine.dbal.db'] = $this->getDbDefinition($container);
         $container['doctrine.dbal.db.config'] = $this->getDbConfigDefinition($container);
@@ -38,11 +39,18 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     private function getDbDefaultOptions(): array
     {
         return [
-            'driver' => 'pdo_mysql',
-            'dbname' => null,
-            'host' => 'localhost',
-            'user' => 'root',
-            'password' => null,
+            'connection' => [
+                'driver' => 'pdo_mysql',
+                'dbname' => null,
+                'host' => 'localhost',
+                'user' => 'root',
+                'password' => null,
+            ],
+            'configuration' => [
+                'result_cache' => 'array',
+                'filter_schema_assets_expression' => null,
+                'auto_commit' => true,
+            ],
         ];
     }
 
@@ -70,7 +78,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             $tmp = $container['doctrine.dbal.dbs.options'];
             foreach ($tmp as $name => &$options) {
-                $options = array_replace($container['doctrine.dbal.db.default_options'], $options);
+                $options = array_replace_recursive($container['doctrine.dbal.db.default_options'], $options);
 
                 if (!isset($container['doctrine.dbal.dbs.default'])) {
                     $container['doctrine.dbal.dbs.default'] = $name;
@@ -103,7 +111,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
                 }
 
                 $dbs[$name] = function () use ($options, $config, $manager) {
-                    return DriverManager::getConnection($options, $config, $manager);
+                    return DriverManager::getConnection($options['connection'], $config, $manager);
                 };
             }
 
@@ -125,11 +133,27 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             $configs = new Container();
             foreach ($container['doctrine.dbal.dbs.options'] as $name => $options) {
-                $configs[$name] = function () use ($addLogger, $container) {
+                $configs[$name] = function () use ($addLogger, $container, $name, $options) {
+                    $configOptions = $options['configuration'];
+
                     $config = new Configuration();
+
                     if ($addLogger) {
                         $config->setSQLLogger(new DoctrineDbalLogger($container['logger']));
                     }
+
+                    if (is_string($configOptions['result_cache'])) {
+                        $configOptions['result_cache'] = ['driver' => $configOptions['result_cache']];
+                    }
+
+                    $config->setResultCacheImpl(
+                        $container['doctrine.cache.locator'](
+                            sprintf('%s_%s', $name, 'result'),
+                            $configOptions['result_cache']
+                        )
+                    );
+                    $config->setFilterSchemaAssetsExpression($configOptions['filter_schema_assets_expression']);
+                    $config->setAutoCommit($configOptions['auto_commit']);
 
                     return $config;
                 };

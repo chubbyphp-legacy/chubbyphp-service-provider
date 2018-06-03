@@ -2,7 +2,11 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
+use Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
+use Chubbyphp\ServiceProvider\Logger\DoctrineDbalLogger;
+use Doctrine\Common\Cache\ApcuCache;
+use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
@@ -19,24 +23,35 @@ class DoctrineDbalServiceProviderTest extends TestCase
     {
         $container = new Container();
 
-        $serviceProvider = new DoctrineDbalServiceProvider();
-        $serviceProvider->register($container);
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
+
+        $dbalServiceProvider = new DoctrineDbalServiceProvider();
+        $dbalServiceProvider->register($container);
 
         self::assertTrue($container->offsetExists('doctrine.dbal.db.default_options'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.options.initializer'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.config'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.default_cache'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.event_manager'));
         self::assertTrue($container->offsetExists('doctrine.dbal.db'));
         self::assertTrue($container->offsetExists('doctrine.dbal.db.config'));
         self::assertTrue($container->offsetExists('doctrine.dbal.db.event_manager'));
 
         self::assertEquals([
-            'driver' => 'pdo_mysql',
-            'dbname' => null,
-            'host' => 'localhost',
-            'user' => 'root',
-            'password' => null,
+            'connection' => [
+                'driver' => 'pdo_mysql',
+                'dbname' => null,
+                'host' => 'localhost',
+                'user' => 'root',
+                'password' => null,
+            ],
+            'configuration' => [
+                'result_cache' => 'array',
+                'filter_schema_assets_expression' => null,
+                'auto_commit' => true,
+            ],
         ], $container['doctrine.dbal.db.default_options']);
 
         self::assertInstanceOf(\Closure::class, $container['doctrine.dbal.dbs.options.initializer']);
@@ -62,6 +77,8 @@ class DoctrineDbalServiceProviderTest extends TestCase
         self::assertTrue($dbsConfig->offsetExists('default'));
 
         self::assertInstanceOf(Configuration::class, $dbsConfig['default']);
+
+        self::assertEquals(['driver' => 'array'], $container['doctrine.dbal.default_cache']);
 
         // end: dbs.config
 
@@ -90,6 +107,14 @@ class DoctrineDbalServiceProviderTest extends TestCase
 
         self::assertInstanceOf(Configuration::class, $container['doctrine.dbal.db.config']);
 
+        /** @var Configuration $configuration */
+        $configuration = $container['doctrine.dbal.db.config'];
+
+        self::assertNull($configuration->getSQLLogger());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getResultCacheImpl());
+        self::assertNull($configuration->getFilterSchemaAssetsExpression());
+        self::assertTrue($configuration->getAutoCommit());
+
         self::assertSame($container['doctrine.dbal.db.config'], $container['doctrine.dbal.dbs.config']['default']);
 
         self::assertInstanceOf(EventManager::class, $container['doctrine.dbal.db.event_manager']);
@@ -101,22 +126,31 @@ class DoctrineDbalServiceProviderTest extends TestCase
     {
         $container = new Container();
 
-        $serviceProvider = new DoctrineDbalServiceProvider();
-        $serviceProvider->register($container);
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
+
+        $dbalServiceProvider = new DoctrineDbalServiceProvider();
+        $dbalServiceProvider->register($container);
 
         $container['logger'] = function () {
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
         };
 
         $container['doctrine.dbal.db.options'] = [
-            'driver' => 'pdo_mysql',
-            'host' => 'mysql_read.someplace.tld',
-            'dbname' => 'my_database',
-            'user' => 'my_username',
-            'password' => 'my_password',
-            'charset' => 'utf8mb4',
+            'connection' => [
+                'driver' => 'pdo_mysql',
+                'host' => 'mysql_read.someplace.tld',
+                'dbname' => 'my_database',
+                'user' => 'my_username',
+                'password' => 'my_password',
+                'charset' => 'utf8mb4',
+            ],
+            'configuration' => [
+                'result_cache' => 'apcu',
+            ],
         ];
 
+        /** @var Connection $db */
         $db = $container['doctrine.dbal.db'];
 
         self::assertEquals([
@@ -127,14 +161,25 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'password' => 'my_password',
             'charset' => 'utf8mb4',
         ], $db->getParams());
+
+        /** @var Configuration $configuration */
+        $configuration = $container['doctrine.dbal.db.config'];
+
+        self::assertInstanceOf(DoctrineDbalLogger::class, $configuration->getSQLLogger());
+        self::assertInstanceOf(ApcuCache::class, $configuration->getResultCacheImpl());
+        self::assertNull($configuration->getFilterSchemaAssetsExpression());
+        self::assertTrue($configuration->getAutoCommit());
     }
 
     public function testRegisterWithMultipleConnetions()
     {
         $container = new Container();
 
-        $serviceProvider = new DoctrineDbalServiceProvider();
-        $serviceProvider->register($container);
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
+
+        $dbalServiceProvider = new DoctrineDbalServiceProvider();
+        $dbalServiceProvider->register($container);
 
         $container['logger'] = function () {
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
@@ -142,20 +187,32 @@ class DoctrineDbalServiceProviderTest extends TestCase
 
         $container['doctrine.dbal.dbs.options'] = [
             'mysql_read' => [
-                'driver' => 'pdo_mysql',
-                'host' => 'mysql_read.someplace.tld',
-                'dbname' => 'my_database',
-                'user' => 'my_username',
-                'password' => 'my_password',
-                'charset' => 'utf8mb4',
+                'connection' => [
+                    'driver' => 'pdo_mysql',
+                    'host' => 'mysql_read.someplace.tld',
+                    'dbname' => 'my_database',
+                    'user' => 'my_username',
+                    'password' => 'my_password',
+                    'charset' => 'utf8mb4',
+                ],
+                'configuration' => [
+                    'result_cache' => 'apcu',
+                    'filter_schema_assets_expression' => 'expression',
+                    'auto_commit' => false,
+                ],
             ],
             'mysql_write' => [
-                'driver' => 'pdo_mysql',
-                'host' => 'mysql_write.someplace.tld',
-                'dbname' => 'my_database',
-                'user' => 'my_username',
-                'password' => 'my_password',
-                'charset' => 'utf8mb4',
+                'connection' => [
+                    'driver' => 'pdo_mysql',
+                    'host' => 'mysql_write.someplace.tld',
+                    'dbname' => 'my_database',
+                    'user' => 'my_username',
+                    'password' => 'my_password',
+                    'charset' => 'utf8mb4',
+                ],
+                'configuration' => [
+                     'result_cache' => 'apcu',
+                ],
             ],
         ];
 
@@ -186,5 +243,13 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'password' => 'my_password',
             'charset' => 'utf8mb4',
         ], $dbWrite->getParams());
+
+        /** @var Configuration $configuration */
+        $configuration = $container['doctrine.dbal.dbs.config']['mysql_read'];
+
+        self::assertInstanceOf(DoctrineDbalLogger::class, $configuration->getSQLLogger());
+        self::assertInstanceOf(ApcuCache::class, $configuration->getResultCacheImpl());
+        self::assertSame('expression', $configuration->getFilterSchemaAssetsExpression());
+        self::assertFalse($configuration->getAutoCommit());
     }
 }

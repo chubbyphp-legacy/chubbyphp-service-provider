@@ -6,6 +6,8 @@ use Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
+use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\CacheConfiguration;
 use Doctrine\ORM\Configuration;
@@ -110,7 +112,47 @@ class DoctrineOrmServiceProviderTest extends TestCase
         /** @var EntityManager $entityManager */
         $entityManager = $container['doctrine.orm.em'];
 
-        $entityManager->getConfiguration()->getAutoCommit();
+        /** @var Configuration $configuration */
+        $configuration = $container['doctrine.orm.em.config'];
+
+        self::assertSame($configuration, $entityManager->getConfiguration());
+
+        self::assertNull($configuration->getSQLLogger());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getResultCacheImpl());
+        self::assertTrue($configuration->getAutoCommit());
+        self::assertSame(sys_get_temp_dir(), $configuration->getProxyDir());
+        self::assertSame(1, $configuration->getAutoGenerateProxyClasses());
+        self::assertSame('DoctrineProxy', $configuration->getProxyNamespace());
+        //self::assertSame('', $configuration->getEntityNamespace('alias'));
+        //self::assertSame([], $configuration->getEntityNamespaces());
+        self::assertInstanceOf(MappingDriverChain::class, $configuration->getMetadataDriverImpl());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getQueryCacheImpl());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getHydrationCacheImpl());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getMetadataCacheImpl());
+        //self::assertSame('', $configuration->getNamedQuery('name'));
+        //self::assertSame('', $configuration->getNamedNativeQuery('name'));
+        //self::assertSame('', $configuration->getCustomStringFunction('name'));
+        //self::assertSame('', $configuration->getCustomNumericFunction('name'));
+        //self::assertSame('', $configuration->getCustomDatetimeFunction('name'));
+        //self::assertSame('', $configuration->getCustomHydrationMode('name'));
+        self::assertSame(ClassMetadataFactory::class, $configuration->getClassMetadataFactoryName());
+        //self::assertSame('', $configuration->getFilterClassName('name'));
+        self::assertSame(EntityRepository::class, $configuration->getDefaultRepositoryClassName());
+        self::assertInstanceOf(DefaultNamingStrategy::class, $configuration->getNamingStrategy());
+        self::assertInstanceOf(DefaultQuoteStrategy::class, $configuration->getQuoteStrategy());
+        self::assertInstanceOf(DefaultEntityListenerResolver::class, $configuration->getEntityListenerResolver());
+        self::assertInstanceOf(DefaultRepositoryFactory::class, $configuration->getRepositoryFactory());
+        self::assertFalse($configuration->isSecondLevelCacheEnabled());
+        self::assertInstanceOf(CacheConfiguration::class, $configuration->getSecondLevelCacheConfiguration());
+        //self::assertSame('', $configuration->getDefaultQueryHint('name'));
+
+        self::assertSame($container['doctrine.orm.class_metadata_factory_name'], $configuration->getClassMetadataFactoryName());
+        self::assertSame($container['doctrine.orm.default_repository_class'], $configuration->getDefaultRepositoryClassName());
+        self::assertSame($container['doctrine.orm.strategy.naming'], $configuration->getNamingStrategy());
+        self::assertSame($container['doctrine.orm.strategy.quote'], $configuration->getQuoteStrategy());
+        self::assertSame($container['doctrine.orm.entity_listener_resolver'], $configuration->getEntityListenerResolver());
+        self::assertSame($container['doctrine.orm.repository_factory'], $configuration->getRepositoryFactory());
+        self::assertSame($container['doctrine.orm.second_level_cache.configuration'], $configuration->getSecondLevelCacheConfiguration());
     }
 
     public function testRegisterWithOneConnection()
@@ -302,5 +344,57 @@ class DoctrineOrmServiceProviderTest extends TestCase
         ];
 
         self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
+    }
+
+    public function testRegisterWithInvalidMappingStructure()
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessage('The "doctrine.orm.em.options" option "mappings" should be an array of arrays.');
+
+        $container = new Container();
+
+        $dbalServiceProvider = new DoctrineDbalServiceProvider();
+        $dbalServiceProvider->register($container);
+
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
+
+        $ormServiceProvider = new DoctrineOrmServiceProvider();
+        $ormServiceProvider->register($container);
+
+        $container['doctrine.orm.em.options'] = [
+            'mappings' => [
+                'invalid_mapping',
+            ],
+        ];
+
+        $container['doctrine.orm.em'];
+    }
+
+    public function testRegisterWithInvalidMappingType()
+    {
+        self::expectException(\InvalidArgumentException::class);
+        self::expectExceptionMessage('There is no driver factory for type "unknown"');
+
+        $container = new Container();
+
+        $dbalServiceProvider = new DoctrineDbalServiceProvider();
+        $dbalServiceProvider->register($container);
+
+        $cacheServiceProvider = new DoctrineCacheServiceProvider();
+        $cacheServiceProvider->register($container);
+
+        $ormServiceProvider = new DoctrineOrmServiceProvider();
+        $ormServiceProvider->register($container);
+
+        $container['doctrine.orm.em.options'] = [
+            'mappings' => [
+                [
+                    'type' => 'unknown',
+                ],
+            ],
+        ];
+
+        $container['doctrine.orm.em'];
     }
 }

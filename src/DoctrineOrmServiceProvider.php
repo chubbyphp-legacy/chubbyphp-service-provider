@@ -246,25 +246,25 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             /** @var MappingDriverChain $chain */
             $chain = $container['doctrine.orm.mapping_driver_chain.factory']();
-            foreach ($mappings as $entity) {
-                if (!is_array($entity)) {
+            foreach ($mappings as $mapping) {
+                if (!is_array($mapping)) {
                     throw new \InvalidArgumentException(
-                        "The 'doctrine.orm.em.options' option 'mappings' should be an array of arrays."
+                        'The "doctrine.orm.em.options" option "mappings" should be an array of arrays.'
                     );
                 }
 
-                if (isset($entity['alias'])) {
-                    $config->addEntityNamespace($entity['alias'], $entity['namespace']);
+                if (isset($mapping['alias'])) {
+                    $config->addEntityNamespace($mapping['alias'], $mapping['namespace']);
                 }
 
-                $factoryKey = sprintf('doctrine.orm.mapping_driver.factory.%s', $entity['type']);
+                $factoryKey = sprintf('doctrine.orm.mapping_driver.factory.%s', $mapping['type']);
                 if (!isset($container[$factoryKey])) {
                     throw new \InvalidArgumentException(
-                        sprintf('There is no driver factory for type "%s"', $entity['type'])
+                        sprintf('There is no driver factory for type "%s"', $mapping['type'])
                     );
                 }
 
-                $chain->addDriver($container[$factoryKey]($entity, $config), $entity['namespace']);
+                $chain->addDriver($container[$factoryKey]($mapping, $config), $mapping['namespace']);
             }
 
             return $container['doctrine.orm.mapping_driver_chain.instances.'.$name] = $chain;
@@ -290,11 +290,11 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverFactoryAnnotation(Container $container): callable
     {
-        return $container->protect(function (array $entity, Configuration $config) {
-            $useSimpleAnnotationReader = $entity['use_simple_annotation_reader'] ?? true;
+        return $container->protect(function (array $mapping, Configuration $config) {
+            $useSimpleAnnotationReader = $mapping['use_simple_annotation_reader'] ?? true;
 
             return $config->newDefaultAnnotationDriver(
-                (array) $entity['path'],
+                (array) $mapping['path'],
                 $useSimpleAnnotationReader
             );
         });
@@ -307,8 +307,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverFactoryYaml(Container $container): callable
     {
-        return $container->protect(function (array $entity, Configuration $config) {
-            return new YamlDriver($entity['path']);
+        return $container->protect(function (array $mapping, Configuration $config) {
+            return new YamlDriver($mapping['path']);
         });
     }
 
@@ -319,8 +319,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverFactorySimpleYaml(Container $container): callable
     {
-        return $container->protect(function (array $entity, Configuration $config) {
-            return new SimplifiedYamlDriver([$entity['path'] => $entity['namespace']]);
+        return $container->protect(function (array $mapping, Configuration $config) {
+            return new SimplifiedYamlDriver([$mapping['path'] => $mapping['namespace']]);
         });
     }
 
@@ -331,8 +331,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverFactoryXml(Container $container): callable
     {
-        return $container->protect(function (array $entity, Configuration $config) {
-            return new XmlDriver($entity['path']);
+        return $container->protect(function (array $mapping, Configuration $config) {
+            return new XmlDriver($mapping['path']);
         });
     }
 
@@ -343,8 +343,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverFactorySimpleXml(Container $container): callable
     {
-        return $container->protect(function (array $entity, Configuration $config) {
-            return new SimplifiedXmlDriver([$entity['path'] => $entity['namespace']]);
+        return $container->protect(function (array $mapping, Configuration $config) {
+            return new SimplifiedXmlDriver([$mapping['path'] => $mapping['namespace']]);
         });
     }
 
@@ -355,8 +355,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverFactoryPhp(Container $container): callable
     {
-        return $container->protect(function (array $entity, Configuration $config) {
-            return new StaticPHPDriver($entity['path']);
+        return $container->protect(function (array $mapping, Configuration $config) {
+            return new StaticPHPDriver($mapping['path']);
         });
     }
 

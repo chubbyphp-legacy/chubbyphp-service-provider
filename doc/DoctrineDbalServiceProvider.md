@@ -41,14 +41,9 @@ composer require doctrine/dbal "^2.5"
 
 ## Services
 
-* **doctrine.dbal.db**: The database connection, instance of
-  ``Doctrine\DBAL\Connection``.
-
-* **doctrine.dbal.db.config**: The doctrine configuration, instance of
-  ``Doctrine\DBAL\Configuration``.
-
-* **doctrine.dbal.db.event_manager**: The doctrine event manager, instance of
-  ``Doctrine\Common\EventManager``.
+* **doctrine.dbal.db**: The database connection, instance of ``Doctrine\DBAL\Connection``.
+* **doctrine.dbal.db.config**: The doctrine configuration, instance of ``Doctrine\DBAL\Configuration``.
+* **doctrine.dbal.db.event_manager**: The doctrine event manager, instance of  ``Doctrine\Common\EventManager``.
 
 ## Registering
 

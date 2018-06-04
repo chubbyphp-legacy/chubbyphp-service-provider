@@ -114,12 +114,14 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()
 $container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider()));
 
 $container['doctrine.dbal.db.options'] = [
-    'driver'    => 'pdo_mysql',
-    'host'      => 'mysql.someplace.tld',
-    'dbname'    => 'my_database',
-    'user'      => 'my_username',
-    'password'  => 'my_password',
-    'charset'   => 'utf8mb4',
+    'connection' => [
+        'driver'    => 'pdo_mysql',
+        'host'      => 'mysql.someplace.tld',
+        'dbname'    => 'my_database',
+        'user'      => 'my_username',
+        'password'  => 'my_password',
+        'charset'   => 'utf8mb4',
+    ],
 ];
 
 $container['doctrine.orm.em.options'] = [
@@ -147,20 +149,24 @@ $container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider())
 
 $container['doctrine.dbal.dbs.options'] = [
     'mysql_read' => [
-        'driver'    => 'pdo_mysql',
-        'host'      => 'mysql_read.someplace.tld',
-        'dbname'    => 'my_database',
-        'user'      => 'my_username',
-        'password'  => 'my_password',
-        'charset'   => 'utf8mb4',
+        'connection' => [
+            'driver'    => 'pdo_mysql',
+            'host'      => 'mysql_read.someplace.tld',
+            'dbname'    => 'my_database',
+            'user'      => 'my_username',
+            'password'  => 'my_password',
+            'charset'   => 'utf8mb4',
+        ],
     ],
     'mysql_write' => [
-        'driver'    => 'pdo_mysql',
-        'host'      => 'mysql_write.someplace.tld',
-        'dbname'    => 'my_database',
-        'user'      => 'my_username',
-        'password'  => 'my_password',
-        'charset'   => 'utf8mb4',
+        'connection' => [
+            'driver'    => 'pdo_mysql',
+            'host'      => 'mysql_write.someplace.tld',
+            'dbname'    => 'my_database',
+            'user'      => 'my_username',
+            'password'  => 'my_password',
+            'charset'   => 'utf8mb4',
+        ],
     ],
 ];
 

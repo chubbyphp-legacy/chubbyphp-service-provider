@@ -6,10 +6,16 @@ use Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
+use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Cache\FilesystemCache;
+use Doctrine\Common\Cache\MemcachedCache;
+use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
+use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\CacheConfiguration;
+use Doctrine\ORM\Cache\CacheFactory;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -17,7 +23,16 @@ use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Doctrine\ORM\Mapping\DefaultEntityListenerResolver;
 use Doctrine\ORM\Mapping\DefaultNamingStrategy;
 use Doctrine\ORM\Mapping\DefaultQuoteStrategy;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
+use Doctrine\ORM\Mapping\Driver\SimplifiedYamlDriver;
+use Doctrine\ORM\Mapping\Driver\XmlDriver;
+use Doctrine\ORM\Mapping\Driver\YamlDriver;
+use Doctrine\ORM\Mapping\EntityListenerResolver;
+use Doctrine\ORM\Mapping\NamingStrategy;
+use Doctrine\ORM\Mapping\QuoteStrategy;
 use Doctrine\ORM\Repository\DefaultRepositoryFactory;
+use Doctrine\ORM\Repository\RepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 
@@ -123,20 +138,11 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame(sys_get_temp_dir(), $configuration->getProxyDir());
         self::assertSame(1, $configuration->getAutoGenerateProxyClasses());
         self::assertSame('DoctrineProxy', $configuration->getProxyNamespace());
-        //self::assertSame('', $configuration->getEntityNamespace('alias'));
-        //self::assertSame([], $configuration->getEntityNamespaces());
         self::assertInstanceOf(MappingDriverChain::class, $configuration->getMetadataDriverImpl());
         self::assertInstanceOf(ArrayCache::class, $configuration->getQueryCacheImpl());
         self::assertInstanceOf(ArrayCache::class, $configuration->getHydrationCacheImpl());
         self::assertInstanceOf(ArrayCache::class, $configuration->getMetadataCacheImpl());
-        //self::assertSame('', $configuration->getNamedQuery('name'));
-        //self::assertSame('', $configuration->getNamedNativeQuery('name'));
-        //self::assertSame('', $configuration->getCustomStringFunction('name'));
-        //self::assertSame('', $configuration->getCustomNumericFunction('name'));
-        //self::assertSame('', $configuration->getCustomDatetimeFunction('name'));
-        //self::assertSame('', $configuration->getCustomHydrationMode('name'));
         self::assertSame(ClassMetadataFactory::class, $configuration->getClassMetadataFactoryName());
-        //self::assertSame('', $configuration->getFilterClassName('name'));
         self::assertSame(EntityRepository::class, $configuration->getDefaultRepositoryClassName());
         self::assertInstanceOf(DefaultNamingStrategy::class, $configuration->getNamingStrategy());
         self::assertInstanceOf(DefaultQuoteStrategy::class, $configuration->getQuoteStrategy());
@@ -145,7 +151,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertFalse($configuration->isSecondLevelCacheEnabled());
         self::assertInstanceOf(CacheConfiguration::class, $configuration->getSecondLevelCacheConfiguration());
         //self::assertSame('', $configuration->getDefaultQueryHint('name'));
-
         self::assertSame($container['doctrine.orm.class_metadata_factory_name'], $configuration->getClassMetadataFactoryName());
         self::assertSame($container['doctrine.orm.default_repository_class'], $configuration->getDefaultRepositoryClassName());
         self::assertSame($container['doctrine.orm.strategy.naming'], $configuration->getNamingStrategy());
@@ -199,6 +204,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     'type' => 'annotation',
                     'namespace' => 'One\Entities',
                     'path' => __DIR__.'/src/One/Entities',
+                    'alias' => 'Alias\Entities',
                 ],
                 [
                     'type' => 'yml',
@@ -228,11 +234,109 @@ class DoctrineOrmServiceProviderTest extends TestCase
             ],
             'types' => [
                 Type::STRING => \stdClass::class,
-                'aotherTyoe' => \stdClass::class,
+                'anotherType' => \stdClass::class,
             ],
         ];
 
-        self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
+        $container['doctrine.orm.proxies_dir'] = '/another/proxy/dir';
+        $container['doctrine.orm.auto_generate_proxies'] = false;
+        $container['doctrine.orm.proxies_namespace'] = 'AnotherNamespace';
+        $container['doctrine.orm.custom.functions.string'] = ['string' => \stdClass::class];
+        $container['doctrine.orm.custom.functions.numeric'] = ['numeric' => \stdClass::class];
+        $container['doctrine.orm.custom.functions.datetime'] = ['datetime' => \stdClass::class];
+        $container['doctrine.orm.custom.hydration_modes'] = ['mode' => \stdClass::class];
+        $container['doctrine.orm.class_metadata_factory_name'] = function () {
+            return $this->getMockBuilder(ClassMetadataFactory::class)
+                ->disableOriginalConstructor()
+                ->getMock();
+        };
+        $container['doctrine.orm.default_repository_class'] = function () {
+            return $this->getMockBuilder(EntityRepository::class)->disableOriginalConstructor()->getMock();
+        };
+        $container['doctrine.orm.strategy.naming'] = function () {
+            return $this->getMockBuilder(NamingStrategy::class)->getMockForAbstractClass();
+        };
+        $container['doctrine.orm.strategy.quote'] = function () {
+            return $this->getMockBuilder(QuoteStrategy::class)->getMockForAbstractClass();
+        };
+        $container['doctrine.orm.entity_listener_resolver'] = function () {
+            return $this->getMockBuilder(EntityListenerResolver::class)->getMockForAbstractClass();
+        };
+        $container['doctrine.orm.repository_factory'] = function () {
+            return $this->getMockBuilder(RepositoryFactory::class)->getMockForAbstractClass();
+        };
+        $container['doctrine.orm.second_level_cache.enabled'] = true;
+        $container['doctrine.orm.second_level_cache.configuration'] = function () {
+            /** @var CacheFactory $factory */
+            $factory = $this->getMockBuilder(CacheFactory::class)->getMockForAbstractClass();
+
+            $cacheConfig = new CacheConfiguration();
+            $cacheConfig->setCacheFactory($factory);
+
+            return $cacheConfig;
+        };
+        $container['doctrine.orm.default.query_hints'] = ['name' => \stdClass::class];
+
+        /** @var EntityManager $entityManager */
+        $entityManager = $container['doctrine.orm.em'];
+
+        /** @var Configuration $configuration */
+        $configuration = $container['doctrine.orm.em.config'];
+
+        self::assertSame($configuration, $entityManager->getConfiguration());
+
+        self::assertNull($configuration->getSQLLogger());
+        self::assertInstanceOf(MemcachedCache::class, $configuration->getResultCacheImpl());
+        self::assertTrue($configuration->getAutoCommit());
+        self::assertSame('/another/proxy/dir', $configuration->getProxyDir());
+        self::assertSame(0, $configuration->getAutoGenerateProxyClasses());
+        self::assertSame('AnotherNamespace', $configuration->getProxyNamespace());
+        self::assertSame('One\Entities', $configuration->getEntityNamespace('Alias\Entities'));
+        self::assertSame(['Alias\Entities' => 'One\Entities'], $configuration->getEntityNamespaces());
+        self::assertInstanceOf(MappingDriverChain::class, $configuration->getMetadataDriverImpl());
+        self::assertInstanceOf(ApcuCache::class, $configuration->getQueryCacheImpl());
+        self::assertInstanceOf(RedisCache::class, $configuration->getHydrationCacheImpl());
+        self::assertInstanceOf(FilesystemCache::class, $configuration->getMetadataCacheImpl());
+        self::assertSame(\stdClass::class, $configuration->getCustomStringFunction('string'));
+        self::assertSame(\stdClass::class, $configuration->getCustomNumericFunction('numeric'));
+        self::assertSame(\stdClass::class, $configuration->getCustomDatetimeFunction('datetime'));
+        self::assertSame(\stdClass::class, $configuration->getCustomHydrationMode('mode'));
+        self::assertInstanceOf(ClassMetadataFactory::class, $configuration->getClassMetadataFactoryName());
+        self::assertInstanceOf(EntityRepository::class, $configuration->getDefaultRepositoryClassName());
+        self::assertInstanceOf(NamingStrategy::class, $configuration->getNamingStrategy());
+        self::assertInstanceOf(QuoteStrategy::class, $configuration->getQuoteStrategy());
+        self::assertInstanceOf(EntityListenerResolver::class, $configuration->getEntityListenerResolver());
+        self::assertInstanceOf(RepositoryFactory::class, $configuration->getRepositoryFactory());
+        self::assertTrue($configuration->isSecondLevelCacheEnabled());
+        self::assertInstanceOf(CacheConfiguration::class, $configuration->getSecondLevelCacheConfiguration());
+        self::assertSame($container['doctrine.orm.class_metadata_factory_name'], $configuration->getClassMetadataFactoryName());
+        self::assertSame($container['doctrine.orm.default_repository_class'], $configuration->getDefaultRepositoryClassName());
+        self::assertSame($container['doctrine.orm.strategy.naming'], $configuration->getNamingStrategy());
+        self::assertSame($container['doctrine.orm.strategy.quote'], $configuration->getQuoteStrategy());
+        self::assertSame($container['doctrine.orm.entity_listener_resolver'], $configuration->getEntityListenerResolver());
+        self::assertSame($container['doctrine.orm.repository_factory'], $configuration->getRepositoryFactory());
+        self::assertSame($container['doctrine.orm.second_level_cache.configuration'], $configuration->getSecondLevelCacheConfiguration());
+
+        /** @var MappingDriverChain $metadataDriver */
+        $metadataDriver = $configuration->getMetadataDriverImpl();
+
+        $drivers = $metadataDriver->getDrivers();
+
+        self::assertCount(6, $drivers);
+
+        self::assertArrayHasKey('One\Entities', $drivers);
+        self::assertArrayHasKey('Two\Entities', $drivers);
+        self::assertArrayHasKey('Three\Entities', $drivers);
+        self::assertArrayHasKey('Four\Entities', $drivers);
+        self::assertArrayHasKey('Five\Entities', $drivers);
+        self::assertArrayHasKey('Six\Entities', $drivers);
+
+        self::assertInstanceOf(AnnotationDriver::class, $drivers['One\Entities']);
+        self::assertInstanceOf(YamlDriver::class, $drivers['Two\Entities']);
+        self::assertInstanceOf(SimplifiedYamlDriver::class, $drivers['Three\Entities']);
+        self::assertInstanceOf(XmlDriver::class, $drivers['Four\Entities']);
+        self::assertInstanceOf(SimplifiedXmlDriver::class, $drivers['Five\Entities']);
+        self::assertInstanceOf(StaticPHPDriver::class, $drivers['Six\Entities']);
     }
 
     public function testRegisterWithMultipleConnections()

@@ -20,32 +20,21 @@ composer require doctrine/dbal "^2.5"
     * **driver**: The database driver to use, defaults to ``pdo_mysql``.
       Can be any of: ``pdo_mysql``, ``pdo_sqlite``, ``pdo_pgsql``,
       ``pdo_oci``, ``oci8``, ``ibm_db2``, ``pdo_ibm``, ``pdo_sqlsrv``.
-  
     * **dbname**: The name of the database to connect to.
-  
-    * **host**: The host of the database to connect to. Defaults to
-      localhost.
-  
-    * **user**: The user of the database to connect to. Defaults to
-      root.
-  
+    * **host**: The host of the database to connect to. Defaults to localhost.
+    * **user**: The user of the database to connect to. Defaults to root.
     * **password**: The password of the database to connect to.
-  
     * **charset**: Only relevant for ``pdo_mysql``, and ``pdo_oci/oci8``,
       specifies the charset used when connecting to the database.
-  
     * **path**: Only relevant for ``pdo_sqlite``, specifies the path to
       the SQLite database.
-  
     * **port**: Only relevant for ``pdo_mysql``, ``pdo_pgsql``, and ``pdo_oci/oci8``,
       specifies the port of the database to connect to.
 
   * **configuration**
 
     * **result_cache**: String or array describing result cache implementation.
-    
     * **filter_schema_assets_expression**: An expression to filter for schema (tables)
-    
     * **auto_commit**: Auto commit. Defaults to `true`
 
   These and additional options are described in detail in [Doctrine Dbal Configuration][2].

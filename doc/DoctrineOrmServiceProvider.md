@@ -1,7 +1,6 @@
 # DoctrineOrmServiceProvider
 
-The *DoctrineOrmServiceProvider* provides integration with the [Doctrine ORM][1]
-for easy database access
+The *DoctrineOrmServiceProvider* provides integration with the [Doctrine ORM][1].
 
 ## Install
 
@@ -46,6 +45,7 @@ composer require doctrine/orm "^2.5"
        Note that if set to `false`, the `AnnotationRegistry` will probably
        need to be configured correctly so that it can load your Annotations
        classes.
+
    * **query_cache** (Default: setting specified by doctrine.orm.default_cache):
      String or array describing query cache implementation.
    * **metadata_cache** (Default: setting specified by doctrine.orm.default_cache):
@@ -76,17 +76,6 @@ composer require doctrine/orm "^2.5"
    `Doctrine\ORM\Mapping\EntityListenerResolver`.
  * **doctrine.orm.default_cache**:
    String or array describing default cache implementation.
- * **doctrine.orm.add_mapping_driver**:
-   Function providing the ability to add a mapping driver to an Entity Manager.
-
-   These params are available:
-    * **$mappingDriver**:
-      Mapping driver to be added,
-      instance `Doctrine\Common\Persistence\Mapping\Driver\MappingDriver`.
-    * **$namespace**:
-      Namespace to be mapped by `$mappingDriver`, string.
-    * **$name**:
-      Name of Entity Manager to add mapping to, string, default `null`.
  * **doctrine.orm.strategy**:
    * **naming**: Naming strategy, instance `Doctrine\ORM\Mapping\NamingStrategy`.
    * **quote**: Quote strategy, instance `Doctrine\ORM\Mapping\QuoteStrategy`.

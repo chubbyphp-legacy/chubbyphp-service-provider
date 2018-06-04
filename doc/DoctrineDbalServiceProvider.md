@@ -1,8 +1,6 @@
 # DoctrineDbalServiceProvider
 
-The *DoctrineDbalServiceProvider* provides integration with the [Doctrine Dbal][1]
-for easy database access
-(Doctrine ORM integration is **not** supplied).
+The *DoctrineDbalServiceProvider* provides integration with the [Doctrine Dbal][1].
 
 ## Install
 
@@ -57,10 +55,11 @@ composer require doctrine/dbal "^2.5"
 * **doctrine.dbal.db**: The database connection, instance of
   ``Doctrine\DBAL\Connection``.
 
-* **doctrine.dbal.db.config**: Configuration object for Doctrine. Defaults to
-  an empty ``Doctrine\DBAL\Configuration``.
+* **doctrine.dbal.db.config**: The doctrine configuration, instance of
+  ``Doctrine\DBAL\Configuration``.
 
-* **doctrine.dbal.db.event_manager**: Event Manager for Doctrine.
+* **doctrine.dbal.db.event_manager**: The doctrine event manager, instance of
+  ``Doctrine\Common\EventManager``.
 
 ## Registering
 

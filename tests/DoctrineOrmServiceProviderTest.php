@@ -74,7 +74,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.xml', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_xml', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.php', $container);
-        self::assertArrayHasKey('doctrine.orm.default_cache', $container);
+        self::assertArrayHasKey('doctrine.orm.default_cache.provider', $container);
         self::assertArrayHasKey('doctrine.orm.custom.functions.string', $container);
         self::assertArrayHasKey('doctrine.orm.custom.functions.numeric', $container);
         self::assertArrayHasKey('doctrine.orm.custom.functions.datetime', $container);
@@ -111,7 +111,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.xml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_xml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.php']);
-        self::assertEquals(['driver' => 'array'], $container['doctrine.orm.default_cache']);
+        self::assertEquals(['driver' => 'array'], $container['doctrine.orm.default_cache.provider']);
         self::assertEquals([], $container['doctrine.orm.custom.functions.string']);
         self::assertEquals([], $container['doctrine.orm.custom.functions.numeric']);
         self::assertEquals([], $container['doctrine.orm.custom.functions.datetime']);
@@ -272,15 +272,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
             return $this->getMockBuilder(RepositoryFactory::class)->getMockForAbstractClass();
         };
         $container['doctrine.orm.second_level_cache.enabled'] = true;
-        $container['doctrine.orm.second_level_cache.configuration'] = function () {
-            /** @var CacheFactory $factory */
-            $factory = $this->getMockBuilder(CacheFactory::class)->getMockForAbstractClass();
-
-            $cacheConfig = new CacheConfiguration();
-            $cacheConfig->setCacheFactory($factory);
-
-            return $cacheConfig;
-        };
         $container['doctrine.orm.default.query_hints'] = ['name' => \stdClass::class];
 
         /** @var EntityManager $entityManager */

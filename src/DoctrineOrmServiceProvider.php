@@ -13,6 +13,8 @@ use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\CacheConfiguration;
+use Doctrine\ORM\Cache\DefaultCacheFactory;
+use Doctrine\ORM\Cache\RegionsConfiguration;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -52,7 +54,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['doctrine.orm.mapping_driver.factory.xml'] = $this->getOrmMappingDriverFactoryXml($container);
         $container['doctrine.orm.mapping_driver.factory.simple_xml'] = $this->getOrmMappingDriverFactorySimpleXml($container);
         $container['doctrine.orm.mapping_driver.factory.php'] = $this->getOrmMappingDriverFactoryPhp($container);
-        $container['doctrine.orm.default_cache'] = ['driver' => 'array'];
+        $container['doctrine.orm.default_cache.provider'] = ['driver' => 'array'];
         $container['doctrine.orm.custom.functions.string'] = [];
         $container['doctrine.orm.custom.functions.numeric'] = [];
         $container['doctrine.orm.custom.functions.datetime'] = [];
@@ -65,6 +67,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['doctrine.orm.repository_factory'] = $this->getOrmRepositoryFactoryDefinition($container);
         $container['doctrine.orm.second_level_cache.enabled'] = false;
         $container['doctrine.orm.second_level_cache.configuration'] = $this->getOrmSecondLevelCacheConfigurationDefinition($container);
+        $container['doctrine.orm.second_level_cache.provider'] = null;
         $container['doctrine.orm.default.query_hints'] = [];
         $container['doctrine.orm.em'] = $this->getOrmEmDefinition($container);
         $container['doctrine.orm.em.config'] = $this->getOrmEmConfigDefinition($container);
@@ -193,7 +196,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             foreach (['query', 'hydration', 'metadata', 'result'] as $cacheType) {
                 $setMethod = sprintf('set%sCacheImpl', ucfirst($cacheType));
-                $cacheOptions = $options[sprintf('%s_cache', $cacheType)] ?? $container['doctrine.orm.default_cache'];
+                $cacheOptions = $options[sprintf('%s_cache', $cacheType)] ?? $container['doctrine.orm.default_cache.provider'];
                 if (is_string($cacheOptions)) {
                     $cacheOptions = ['driver' => $cacheOptions];
                 }
@@ -422,7 +425,21 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     private function getOrmSecondLevelCacheConfigurationDefinition(Container $container): callable
     {
         return function () use ($container) {
-            return new CacheConfiguration();
+            $regionsCacheConfiguration = new RegionsConfiguration();
+            $factory = new DefaultCacheFactory(
+                $regionsCacheConfiguration,
+                $container['doctrine.cache.locator'](
+                    'second_level',
+                    $container['doctrine.orm.second_level_cache.provider']
+                        ?? $container['doctrine.orm.default_cache.provider']
+                )
+            );
+
+            $cacheConfiguration = new CacheConfiguration();
+            $cacheConfiguration->setCacheFactory($factory);
+            $cacheConfiguration->setRegionsConfiguration($regionsCacheConfiguration);
+
+            return $cacheConfiguration;
         };
     }
 

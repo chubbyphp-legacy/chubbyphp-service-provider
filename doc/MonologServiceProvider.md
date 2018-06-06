@@ -9,18 +9,18 @@ even in production.
 
 ## Install
 
-```sh
+``sh
 composer require "monolog/monolog": "^1.4.1"
-```
+``
 
 ## Parameters
 
 * **monolog.logfile**: File where logs are written to.
-* **monolog.level** (optional): Level of logging, defaults to ``DEBUG``.
-  PSR-3 log levels from ``\Psr\Log\LogLevel::`` constants are also supported.
+* **monolog.level** (optional): Level of logging, defaults to `DEBUG`.
+  PSR-3 log levels from `\Psr\Log\LogLevel::` constants are also supported.
 
 * **monolog.name** (optional): Name of the monolog channel,
-  defaults to ``myapp``.
+  defaults to `myapp`.
 
 * **monolog.bubble** (optional): Whether the messages that are handled can bubble up the stack or not.
 * **monolog.permission** (optional): File permissions default (null), nothing change.
@@ -37,21 +37,21 @@ composer require "monolog/monolog": "^1.4.1"
 
 ## Registering
 
-```php
+``php
 $container['monolog.logfile'] = __DIR__.'/development.log';
 
 $container->register(new Chubbyphp\ServiceProvider\MonologServiceProvider());
-```
+``
 
 ## Usage
 
-The MonologServiceProvider provides a ``monolog`` service. You can use it to
-add log entries for any logging level through ``debug()``, ``info()``,
-``warning()`` and ``error()``::
+The MonologServiceProvider provides a `monolog` service. You can use it to
+add log entries for any logging level through `debug()`, `info()`,
+`warning()` and `error()`::
 
-```php
+``php
 $container['monolog']->info(sprintf("User '%s' registered.", $username));
-```
+``
 
 (c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)
 

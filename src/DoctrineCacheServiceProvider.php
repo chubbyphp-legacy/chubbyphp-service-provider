@@ -27,14 +27,14 @@ final class DoctrineCacheServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container)
     {
-        $container['doctrine.cache.locator'] = $this->getOrmCacheLocatorDefinition($container);
-        $container['doctrine.cache.factory'] = $this->getOrmCacheFactoryDefinition($container);
-        $container['doctrine.cache.factory.apcu'] = $this->getOrmCacheFactoryApcuDefinition($container);
-        $container['doctrine.cache.factory.array'] = $this->getOrmCacheFactoryArrayDefinition($container);
-        $container['doctrine.cache.factory.filesystem'] = $this->getOrmCacheFactoryFilesystemDefinition($container);
-        $container['doctrine.cache.factory.memcached'] = $this->getOrmCacheFactoryMemcachedDefinition($container);
-        $container['doctrine.cache.factory.redis'] = $this->getOrmCacheFactoryRedisDefinition($container);
-        $container['doctrine.cache.factory.xcache'] = $this->getOrmCacheFactoryXCacheDefinition($container);
+        $container['doctrine.cache.provider.locator'] = $this->getOrmCacheLocatorDefinition($container);
+        $container['doctrine.cache.provider.factory'] = $this->getOrmCacheFactoryDefinition($container);
+        $container['doctrine.cache.provider.factory.apcu'] = $this->getOrmCacheFactoryApcuDefinition($container);
+        $container['doctrine.cache.provider.factory.array'] = $this->getOrmCacheFactoryArrayDefinition($container);
+        $container['doctrine.cache.provider.factory.filesystem'] = $this->getOrmCacheFactoryFilesystemDefinition($container);
+        $container['doctrine.cache.provider.factory.memcached'] = $this->getOrmCacheFactoryMemcachedDefinition($container);
+        $container['doctrine.cache.provider.factory.redis'] = $this->getOrmCacheFactoryRedisDefinition($container);
+        $container['doctrine.cache.provider.factory.xcache'] = $this->getOrmCacheFactoryXCacheDefinition($container);
     }
 
     /**
@@ -57,7 +57,7 @@ final class DoctrineCacheServiceProvider implements ServiceProviderInterface
             $driver = $options['driver'];
 
             /** @var CacheProvider $cache */
-            $cache = $container['doctrine.cache.factory']($driver, $options);
+            $cache = $container['doctrine.cache.provider.factory']($driver, $options);
 
             if (isset($options['cache_namespace'])) {
                 $cache->setNamespace($options['cache_namespace']);
@@ -75,7 +75,7 @@ final class DoctrineCacheServiceProvider implements ServiceProviderInterface
     private function getOrmCacheFactoryDefinition(Container $container): callable
     {
         return $container->protect(function (string $driver, array $options) use ($container) {
-            $cacheFactoryKey = 'doctrine.cache.factory.'.$driver;
+            $cacheFactoryKey = 'doctrine.cache.provider.factory.'.$driver;
             if (!isset($container[$cacheFactoryKey])) {
                 throw new \RuntimeException(
                     sprintf('Factory "%s" for cache type "%s" not defined', $cacheFactoryKey, $driver)

@@ -202,7 +202,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                 }
 
                 $config->$setMethod(
-                    $container['doctrine.cache.locator'](sprintf('%s_%s', $name, $cacheType), $cacheOptions)
+                    $container['doctrine.cache.provider.locator'](sprintf('%s_%s', $name, $cacheType), $cacheOptions)
                 );
             }
 
@@ -428,7 +428,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             $regionsCacheConfiguration = new RegionsConfiguration();
             $factory = new DefaultCacheFactory(
                 $regionsCacheConfiguration,
-                $container['doctrine.cache.locator'](
+                $container['doctrine.cache.provider.locator'](
                     'second_level',
                     $container['doctrine.orm.second_level_cache.provider']
                         ?? $container['doctrine.orm.default_cache.provider']

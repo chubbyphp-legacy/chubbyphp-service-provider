@@ -146,7 +146,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
                     }
 
                     $config->setResultCacheImpl(
-                        $container['doctrine.cache.locator'](
+                        $container['doctrine.cache.provider.locator'](
                             sprintf('%s_%s', $name, 'result'),
                             $configOptions['result_cache']
                         )

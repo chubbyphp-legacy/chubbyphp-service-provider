@@ -308,7 +308,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     private function getOrmMappingDriverFactoryYaml(Container $container): callable
     {
         return $container->protect(function (array $mapping, Configuration $config) {
-            return new YamlDriver($mapping['path']);
+            return new YamlDriver($mapping['path'], $mapping['extension'] ?? YamlDriver::DEFAULT_FILE_EXTENSION);
         });
     }
 
@@ -320,7 +320,10 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     private function getOrmMappingDriverFactorySimpleYaml(Container $container): callable
     {
         return $container->protect(function (array $mapping, Configuration $config) {
-            return new SimplifiedYamlDriver([$mapping['path'] => $mapping['namespace']]);
+            return new SimplifiedYamlDriver(
+                [$mapping['path'] => $mapping['namespace']],
+                $mapping['extension'] ?? SimplifiedYamlDriver::DEFAULT_FILE_EXTENSION
+            );
         });
     }
 
@@ -332,7 +335,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     private function getOrmMappingDriverFactoryXml(Container $container): callable
     {
         return $container->protect(function (array $mapping, Configuration $config) {
-            return new XmlDriver($mapping['path']);
+            return new XmlDriver($mapping['path'], $mapping['extension'] ?? XmlDriver::DEFAULT_FILE_EXTENSION);
         });
     }
 
@@ -344,7 +347,10 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     private function getOrmMappingDriverFactorySimpleXml(Container $container): callable
     {
         return $container->protect(function (array $mapping, Configuration $config) {
-            return new SimplifiedXmlDriver([$mapping['path'] => $mapping['namespace']]);
+            return new SimplifiedXmlDriver(
+                [$mapping['path'] => $mapping['namespace']],
+                $mapping['extension'] ?? SimplifiedXmlDriver::DEFAULT_FILE_EXTENSION
+            );
         });
     }
 

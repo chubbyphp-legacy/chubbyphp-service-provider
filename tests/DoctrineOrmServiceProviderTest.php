@@ -6,6 +6,11 @@ use Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
+use Chubbyphp\Tests\ServiceProvider\Resources\One\Entity\Model as OneModel;
+use Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity\Model as TwoModel;
+use Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity\Model as ThreeModel;
+use Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity\Model as FourModel;
+use Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity\Model as FiveModel;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\FilesystemCache;
@@ -202,34 +207,35 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'mappings' => [
                 [
                     'type' => 'annotation',
-                    'namespace' => 'One\Entities',
-                    'path' => __DIR__.'/src/One/Entities',
-                    'alias' => 'Alias\Entities',
+                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\One\Entity',
+                    'alias' => 'Alias\Entity',
+                    'path' => __DIR__.'/Resources/One/Entity',
+                    'use_simple_annotation_reader' => false,
                 ],
                 [
                     'type' => 'yml',
-                    'namespace' => 'Two\Entities',
-                    'path' => __DIR__.'/src/Two/Resources/config/doctrine',
+                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity',
+                    'path' => __DIR__.'/Resources/Two/config/yml',
                 ],
                 [
                     'type' => 'simple_yml',
-                    'namespace' => 'Three\Entities',
-                    'path' => __DIR__.'/src/Three/Resources/config/doctrine',
+                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity',
+                    'path' => __DIR__.'/Resources/Three/config/simple_yml',
                 ],
                 [
                     'type' => 'xml',
-                    'namespace' => 'Four\Entities',
-                    'path' => __DIR__.'/src/Four/Resources/config/doctrine',
+                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity',
+                    'path' => __DIR__.'/Resources/Four/config/xml',
                 ],
                 [
                     'type' => 'simple_xml',
-                    'namespace' => 'Five\Entities',
-                    'path' => __DIR__.'/src/Five/Resources/config/doctrine',
+                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity',
+                    'path' => __DIR__.'/Resources/Five/config/simple_xml',
                 ],
                 [
                     'type' => 'php',
-                    'namespace' => 'Six\Entities',
-                    'path' => __DIR__.'/src/Six/Entities',
+                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Six\Entity',
+                    'path' => __DIR__.'/Resources/Six/Entity',
                 ],
             ],
             'types' => [
@@ -291,8 +297,8 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame('/another/proxy/dir', $configuration->getProxyDir());
         self::assertSame(0, $configuration->getAutoGenerateProxyClasses());
         self::assertSame('AnotherNamespace', $configuration->getProxyNamespace());
-        self::assertSame('One\Entities', $configuration->getEntityNamespace('Alias\Entities'));
-        self::assertSame(['Alias\Entities' => 'One\Entities'], $configuration->getEntityNamespaces());
+        self::assertSame('Chubbyphp\Tests\ServiceProvider\Resources\One\Entity', $configuration->getEntityNamespace('Alias\Entity'));
+        self::assertSame(['Alias\Entity' => 'Chubbyphp\Tests\ServiceProvider\Resources\One\Entity'], $configuration->getEntityNamespaces());
         self::assertInstanceOf(MappingDriverChain::class, $configuration->getMetadataDriverImpl());
         self::assertInstanceOf(ApcuCache::class, $configuration->getQueryCacheImpl());
         self::assertInstanceOf(RedisCache::class, $configuration->getHydrationCacheImpl());
@@ -324,19 +330,46 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         self::assertCount(6, $drivers);
 
-        self::assertArrayHasKey('One\Entities', $drivers);
-        self::assertArrayHasKey('Two\Entities', $drivers);
-        self::assertArrayHasKey('Three\Entities', $drivers);
-        self::assertArrayHasKey('Four\Entities', $drivers);
-        self::assertArrayHasKey('Five\Entities', $drivers);
-        self::assertArrayHasKey('Six\Entities', $drivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\One\Entity', $drivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity', $drivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity', $drivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity', $drivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity', $drivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Six\Entity', $drivers);
 
-        self::assertInstanceOf(AnnotationDriver::class, $drivers['One\Entities']);
-        self::assertInstanceOf(YamlDriver::class, $drivers['Two\Entities']);
-        self::assertInstanceOf(SimplifiedYamlDriver::class, $drivers['Three\Entities']);
-        self::assertInstanceOf(XmlDriver::class, $drivers['Four\Entities']);
-        self::assertInstanceOf(SimplifiedXmlDriver::class, $drivers['Five\Entities']);
-        self::assertInstanceOf(StaticPHPDriver::class, $drivers['Six\Entities']);
+        self::assertInstanceOf(AnnotationDriver::class, $drivers['Chubbyphp\Tests\ServiceProvider\Resources\One\Entity']);
+        self::assertInstanceOf(YamlDriver::class, $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity']);
+        self::assertInstanceOf(SimplifiedYamlDriver::class, $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity']);
+        self::assertInstanceOf(XmlDriver::class, $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity']);
+        self::assertInstanceOf(SimplifiedXmlDriver::class, $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity']);
+        self::assertInstanceOf(StaticPHPDriver::class, $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Six\Entity']);
+
+        /** @var AnnotationDriver $oneDriver */
+        $oneDriver = $drivers['Chubbyphp\Tests\ServiceProvider\Resources\One\Entity'];
+
+        self::assertSame([__DIR__.'/Resources/One/Entity'], $oneDriver->getPaths());
+        self::assertSame('.php', $oneDriver->getFileExtension());
+        self::assertSame([OneModel::class], $oneDriver->getAllClassNames());
+
+        /** @var YamlDriver $twoDriver */
+        $twoDriver = $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity'];
+
+        self::assertSame([TwoModel::class], $twoDriver->getAllClassNames());
+
+        /** @var SimplifiedYamlDriver $threeDriver */
+        $threeDriver = $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity'];
+
+        self::assertSame([ThreeModel::class], $threeDriver->getAllClassNames());
+
+        /** @var XmlDriver $fourDriver */
+        $fourDriver = $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity'];
+
+        self::assertSame([FourModel::class], $fourDriver->getAllClassNames());
+
+        /** @var SimplifiedXmlDriver $fiveDriver */
+        $fiveDriver = $drivers['Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity'];
+
+        self::assertSame([FiveModel::class], $fiveDriver->getAllClassNames());
     }
 
     public function testRegisterWithMultipleConnections()
@@ -374,39 +407,38 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $container['doctrine.orm.ems.options'] = [
             'mysql_read' => [
                 'connection' => 'mysql_read',
-                'query_cache' => 'xcache',
-                'cache_namespace' => 'prefix-',
                 'mappings' => [
                     [
                         'type' => 'annotation',
-                        'namespace' => 'One\Entities',
-                        'alias' => 'One',
-                        'path' => __DIR__.'/src/One/Entities',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\One\Entity',
+                        'alias' => 'Alias\Entity',
+                        'path' => __DIR__.'/Resources/One/Entity',
+                        'use_simple_annotation_reader' => false,
                     ],
                     [
                         'type' => 'yml',
-                        'namespace' => 'Two\Entities',
-                        'path' => __DIR__.'/src/Two/Resources/config/doctrine',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity',
+                        'path' => __DIR__.'/Resources/Two/config/yml',
                     ],
                     [
                         'type' => 'simple_yml',
-                        'namespace' => 'Three\Entities',
-                        'path' => __DIR__.'/src/Three/Resources/config/doctrine',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity',
+                        'path' => __DIR__.'/Resources/Three/config/simple_yml',
                     ],
                     [
                         'type' => 'xml',
-                        'namespace' => 'Four\Entities',
-                        'path' => __DIR__.'/src/Four/Resources/config/doctrine',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity',
+                        'path' => __DIR__.'/Resources/Four/config/xml',
                     ],
                     [
                         'type' => 'simple_xml',
-                        'namespace' => 'Five\Entities',
-                        'path' => __DIR__.'/src/Five/Resources/config/doctrine',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity',
+                        'path' => __DIR__.'/Resources/Five/config/simple_xml',
                     ],
                     [
                         'type' => 'php',
-                        'namespace' => 'Six\Entities',
-                        'path' => __DIR__.'/src/Six/Entities',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Six\Entity',
+                        'path' => __DIR__.'/Resources/Six/Entity',
                     ],
                 ],
             ],
@@ -415,39 +447,90 @@ class DoctrineOrmServiceProviderTest extends TestCase
                 'mappings' => [
                     [
                         'type' => 'annotation',
-                        'namespace' => 'One\Entities',
-                        'path' => __DIR__.'/src/One/Entities',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\One\Entity',
+                        'alias' => 'Alias\Entity',
+                        'path' => __DIR__.'/Resources/One/Entity',
+                        'use_simple_annotation_reader' => false,
                     ],
                     [
                         'type' => 'yml',
-                        'namespace' => 'Two\Entities',
-                        'path' => __DIR__.'/src/Two/Resources/config/doctrine',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity',
+                        'path' => __DIR__.'/Resources/Two/config/yml',
                     ],
                     [
                         'type' => 'simple_yml',
-                        'namespace' => 'Three\Entities',
-                        'path' => __DIR__.'/src/Three/Resources/config/doctrine',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity',
+                        'path' => __DIR__.'/Resources/Three/config/simple_yml',
                     ],
                     [
                         'type' => 'xml',
-                        'namespace' => 'Four\Entities',
-                        'path' => __DIR__.'/src/Four/Resources/config/doctrine',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity',
+                        'path' => __DIR__.'/Resources/Four/config/xml',
                     ],
                     [
                         'type' => 'simple_xml',
-                        'namespace' => 'Five\Entities',
-                        'path' => __DIR__.'/src/Five/Resources/config/doctrine',
-                    ],
-                    [
-                        'type' => 'php',
-                        'namespace' => 'Six\Entities',
-                        'path' => __DIR__.'/src/Six/Entities',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity',
+                        'path' => __DIR__.'/Resources/Five/config/simple_xml',
                     ],
                 ],
             ],
         ];
 
-        self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
+        /** @var EntityManager $readEntityManager */
+        $readEntityManager = $container['doctrine.orm.ems']['mysql_read'];
+
+        /** @var Configuration $readConfiguration */
+        $readConfiguration = $container['doctrine.orm.ems.config']['mysql_read'];
+
+        self::assertSame($readConfiguration, $readEntityManager->getConfiguration());
+
+        /** @var MappingDriverChain $readMetadataDriver */
+        $readMetadataDriver = $readConfiguration->getMetadataDriverImpl();
+
+        $readDrivers = $readMetadataDriver->getDrivers();
+
+        self::assertCount(6, $readDrivers);
+
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\One\Entity', $readDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity', $readDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity', $readDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity', $readDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity', $readDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Six\Entity', $readDrivers);
+
+        self::assertInstanceOf(AnnotationDriver::class, $readDrivers['Chubbyphp\Tests\ServiceProvider\Resources\One\Entity']);
+        self::assertInstanceOf(YamlDriver::class, $readDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity']);
+        self::assertInstanceOf(SimplifiedYamlDriver::class, $readDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity']);
+        self::assertInstanceOf(XmlDriver::class, $readDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity']);
+        self::assertInstanceOf(SimplifiedXmlDriver::class, $readDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity']);
+        self::assertInstanceOf(StaticPHPDriver::class, $readDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Six\Entity']);
+
+        /** @var EntityManager $writeEntityManager */
+        $writeEntityManager = $container['doctrine.orm.ems']['mysql_write'];
+
+        /** @var Configuration $writeConfiguration */
+        $writeConfiguration = $container['doctrine.orm.ems.config']['mysql_write'];
+
+        self::assertSame($writeConfiguration, $writeEntityManager->getConfiguration());
+
+        /** @var MappingDriverChain $writeMetadataDriver */
+        $writeMetadataDriver = $writeConfiguration->getMetadataDriverImpl();
+
+        $writeDrivers = $writeMetadataDriver->getDrivers();
+
+        self::assertCount(5, $writeDrivers);
+
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\One\Entity', $writeDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity', $writeDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity', $writeDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity', $writeDrivers);
+        self::assertArrayHasKey('Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity', $writeDrivers);
+
+        self::assertInstanceOf(AnnotationDriver::class, $writeDrivers['Chubbyphp\Tests\ServiceProvider\Resources\One\Entity']);
+        self::assertInstanceOf(YamlDriver::class, $writeDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity']);
+        self::assertInstanceOf(SimplifiedYamlDriver::class, $writeDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity']);
+        self::assertInstanceOf(XmlDriver::class, $writeDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity']);
+        self::assertInstanceOf(SimplifiedXmlDriver::class, $writeDrivers['Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity']);
     }
 
     public function testRegisterWithInvalidMappingStructure()

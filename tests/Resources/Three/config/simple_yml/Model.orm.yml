@@ -1,0 +1,7 @@
+Two\Entity\Model:
+  type: entity
+  table: model
+  fields:
+    name:
+      type: string
+      nullable: true

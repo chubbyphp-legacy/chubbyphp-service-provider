@@ -27,13 +27,7 @@ composer require "monolog/monolog": "^1.4.1"
 
 ## Services
 
-* **monolog**: The monolog logger instance.
-
-  Example usage::
-
-    $app['monolog']->debug('Testing the Monolog logging.');
-
-* **monolog.listener**: An event listener to log requests, responses and errors.
+* **monolog**: The monolog logger, instance of `Monolog\Logger`.
 
 ## Registering
 

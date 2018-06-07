@@ -6,10 +6,10 @@ for easy database access
 
 ## Install
 
-``sh
+```sh
 composer require alcaeus/mongo-php-adapter "^1.1.5"
 composer require doctrine/mongodb "^1.1"
-``
+```
 
 ## Parameters
 
@@ -37,7 +37,7 @@ composer require doctrine/mongodb "^1.1"
 
 ### Single connection
 
-``php
+```php
 $container = new Container():
 
 $container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider()));
@@ -50,11 +50,11 @@ $container['doctrine.mongo.db.options'] = [
         'db' => 'admin',
     ],
 ];
-``
+```
 
 ### Multiple connections
 
-``php
+```php
 $container = new Container():
 
 $container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider());
@@ -77,25 +77,25 @@ $container['doctrine.mongo.dbs.options'] = [
         ],
     ],
 ];
-``
+```
 
 ## Usage
 
 ### Single connection
 
-``php
+```php
 $container['doctrine.mongo.db']
     ->selectCollection('users')
     ->findOne(['username' => 'john.doe@domain.com']);
-``
+```
 
 ### Multiple connections
 
-``php
+```php
 $container['doctrine.mongo.dbs']['name']
     ->selectCollection('users')
     ->findOne(['username' => 'john.doe@domain.com']);
-``
+```
 
 [1]: https://www.doctrine-project.org/projects/mongodb.html
 [2]: http://php.net/manual/de/mongo.connecting.php

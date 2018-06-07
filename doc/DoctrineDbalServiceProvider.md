@@ -4,10 +4,10 @@ The *DoctrineDbalServiceProvider* provides integration with the [Doctrine Dbal][
 
 ## Install
 
-``sh
+```sh
 composer require doctrine/cache "^1.6"
 composer require doctrine/dbal "^2.5"
-``
+```
 
 ## Parameters
 
@@ -49,7 +49,7 @@ composer require doctrine/dbal "^2.5"
 
 ### Single connection
 
-``php
+```php
 $container = new Container();
 
 $container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
@@ -65,11 +65,11 @@ $container['doctrine.dbal.db.options'] = [
         'charset'   => 'utf8mb4',
     ],
 ];
-``
+```
 
 ### Multiple connections
 
-``php
+```php
 $container = new Container();
 
 $container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
@@ -97,13 +97,13 @@ $container['doctrine.dbal.dbs.options'] = [
         ],
     ],
 ];
-``
+```
 
 ## Usage
 
 ### Single connection
 
-``php
+```php
 $container['doctrine.dbal.db']
     ->createQueryBuilder()
     ->select('u')
@@ -112,11 +112,11 @@ $container['doctrine.dbal.db']
     ->setParameter('username', 'john.doe@domain.com')
     ->execute()
     ->fetch(\PDO::FETCH_ASSOC);
-``
+```
 
 ### Multiple connections
 
-``php
+```php
 $container['doctrine.dbal.dbs']['name']
     ->createQueryBuilder()
     ->select('u')
@@ -125,7 +125,7 @@ $container['doctrine.dbal.dbs']['name']
     ->setParameter('username', 'john.doe@domain.com')
     ->execute()
     ->fetch(\PDO::FETCH_ASSOC);
-``
+```
 
 (c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)
 

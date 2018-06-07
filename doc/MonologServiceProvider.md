@@ -9,9 +9,9 @@ even in production.
 
 ## Install
 
-``sh
+```sh
 composer require "monolog/monolog": "^1.4.1"
-``
+```
 
 ## Parameters
 
@@ -37,11 +37,11 @@ composer require "monolog/monolog": "^1.4.1"
 
 ## Registering
 
-``php
+```php
 $container['monolog.logfile'] = __DIR__.'/development.log';
 
 $container->register(new Chubbyphp\ServiceProvider\MonologServiceProvider());
-``
+```
 
 ## Usage
 
@@ -49,9 +49,9 @@ The MonologServiceProvider provides a `monolog` service. You can use it to
 add log entries for any logging level through `debug()`, `info()`,
 `warning()` and `error()`::
 
-``php
+```php
 $container['monolog']->info(sprintf("User '%s' registered.", $username));
-``
+```
 
 (c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)
 

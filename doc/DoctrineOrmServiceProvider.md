@@ -4,10 +4,10 @@ The *DoctrineOrmServiceProvider* provides integration with the [Doctrine ORM][1]
 
 ## Install
 
-``sh
+```sh
 composer require doctrine/cache "^1.6"
 composer require doctrine/orm "^2.5"
-``
+```
 
 ## Parameters
 
@@ -20,7 +20,6 @@ composer require doctrine/orm "^2.5"
     
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`
     * **mappings**: Array of Mappings.
-    
         * **type**: The mapping driver to use. Can be any of: `annotation`, `yml`, `simple_yml`, `xml`, `simple_xml`,  or `php`
         * **namespace**: The entity namespace. Example: `One\Entity`
         * **path**: The path to the entities. Example: `/path/to/project/One/Entity`
@@ -35,8 +34,12 @@ composer require doctrine/orm "^2.5"
             $loader = require __DIR__.'/../vendor/autoload.php';
             AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
             ```
-* **doctrine.orm.default_cache.provider**: The default cache configuration, which gets used for `query`, `hydration`, `metadata`, `result`.
-Defaults to: `['driver' => 'array']`
+
+    * **query_cache**: The query cache configuration. Driver can by any of: `apcu`, `array`, `filesystemd`, `memcached`, `redis`, `xcache`. Defaults to `['driver' => 'array]`
+    * **metadata_cache**: The metadata cache configuration. Driver can by any of: `apcu`, `array`, `filesystemd`, `memcached`, `redis`, `xcache`. Defaults to `['driver' => 'array]`
+    * **result_cache**: The result cache configuration. Driver can by any of: `apcu`, `array`, `filesystemd`, `memcached`, `redis`, `xcache`. Defaults to `['driver' => 'array]`
+    * **hydration_cache**: The hydration cache configuration. Driver can by any of: `apcu`, `array`, `filesystemd`, `memcached`, `redis`, `xcache`. Defaults to `['driver' => 'array]`
+* **doctrine.orm.default_cache.provider**: The default cache configuration, which gets used for `query`, `hydration`, `metadata`, `result`. Defaults to: `['driver' => 'array']`
 * **doctrine.orm.custom.functions.string**: Add [dql user defined functions][2] for string
 * **doctrine.orm.custom.functions.numeric**: Add [dql user defined functions][2] for numeric
 * **doctrine.orm.custom.functions.datetime**: Add [dql user defined functions][2] for datetime

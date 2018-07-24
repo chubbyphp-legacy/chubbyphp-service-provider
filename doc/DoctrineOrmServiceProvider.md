@@ -39,7 +39,7 @@ composer require doctrine/orm "^2.5"
     * **result_cache**: String with the cache type, defaults to `null`.
     * **hydration_cache**: String with the cache type, defaults to `null`.
     * **second_level_cache**: String with the cache type, defaults to `null`.
-    Can be any of: `apcu`, `array`
+    Can be any of: `apcu`, `array`.
     Define your own cache adapters by adding `doctrine.orm.em.cache_factory.%s` to the container
 * **doctrine.orm.custom.functions.string**: Add [dql user defined functions][2] for string
 * **doctrine.orm.custom.functions.numeric**: Add [dql user defined functions][2] for numeric

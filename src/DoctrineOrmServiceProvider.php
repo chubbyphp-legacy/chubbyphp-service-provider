@@ -9,6 +9,8 @@ declare(strict_types=1);
 namespace Chubbyphp\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
+use Doctrine\Common\Cache\ApcuCache;
+use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\DBAL\Types\Type;
@@ -54,7 +56,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['doctrine.orm.mapping_driver.factory.xml'] = $this->getOrmMappingDriverFactoryXml($container);
         $container['doctrine.orm.mapping_driver.factory.simple_xml'] = $this->getOrmMappingDriverFactorySimpleXml($container);
         $container['doctrine.orm.mapping_driver.factory.php'] = $this->getOrmMappingDriverFactoryPhp($container);
-        $container['doctrine.orm.default_cache.provider'] = ['driver' => 'array'];
         $container['doctrine.orm.custom.functions.string'] = [];
         $container['doctrine.orm.custom.functions.numeric'] = [];
         $container['doctrine.orm.custom.functions.datetime'] = [];
@@ -65,13 +66,12 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['doctrine.orm.strategy.quote'] = $this->getOrmQuoteStrategyDefinition($container);
         $container['doctrine.orm.entity_listener_resolver'] = $this->getOrmEntityListenerResolverDefinition($container);
         $container['doctrine.orm.repository_factory'] = $this->getOrmRepositoryFactoryDefinition($container);
-        $container['doctrine.orm.second_level_cache.enabled'] = false;
-        $container['doctrine.orm.second_level_cache.configuration'] = $this->getOrmSecondLevelCacheConfigurationDefinition($container);
-        $container['doctrine.orm.second_level_cache.provider'] = null;
         $container['doctrine.orm.default.query_hints'] = [];
         $container['doctrine.orm.em'] = $this->getOrmEmDefinition($container);
         $container['doctrine.orm.em.config'] = $this->getOrmEmConfigDefinition($container);
         $container['doctrine.orm.manager_registry'] = $this->getOrmManagerRegistryDefintion($container);
+        $container['doctrine.orm.em.cache_factory.array'] = $this->getOrmArrayCacheFactoryDefinition($container);
+        $container['doctrine.orm.em.cache_factory.apcu'] = $this->getOrmApcuCacheFactoryDefinition($container);
     }
 
     /**
@@ -81,6 +81,11 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     {
         return [
             'connection' => 'default',
+            'query_cache' => null,
+            'metadata_cache' => null,
+            'result_cache' => null,
+            'hydration_cache' => null,
+            'second_level_cache' => null,
             'mappings' => [],
             'types' => [],
         ];
@@ -195,15 +200,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             );
 
             foreach (['query', 'hydration', 'metadata', 'result'] as $cacheType) {
-                $setMethod = sprintf('set%sCacheImpl', ucfirst($cacheType));
-                $cacheOptions = $options[sprintf('%s_cache', $cacheType)] ?? $container['doctrine.orm.default_cache.provider'];
-                if (is_string($cacheOptions)) {
-                    $cacheOptions = ['driver' => $cacheOptions];
-                }
-
-                $config->$setMethod(
-                    $container['doctrine.cache.provider.locator'](sprintf('%s_%s', $name, $cacheType), $cacheOptions)
-                );
+                $this->assignCache($container, $config, $options, $cacheType);
             }
 
             foreach ((array) $options['types'] as $typeName => $typeClass) {
@@ -228,13 +225,57 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             $config->setEntityListenerResolver($container['doctrine.orm.entity_listener_resolver']);
             $config->setRepositoryFactory($container['doctrine.orm.repository_factory']);
 
-            $config->setSecondLevelCacheEnabled($container['doctrine.orm.second_level_cache.enabled']);
-            $config->setSecondLevelCacheConfiguration($container['doctrine.orm.second_level_cache.configuration']);
+            $this->assignSecondLevelCache($container, $config, $options);
 
             $config->setDefaultQueryHints($container['doctrine.orm.default.query_hints']);
 
             return $config;
         };
+    }
+
+    /**
+     * @param Container $container
+     * @param Configuration $config
+     * @param array $options
+     * @param string $cacheType
+     */
+    private function assignCache(Container $container, Configuration $config, array $options, string $cacheType)
+    {
+        $optionsKey = sprintf('%s_cache', $cacheType);
+
+        if (null === $options[$optionsKey]) {
+            return;
+        }
+
+        $cacheFactoryKey = sprintf('doctrine.orm.em.cache_factory.%s', $options[$optionsKey]);
+        $setMethod = sprintf('set%sCacheImpl', ucfirst($cacheType));
+
+        $config->$setMethod($container[$cacheFactoryKey]);
+    }
+
+    /**
+     * @param Container $container
+     * @param Configuration $config
+     * @param array $options
+     */
+    private function assignSecondLevelCache(Container $container, Configuration $config, array $options)
+    {
+        if (null === $options['second_level_cache']) {
+            return;
+        }
+
+        $cacheFactoryKey = sprintf('doctrine.orm.em.cache_factory.%s', $options['second_level_cache']);
+        $secondLevelCacheAdapter = $container[$cacheFactoryKey];
+
+        $regionsCacheConfiguration = new RegionsConfiguration();
+        $factory = new DefaultCacheFactory($regionsCacheConfiguration, $secondLevelCacheAdapter);
+
+        $cacheConfiguration = new CacheConfiguration();
+        $cacheConfiguration->setCacheFactory($factory);
+        $cacheConfiguration->setRegionsConfiguration($regionsCacheConfiguration);
+
+        $config->setSecondLevelCacheEnabled(true);
+        $config->setSecondLevelCacheConfiguration($cacheConfiguration);
     }
 
     /**
@@ -422,32 +463,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      *
      * @return callable
      */
-    private function getOrmSecondLevelCacheConfigurationDefinition(Container $container): callable
-    {
-        return function () use ($container) {
-            $regionsCacheConfiguration = new RegionsConfiguration();
-            $factory = new DefaultCacheFactory(
-                $regionsCacheConfiguration,
-                $container['doctrine.cache.provider.locator'](
-                    'second_level',
-                    $container['doctrine.orm.second_level_cache.provider']
-                        ?? $container['doctrine.orm.default_cache.provider']
-                )
-            );
-
-            $cacheConfiguration = new CacheConfiguration();
-            $cacheConfiguration->setCacheFactory($factory);
-            $cacheConfiguration->setRegionsConfiguration($regionsCacheConfiguration);
-
-            return $cacheConfiguration;
-        };
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
     private function getOrmEmDefinition(Container $container): callable
     {
         return function () use ($container) {
@@ -481,5 +496,29 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         return function ($container) {
             return new DoctrineOrmManagerRegistry($container);
         };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return callable
+     */
+    private function getOrmArrayCacheFactoryDefinition(Container $container): callable
+    {
+        return $container->factory(function () use ($container) {
+            return new ArrayCache();
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return callable
+     */
+    private function getOrmApcuCacheFactoryDefinition(Container $container): callable
+    {
+        return $container->factory(function () use ($container) {
+            return new ApcuCache();
+        });
     }
 }

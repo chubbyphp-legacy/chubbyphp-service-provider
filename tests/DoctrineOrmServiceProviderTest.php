@@ -2,20 +2,16 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
-use Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
-use Chubbyphp\Tests\ServiceProvider\Resources\One\Entity\Model as OneModel;
-use Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity\Model as TwoModel;
-use Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity\Model as ThreeModel;
-use Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity\Model as FourModel;
 use Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity\Model as FiveModel;
+use Chubbyphp\Tests\ServiceProvider\Resources\Four\Entity\Model as FourModel;
+use Chubbyphp\Tests\ServiceProvider\Resources\One\Entity\Model as OneModel;
+use Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity\Model as ThreeModel;
+use Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity\Model as TwoModel;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
-use Doctrine\Common\Cache\FilesystemCache;
-use Doctrine\Common\Cache\MemcachedCache;
-use Doctrine\Common\Cache\RedisCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\DBAL\Types\Type;
@@ -52,9 +48,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
 
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
-
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
 
@@ -73,7 +66,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.xml', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_xml', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.php', $container);
-        self::assertArrayHasKey('doctrine.orm.default_cache.provider', $container);
         self::assertArrayHasKey('doctrine.orm.custom.functions.string', $container);
         self::assertArrayHasKey('doctrine.orm.custom.functions.numeric', $container);
         self::assertArrayHasKey('doctrine.orm.custom.functions.datetime', $container);
@@ -84,8 +76,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertArrayHasKey('doctrine.orm.strategy.quote', $container);
         self::assertArrayHasKey('doctrine.orm.entity_listener_resolver', $container);
         self::assertArrayHasKey('doctrine.orm.repository_factory', $container);
-        self::assertArrayHasKey('doctrine.orm.second_level_cache.enabled', $container);
-        self::assertArrayHasKey('doctrine.orm.second_level_cache.configuration', $container);
         self::assertArrayHasKey('doctrine.orm.default.query_hints', $container);
         self::assertArrayHasKey('doctrine.orm.em', $container);
         self::assertArrayHasKey('doctrine.orm.em.config', $container);
@@ -93,6 +83,11 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         self::assertEquals([
             'connection' => 'default',
+            'query_cache' => null,
+            'metadata_cache' => null,
+            'result_cache' => null,
+            'hydration_cache' => null,
+            'second_level_cache' => null,
             'mappings' => [],
             'types' => [],
         ], $container['doctrine.orm.em.default_options']);
@@ -110,7 +105,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.xml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_xml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.php']);
-        self::assertEquals(['driver' => 'array'], $container['doctrine.orm.default_cache.provider']);
         self::assertEquals([], $container['doctrine.orm.custom.functions.string']);
         self::assertEquals([], $container['doctrine.orm.custom.functions.numeric']);
         self::assertEquals([], $container['doctrine.orm.custom.functions.datetime']);
@@ -121,8 +115,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(DefaultQuoteStrategy::class, $container['doctrine.orm.strategy.quote']);
         self::assertInstanceOf(DefaultEntityListenerResolver::class, $container['doctrine.orm.entity_listener_resolver']);
         self::assertInstanceOf(DefaultRepositoryFactory::class, $container['doctrine.orm.repository_factory']);
-        self::assertFalse($container['doctrine.orm.second_level_cache.enabled']);
-        self::assertInstanceOf(CacheConfiguration::class, $container['doctrine.orm.second_level_cache.configuration']);
         self::assertEquals([], $container['doctrine.orm.default.query_hints']);
         self::assertInstanceOf(EntityManager::class, $container['doctrine.orm.em']);
         self::assertInstanceOf(Configuration::class, $container['doctrine.orm.em.config']);
@@ -137,15 +129,15 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame($configuration, $entityManager->getConfiguration());
 
         self::assertNull($configuration->getSQLLogger());
-        self::assertInstanceOf(ArrayCache::class, $configuration->getResultCacheImpl());
+        self::assertNull($configuration->getResultCacheImpl());
         self::assertTrue($configuration->getAutoCommit());
         self::assertSame(sys_get_temp_dir(), $configuration->getProxyDir());
         self::assertSame(1, $configuration->getAutoGenerateProxyClasses());
         self::assertSame('DoctrineProxy', $configuration->getProxyNamespace());
         self::assertInstanceOf(MappingDriverChain::class, $configuration->getMetadataDriverImpl());
-        self::assertInstanceOf(ArrayCache::class, $configuration->getQueryCacheImpl());
-        self::assertInstanceOf(ArrayCache::class, $configuration->getHydrationCacheImpl());
-        self::assertInstanceOf(ArrayCache::class, $configuration->getMetadataCacheImpl());
+        self::assertNull($configuration->getQueryCacheImpl());
+        self::assertNull($configuration->getHydrationCacheImpl());
+        self::assertNull($configuration->getMetadataCacheImpl());
         self::assertSame(ClassMetadataFactory::class, $configuration->getClassMetadataFactoryName());
         self::assertSame(EntityRepository::class, $configuration->getDefaultRepositoryClassName());
         self::assertInstanceOf(DefaultNamingStrategy::class, $configuration->getNamingStrategy());
@@ -153,7 +145,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(DefaultEntityListenerResolver::class, $configuration->getEntityListenerResolver());
         self::assertInstanceOf(DefaultRepositoryFactory::class, $configuration->getRepositoryFactory());
         self::assertFalse($configuration->isSecondLevelCacheEnabled());
-        self::assertInstanceOf(CacheConfiguration::class, $configuration->getSecondLevelCacheConfiguration());
+        self::assertNull($configuration->getSecondLevelCacheConfiguration());
         //self::assertSame('', $configuration->getDefaultQueryHint('name'));
         self::assertSame($container['doctrine.orm.class_metadata_factory_name'], $configuration->getClassMetadataFactoryName());
         self::assertSame($container['doctrine.orm.default_repository_class'], $configuration->getDefaultRepositoryClassName());
@@ -161,7 +153,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame($container['doctrine.orm.strategy.quote'], $configuration->getQuoteStrategy());
         self::assertSame($container['doctrine.orm.entity_listener_resolver'], $configuration->getEntityListenerResolver());
         self::assertSame($container['doctrine.orm.repository_factory'], $configuration->getRepositoryFactory());
-        self::assertSame($container['doctrine.orm.second_level_cache.configuration'], $configuration->getSecondLevelCacheConfiguration());
     }
 
     public function testRegisterWithOneConnection()
@@ -170,9 +161,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
-
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
 
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
@@ -187,22 +175,11 @@ class DoctrineOrmServiceProviderTest extends TestCase
         ];
 
         $container['doctrine.orm.em.options'] = [
-            'query_cache' => 'apcu',
-            'metadata_cache' => [
-                'driver' => 'filesystem',
-                'path' => sys_get_temp_dir(),
-            ],
-            'result_cache' => [
-                'driver' => 'memcached',
-                'host' => '127.0.0.1',
-                'port' => 11211,
-            ],
-            'hydration_cache' => [
-                'driver' => 'redis',
-                'host' => '127.0.0.1',
-                'port' => 6379,
-                'password' => 'password',
-            ],
+            'query_cache' => 'array',
+            'metadata_cache' => 'array',
+            'result_cache' => 'apcu',
+            'hydration_cache' => 'apcu',
+            'second_level_cache' => 'apcu',
             'mappings' => [
                 [
                     'type' => 'annotation',
@@ -270,7 +247,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $container['doctrine.orm.repository_factory'] = function () {
             return $this->getMockBuilder(RepositoryFactory::class)->getMockForAbstractClass();
         };
-        $container['doctrine.orm.second_level_cache.enabled'] = true;
         $container['doctrine.orm.default.query_hints'] = ['name' => \stdClass::class];
 
         /** @var EntityManager $entityManager */
@@ -282,7 +258,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame($configuration, $entityManager->getConfiguration());
 
         self::assertNull($configuration->getSQLLogger());
-        self::assertInstanceOf(MemcachedCache::class, $configuration->getResultCacheImpl());
+        self::assertInstanceOf(ApcuCache::class, $configuration->getResultCacheImpl());
         self::assertTrue($configuration->getAutoCommit());
         self::assertSame('/another/proxy/dir', $configuration->getProxyDir());
         self::assertSame(0, $configuration->getAutoGenerateProxyClasses());
@@ -290,9 +266,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame('Chubbyphp\Tests\ServiceProvider\Resources\One\Entity', $configuration->getEntityNamespace('Alias\Entity'));
         self::assertSame(['Alias\Entity' => 'Chubbyphp\Tests\ServiceProvider\Resources\One\Entity'], $configuration->getEntityNamespaces());
         self::assertInstanceOf(MappingDriverChain::class, $configuration->getMetadataDriverImpl());
-        self::assertInstanceOf(ApcuCache::class, $configuration->getQueryCacheImpl());
-        self::assertInstanceOf(RedisCache::class, $configuration->getHydrationCacheImpl());
-        self::assertInstanceOf(FilesystemCache::class, $configuration->getMetadataCacheImpl());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getQueryCacheImpl());
+        self::assertInstanceOf(ApcuCache::class, $configuration->getHydrationCacheImpl());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getMetadataCacheImpl());
         self::assertSame(\stdClass::class, $configuration->getCustomStringFunction('string'));
         self::assertSame(\stdClass::class, $configuration->getCustomNumericFunction('numeric'));
         self::assertSame(\stdClass::class, $configuration->getCustomDatetimeFunction('datetime'));
@@ -311,7 +287,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame($container['doctrine.orm.strategy.quote'], $configuration->getQuoteStrategy());
         self::assertSame($container['doctrine.orm.entity_listener_resolver'], $configuration->getEntityListenerResolver());
         self::assertSame($container['doctrine.orm.repository_factory'], $configuration->getRepositoryFactory());
-        self::assertSame($container['doctrine.orm.second_level_cache.configuration'], $configuration->getSecondLevelCacheConfiguration());
 
         /** @var MappingDriverChain $metadataDriver */
         $metadataDriver = $configuration->getMetadataDriverImpl();
@@ -368,9 +343,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
-
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
 
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
@@ -533,9 +505,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
 
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
-
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);
 
@@ -557,9 +526,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
-
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
 
         $ormServiceProvider = new DoctrineOrmServiceProvider();
         $ormServiceProvider->register($container);

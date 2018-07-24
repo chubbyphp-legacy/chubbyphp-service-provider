@@ -17,7 +17,7 @@ composer require doctrine/orm "^2.5"
 * **doctrine.orm.proxies_namespace**: The namespace of generated proxies. Defaults to `DoctrineProxy`
 
     These options are available:
-    
+
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`
     * **mappings**: Array of Mappings.
         * **type**: The mapping driver to use. Can be any of: `annotation`, `yml`, `simple_yml`, `xml`, `simple_xml`,  or `php`
@@ -30,22 +30,21 @@ composer require doctrine/orm "^2.5"
 
             ```php
             use \Doctrine\Common\Annotations\AnnotationRegistry;
-                        
+
             $loader = require __DIR__.'/../vendor/autoload.php';
             AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
             ```
-
-    * **query_cache**: The query cache configuration. Driver can by any of: `apcu`, `array`, `filesystemd`, `memcached`, `redis`, `xcache`. Defaults to `['driver' => 'array]`
-    * **metadata_cache**: The metadata cache configuration. Driver can by any of: `apcu`, `array`, `filesystemd`, `memcached`, `redis`, `xcache`. Defaults to `['driver' => 'array]`
-    * **result_cache**: The result cache configuration. Driver can by any of: `apcu`, `array`, `filesystemd`, `memcached`, `redis`, `xcache`. Defaults to `['driver' => 'array]`
-    * **hydration_cache**: The hydration cache configuration. Driver can by any of: `apcu`, `array`, `filesystemd`, `memcached`, `redis`, `xcache`. Defaults to `['driver' => 'array]`
-* **doctrine.orm.default_cache.provider**: The default cache configuration, which gets used for `query`, `hydration`, `metadata`, `result`. Defaults to: `['driver' => 'array']`
+    * **query_cache**: String with the cache type, defaults to `null`.
+    * **metadata_cache**: String with the cache type, defaults to `null`.
+    * **result_cache**: String with the cache type, defaults to `null`.
+    * **hydration_cache**: String with the cache type, defaults to `null`.
+    * **second_level_cache**: String with the cache type, defaults to `null`.
+    Can be any of: `apcu`, `array`
+    Define your own cache adapters by adding `doctrine.orm.em.cache_factory.%s` to the container
 * **doctrine.orm.custom.functions.string**: Add [dql user defined functions][2] for string
 * **doctrine.orm.custom.functions.numeric**: Add [dql user defined functions][2] for numeric
 * **doctrine.orm.custom.functions.datetime**: Add [dql user defined functions][2] for datetime
 * **doctrine.orm.custom.hydration_modes**: Add [custom hydration modes][3]
-* **doctrine.orm.second_level_cache.enabled**: Enable or disable the second level cache. Defaults to `false`
-* **doctrine.orm.second_level_cache.provider**: Define the cache provider. Defaults to `$container['doctrine.orm.default_cache.provider']`
 
 ## Services
 
@@ -60,7 +59,6 @@ composer require doctrine/orm "^2.5"
 ```php
 $container = new Container();
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider()));
 
@@ -92,7 +90,6 @@ $container['doctrine.orm.em.options'] = [
 ```php
 $container = new Container();
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider()));
 

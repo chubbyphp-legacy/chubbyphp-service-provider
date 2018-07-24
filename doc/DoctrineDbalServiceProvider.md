@@ -14,9 +14,9 @@ composer require doctrine/dbal "^2.5"
 * **doctrine.dbal.db.options**: Array of Doctrine DBAL options.
 
     These options are available:
-  
+
     * **connection**:
-    
+
         * **driver**: The database driver to use, defaults to `pdo_mysql`.
         Can be any of: `pdo_mysql`, `pdo_sqlite`, `pdo_pgsql`,
         `pdo_oci`, `oci8`, `ibm_db2`, `pdo_ibm`, `pdo_sqlsrv`.
@@ -30,10 +30,12 @@ composer require doctrine/dbal "^2.5"
         the SQLite database.
         * **port**: Only relevant for `pdo_mysql`, `pdo_pgsql`, and `pdo_oci/oci8`,
         specifies the port of the database to connect to.
-    
+
     * **configuration**
-    
-        * **result_cache**: String or array describing result cache implementation.
+
+        * **result_cache**: String with the cache type, defaults to `null`.
+        Can be any of: `apcu`, `array`
+        Define your own cache adapters by adding `doctrine.dbal.db.cache_factory.%s` to the container
         * **filter_schema_assets_expression**: An expression to filter for schema (tables)
         * **auto_commit**: Auto commit. Defaults to `true`
 
@@ -52,7 +54,6 @@ composer require doctrine/dbal "^2.5"
 ```php
 $container = new Container();
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider()));
 
 $container['doctrine.dbal.db.options'] = [
@@ -72,7 +73,6 @@ $container['doctrine.dbal.db.options'] = [
 ```php
 $container = new Container();
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider()));
 $container->register(new Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider());
 
 $container['doctrine.dbal.dbs.options'] = [

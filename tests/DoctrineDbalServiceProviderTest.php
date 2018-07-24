@@ -2,7 +2,6 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
-use Chubbyphp\ServiceProvider\DoctrineCacheServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\Logger\DoctrineDbalLogger;
 use Doctrine\Common\Cache\ApcuCache;
@@ -22,9 +21,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
     public function testRegisterWithDefaults()
     {
         $container = new Container();
-
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
@@ -47,7 +43,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
                 'password' => null,
             ],
             'configuration' => [
-                'result_cache' => 'array',
+                'result_cache' => null,
                 'filter_schema_assets_expression' => null,
                 'auto_commit' => true,
             ],
@@ -108,7 +104,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $configuration = $container['doctrine.dbal.db.config'];
 
         self::assertNull($configuration->getSQLLogger());
-        self::assertInstanceOf(ArrayCache::class, $configuration->getResultCacheImpl());
+        self::assertNull($configuration->getResultCacheImpl());
         self::assertNull($configuration->getFilterSchemaAssetsExpression());
         self::assertTrue($configuration->getAutoCommit());
 
@@ -122,9 +118,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
     public function testRegisterWithOneConnetion()
     {
         $container = new Container();
-
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
@@ -143,7 +136,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
                 'charset' => 'utf8mb4',
             ],
             'configuration' => [
-                'result_cache' => 'apcu',
+                'result_cache' => 'array',
             ],
         ];
 
@@ -163,7 +156,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $configuration = $container['doctrine.dbal.db.config'];
 
         self::assertInstanceOf(DoctrineDbalLogger::class, $configuration->getSQLLogger());
-        self::assertInstanceOf(ApcuCache::class, $configuration->getResultCacheImpl());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getResultCacheImpl());
         self::assertNull($configuration->getFilterSchemaAssetsExpression());
         self::assertTrue($configuration->getAutoCommit());
     }
@@ -171,9 +164,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
     public function testRegisterWithMultipleConnetions()
     {
         $container = new Container();
-
-        $cacheServiceProvider = new DoctrineCacheServiceProvider();
-        $cacheServiceProvider->register($container);
 
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);

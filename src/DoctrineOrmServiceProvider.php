@@ -189,10 +189,15 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
                 $config->setSQLLogger($container['doctrine.dbal.dbs.config'][$name]->getSQLLogger());
 
-                foreach (['query', 'hydration', 'metadata'] as $cacheType) {
-                    $this->assignCache($container, $config, $options, $cacheType);
-                }
-
+                $config->setQueryCacheImpl(
+                    $container[sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.query'])]
+                );
+                $config->setHydrationCacheImpl(
+                    $container[sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.hydration'])]
+                );
+                $config->setMetadataCacheImpl(
+                    $container[sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.metadata'])]
+                );
                 $config->setResultCacheImpl($container['doctrine.dbal.dbs.config'][$name]->getResultCacheImpl());
 
                 $config->setClassMetadataFactoryName($options['class_metadata.factory.name']);
@@ -245,22 +250,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             return $configs;
         };
-    }
-
-    /**
-     * @param Container     $container
-     * @param Configuration $config
-     * @param array         $options
-     * @param string        $cacheType
-     */
-    private function assignCache(Container $container, Configuration $config, array $options, string $cacheType)
-    {
-        $optionsKey = sprintf('cache.%s', $cacheType);
-
-        $cacheFactoryKey = sprintf('doctrine.orm.em.cache_factory.%s', $options[$optionsKey]);
-        $setMethod = sprintf('set%sCacheImpl', ucfirst($cacheType));
-
-        $config->$setMethod($container[$cacheFactoryKey]);
     }
 
     /**

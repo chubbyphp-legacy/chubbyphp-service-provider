@@ -194,5 +194,10 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_yml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.xml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.yml']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver_chain']);
+
+        self::assertSame($config->getRepositoryFactory(), $container['doctrine.orm.repository.factory.default']);
+        self::assertSame($config->getNamingStrategy(), $container['doctrine.orm.strategy.naming.default']);
+        self::assertSame($config->getQuoteStrategy(), $container['doctrine.orm.strategy.quote.default']);
     }
 }

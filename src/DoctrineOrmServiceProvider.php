@@ -421,12 +421,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         return $container->protect(function (string $name, Configuration $config, array $mappings) use ($container) {
             $chain = new MappingDriverChain();
             foreach ($mappings as $mapping) {
-                if (!is_array($mapping)) {
-                    throw new \InvalidArgumentException(
-                        'The "doctrine.orm.em.options" option "mappings" should be an array of arrays.'
-                    );
-                }
-
                 if (isset($mapping['alias'])) {
                     $config->addEntityNamespace($mapping['alias'], $mapping['namespace']);
                 }

@@ -4,12 +4,20 @@ namespace Chubbyphp\Tests\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
+use Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity\Annotation;
+use Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity\SimpleXml;
+use Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity\SimpleYaml;
+use Chubbyphp\Tests\ServiceProvider\Resources\StaticPhp\Entity\StaticPhp;
+use Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity\Xml;
+use Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity\Yaml;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\StringType;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\CacheConfiguration;
 use Doctrine\ORM\Cache\DefaultCache;
 use Doctrine\ORM\Configuration;
@@ -24,12 +32,6 @@ use Doctrine\ORM\Repository\DefaultRepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
-use Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity\Annotation;
-use Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity\SimpleYaml;
-use Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity\SimpleXml;
-use Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity\Xml;
-use Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity\Yaml;
-use Chubbyphp\Tests\ServiceProvider\Resources\StaticPhp\Entity\StaticPhp;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider
@@ -230,6 +232,10 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     'path' => __DIR__.'/Resources/Annotation/Entity',
                 ],
             ],
+            'types' => [
+                Type::STRING => StringType::class,
+                'anotherType' => StringType::class,
+            ],
         ];
 
         /** @var EntityManager $em */
@@ -268,6 +274,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     [
                         'type' => 'annotation',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity',
+                        'alias' => 'Entity\Annotation',
                         'path' => __DIR__.'/Resources/Annotation/Entity',
                     ],
                 ],
@@ -278,6 +285,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     [
                         'type' => 'simple_yaml',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity',
+                        'alias' => 'Entity\SimpleYaml',
                         'path' => __DIR__.'/Resources/SimpleYaml/config',
                     ],
                 ],
@@ -288,6 +296,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     [
                         'type' => 'simple_xml',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity',
+                        'alias' => 'Entity\SimpleXml',
                         'path' => __DIR__.'/Resources/SimpleXml/config',
                     ],
                 ],
@@ -298,6 +307,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     [
                         'type' => 'yaml',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity',
+                        'alias' => 'Entity\Yaml',
                         'path' => __DIR__.'/Resources/Yaml/config',
                     ],
                 ],
@@ -308,6 +318,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     [
                         'type' => 'xml',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity',
+                        'alias' => 'Entity\Xml',
                         'path' => __DIR__.'/Resources/Xml/config',
                     ],
                 ],
@@ -318,6 +329,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     [
                         'type' => 'static_php',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\StaticPhp\Entity',
+                        'alias' => 'Entity\StaticPhp',
                         'path' => __DIR__.'/Resources/StaticPhp/Entity',
                     ],
                 ],

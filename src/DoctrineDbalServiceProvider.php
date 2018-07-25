@@ -175,10 +175,8 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
                         $config->setSQLLogger(new DoctrineDbalLogger($container['logger']));
                     }
 
-                    if (null !== $configOptions['result_cache']) {
-                        $cacheFactoryKey = sprintf('doctrine.dbal.db.cache_factory.%s', $configOptions['result_cache']);
-                        $config->setResultCacheImpl($container[$cacheFactoryKey]);
-                    }
+                    $cacheFactoryKey = sprintf('doctrine.dbal.db.cache_factory.%s', $configOptions['result_cache']);
+                    $config->setResultCacheImpl($container[$cacheFactoryKey]);
 
                     $config->setFilterSchemaAssetsExpression($configOptions['filter_schema_assets_expression']);
                     $config->setAutoCommit($configOptions['auto_commit']);

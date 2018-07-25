@@ -25,79 +25,33 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $dbalServiceProvider = new DoctrineDbalServiceProvider();
         $dbalServiceProvider->register($container);
 
+        self::assertTrue($container->offsetExists('doctrine.dbal.db'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.db.config'));
         self::assertTrue($container->offsetExists('doctrine.dbal.db.default_options'));
-        self::assertTrue($container->offsetExists('doctrine.dbal.dbs.options.initializer'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.db.event_manager'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.config'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.event_manager'));
-        self::assertTrue($container->offsetExists('doctrine.dbal.db'));
-        self::assertTrue($container->offsetExists('doctrine.dbal.db.config'));
-        self::assertTrue($container->offsetExists('doctrine.dbal.db.event_manager'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.dbs.options.initializer'));
 
-        self::assertEquals([
-            'connection' => [
-                'driver' => 'pdo_mysql',
-                'dbname' => null,
-                'host' => 'localhost',
-                'user' => 'root',
-                'password' => null,
-            ],
-            'configuration' => [
-                'result_cache' => null,
-                'filter_schema_assets_expression' => null,
-                'auto_commit' => true,
-            ],
-        ], $container['doctrine.dbal.db.default_options']);
-
-        self::assertInstanceOf(\Closure::class, $container['doctrine.dbal.dbs.options.initializer']);
-
-        // start: dbs
-        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs']);
-
-        /** @var Container $dbs */
-        $dbs = $container['doctrine.dbal.dbs'];
-
-        self::assertTrue($dbs->offsetExists('default'));
-
-        self::assertInstanceOf(Connection::class, $dbs['default']);
-
-        // end: dbs
-
-        // start: dbs.config
-        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.config']);
-
-        /** @var Container $dbsConfig */
-        $dbsConfig = $container['doctrine.dbal.dbs.config'];
-
-        self::assertTrue($dbsConfig->offsetExists('default'));
-
-        self::assertInstanceOf(Configuration::class, $dbsConfig['default']);
-
-        // end: dbs.config
-
-        // start: dbs.event_manager
-        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.event_manager']);
-
-        /** @var Container $dbsEventManager */
-        $dbsEventManager = $container['doctrine.dbal.dbs.event_manager'];
-
-        self::assertTrue($dbsEventManager->offsetExists('default'));
-
-        self::assertInstanceOf(EventManager::class, $dbsEventManager['default']);
-        // end: dbs.event_manager
-
+        // start: doctrine.dbal.db
         self::assertInstanceOf(Connection::class, $container['doctrine.dbal.db']);
 
         self::assertEquals([
-            'driver' => 'pdo_mysql',
+            'charset' => 'utf8mb4',
             'dbname' => null,
+            'driver' => 'pdo_mysql',
             'host' => 'localhost',
-            'user' => 'root',
             'password' => null,
+            'path' => null,
+            'port' => 3306,
+            'user' => 'root',
         ], $container['doctrine.dbal.db']->getParams());
 
         self::assertSame($container['doctrine.dbal.db'], $container['doctrine.dbal.dbs']['default']);
+        // end: doctrine.dbal.db
 
+        // start: doctrine.dbal.db.config
         self::assertInstanceOf(Configuration::class, $container['doctrine.dbal.db.config']);
 
         /** @var Configuration $configuration */
@@ -109,10 +63,73 @@ class DoctrineDbalServiceProviderTest extends TestCase
         self::assertTrue($configuration->getAutoCommit());
 
         self::assertSame($container['doctrine.dbal.db.config'], $container['doctrine.dbal.dbs.config']['default']);
+        // end: doctrine.dbal.db.config
 
+        // start: doctrine.dbal.db.default_options
+        self::assertEquals([
+            'configuration' => [
+                'auto_commit' => true,
+                'filter_schema_assets_expression' => null,
+                'result_cache' => null,
+            ],
+            'connection' => [
+                'charset' => 'utf8mb4',
+                'dbname' => null,
+                'driver' => 'pdo_mysql',
+                'host' => 'localhost',
+                'password' => null,
+                'path' => null,
+                'port' => 3306,
+                'user' => 'root',
+            ],
+        ], $container['doctrine.dbal.db.default_options']);
+        // end: doctrine.dbal.db.default_options
+
+        // start: doctrine.dbal.db.event_manager
         self::assertInstanceOf(EventManager::class, $container['doctrine.dbal.db.event_manager']);
 
-        self::assertSame($container['doctrine.dbal.db.event_manager'], $container['doctrine.dbal.dbs.event_manager']['default']);
+        self::assertSame(
+            $container['doctrine.dbal.db.event_manager'],
+            $container['doctrine.dbal.dbs.event_manager']['default']
+        );
+        // end: doctrine.dbal.db.event_manager
+
+        // start: doctrine.dbal.dbs
+        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs']);
+
+        /** @var Container $dbs */
+        $dbs = $container['doctrine.dbal.dbs'];
+
+        self::assertTrue($dbs->offsetExists('default'));
+
+        self::assertInstanceOf(Connection::class, $dbs['default']);
+        // end: doctrine.dbal.dbs
+
+        // start: doctrine.dbal.dbs.confi
+        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.config']);
+
+        /** @var Container $dbsConfig */
+        $dbsConfig = $container['doctrine.dbal.dbs.config'];
+
+        self::assertTrue($dbsConfig->offsetExists('default'));
+
+        self::assertInstanceOf(Configuration::class, $dbsConfig['default']);
+        // end: doctrine.dbal.dbs.confi
+
+        // start: doctrine.dbal.dbs.event_manager
+        self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.event_manager']);
+
+        /** @var Container $dbsEventManager */
+        $dbsEventManager = $container['doctrine.dbal.dbs.event_manager'];
+
+        self::assertTrue($dbsEventManager->offsetExists('default'));
+
+        self::assertInstanceOf(EventManager::class, $dbsEventManager['default']);
+        // end: doctrine.dbal.dbs.event_manager
+
+        // start: doctrine.dbal.dbs.options.initializer
+        self::assertInstanceOf(\Closure::class, $container['doctrine.dbal.dbs.options.initializer']);
+        // end: doctrine.dbal.dbs.options.initializer
     }
 
     public function testRegisterWithOneConnetion()
@@ -127,16 +144,14 @@ class DoctrineDbalServiceProviderTest extends TestCase
         };
 
         $container['doctrine.dbal.db.options'] = [
-            'connection' => [
-                'driver' => 'pdo_mysql',
-                'host' => 'mysql_read.someplace.tld',
-                'dbname' => 'my_database',
-                'user' => 'my_username',
-                'password' => 'my_password',
-                'charset' => 'utf8mb4',
-            ],
             'configuration' => [
                 'result_cache' => 'array',
+            ],
+            'connection' => [
+                'dbname' => 'my_database',
+                'host' => 'mysql.someplace.tld',
+                'password' => 'my_password',
+                'user' => 'my_username',
             ],
         ];
 
@@ -144,12 +159,14 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $db = $container['doctrine.dbal.db'];
 
         self::assertEquals([
-            'driver' => 'pdo_mysql',
-            'host' => 'mysql_read.someplace.tld',
-            'dbname' => 'my_database',
-            'user' => 'my_username',
-            'password' => 'my_password',
             'charset' => 'utf8mb4',
+            'dbname' => 'my_database',
+            'driver' => 'pdo_mysql',
+            'host' => 'mysql.someplace.tld',
+            'password' => 'my_password',
+            'path' => null,
+            'port' => 3306,
+            'user' => 'my_username',
         ], $db->getParams());
 
         /** @var Configuration $configuration */
@@ -174,31 +191,27 @@ class DoctrineDbalServiceProviderTest extends TestCase
 
         $container['doctrine.dbal.dbs.options'] = [
             'mysql_read' => [
-                'connection' => [
-                    'driver' => 'pdo_mysql',
-                    'host' => 'mysql_read.someplace.tld',
-                    'dbname' => 'my_database',
-                    'user' => 'my_username',
-                    'password' => 'my_password',
-                    'charset' => 'utf8mb4',
-                ],
                 'configuration' => [
-                    'result_cache' => 'apcu',
-                    'filter_schema_assets_expression' => 'expression',
                     'auto_commit' => false,
+                    'filter_schema_assets_expression' => 'expression',
+                    'result_cache' => 'apcu',
+                ],
+                'connection' => [
+                    'dbname' => 'my_database',
+                    'host' => 'mysql_read.someplace.tld',
+                    'password' => 'my_password',
+                    'user' => 'my_username',
                 ],
             ],
             'mysql_write' => [
-                'connection' => [
-                    'driver' => 'pdo_mysql',
-                    'host' => 'mysql_write.someplace.tld',
-                    'dbname' => 'my_database',
-                    'user' => 'my_username',
-                    'password' => 'my_password',
-                    'charset' => 'utf8mb4',
-                ],
                 'configuration' => [
-                     'result_cache' => 'apcu',
+                    'result_cache' => 'apcu',
+                ],
+                'connection' => [
+                    'dbname' => 'my_database',
+                    'host' => 'mysql_write.someplace.tld',
+                    'password' => 'my_password',
+                    'user' => 'my_username',
                 ],
             ],
         ];
@@ -210,26 +223,16 @@ class DoctrineDbalServiceProviderTest extends TestCase
         /** @var Connection $dbRead */
         $dbRead = $container['doctrine.dbal.dbs']['mysql_read'];
 
-        /** @var Connection $dbWrite */
-        $dbWrite = $container['doctrine.dbal.dbs']['mysql_write'];
-
         self::assertEquals([
+            'charset' => 'utf8mb4',
+            'dbname' => 'my_database',
             'driver' => 'pdo_mysql',
             'host' => 'mysql_read.someplace.tld',
-            'dbname' => 'my_database',
-            'user' => 'my_username',
             'password' => 'my_password',
-            'charset' => 'utf8mb4',
+            'path' => null,
+            'port' => 3306,
+            'user' => 'my_username',
         ], $dbRead->getParams());
-
-        self::assertEquals([
-            'driver' => 'pdo_mysql',
-            'host' => 'mysql_write.someplace.tld',
-            'dbname' => 'my_database',
-            'user' => 'my_username',
-            'password' => 'my_password',
-            'charset' => 'utf8mb4',
-        ], $dbWrite->getParams());
 
         /** @var Configuration $configuration */
         $configuration = $container['doctrine.dbal.dbs.config']['mysql_read'];
@@ -238,5 +241,19 @@ class DoctrineDbalServiceProviderTest extends TestCase
         self::assertInstanceOf(ApcuCache::class, $configuration->getResultCacheImpl());
         self::assertSame('expression', $configuration->getFilterSchemaAssetsExpression());
         self::assertFalse($configuration->getAutoCommit());
+
+        /** @var Connection $dbWrite */
+        $dbWrite = $container['doctrine.dbal.dbs']['mysql_write'];
+
+        self::assertEquals([
+            'charset' => 'utf8mb4',
+            'dbname' => 'my_database',
+            'driver' => 'pdo_mysql',
+            'host' => 'mysql_write.someplace.tld',
+            'password' => 'my_password',
+            'path' => null,
+            'port' => 3306,
+            'user' => 'my_username',
+        ], $dbWrite->getParams());
     }
 }

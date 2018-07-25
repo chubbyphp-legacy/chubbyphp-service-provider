@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-/*
- * (c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)
- */
-
 namespace Chubbyphp\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\Logger\DoctrineDbalLogger;
@@ -24,16 +20,68 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container)
     {
+        $container['doctrine.dbal.db'] = $this->getDbDefinition($container);
+        $container['doctrine.dbal.db.cache_factory.apcu'] = $this->getDbApcuCacheFactoryDefinition($container);
+        $container['doctrine.dbal.db.cache_factory.array'] = $this->getDbArrayCacheFactoryDefinition($container);
+        $container['doctrine.dbal.db.config'] = $this->getDbConfigDefinition($container);
         $container['doctrine.dbal.db.default_options'] = $this->getDbDefaultOptions();
-        $container['doctrine.dbal.dbs.options.initializer'] = $this->getDbsOptionsInitializerDefinition($container);
+        $container['doctrine.dbal.db.event_manager'] = $this->getDbEventManagerDefinition($container);
         $container['doctrine.dbal.dbs'] = $this->getDbsDefinition($container);
         $container['doctrine.dbal.dbs.config'] = $this->getDbsConfigDefinition($container);
         $container['doctrine.dbal.dbs.event_manager'] = $this->getDbsEventManagerDefinition($container);
-        $container['doctrine.dbal.db'] = $this->getDbDefinition($container);
-        $container['doctrine.dbal.db.config'] = $this->getDbConfigDefinition($container);
-        $container['doctrine.dbal.db.event_manager'] = $this->getDbEventManagerDefinition($container);
-        $container['doctrine.dbal.db.cache_factory.array'] = $this->getDbArrayCacheFactoryDefinition($container);
-        $container['doctrine.dbal.db.cache_factory.apcu'] = $this->getDbApcuCacheFactoryDefinition($container);
+        $container['doctrine.dbal.dbs.options.initializer'] = $this->getDbsOptionsInitializerDefinition($container);
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return callable
+     */
+    private function getDbDefinition(Container $container): callable
+    {
+        return function () use ($container) {
+            $dbs = $container['doctrine.dbal.dbs'];
+
+            return $dbs[$container['doctrine.dbal.dbs.default']];
+        };
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return callable
+     */
+    private function getDbApcuCacheFactoryDefinition(Container $container): callable
+    {
+        return $container->factory(function () use ($container) {
+            return new ApcuCache();
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return callable
+     */
+    private function getDbArrayCacheFactoryDefinition(Container $container): callable
+    {
+        return $container->factory(function () use ($container) {
+            return new ArrayCache();
+        });
+    }
+
+    /**
+     * @param Container $container
+     *
+     * @return callable
+     */
+    private function getDbConfigDefinition(Container $container): callable
+    {
+        return function () use ($container) {
+            $dbs = $container['doctrine.dbal.dbs.config'];
+
+            return $dbs[$container['doctrine.dbal.dbs.default']];
+        };
     }
 
     /**
@@ -42,17 +90,20 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
     private function getDbDefaultOptions(): array
     {
         return [
-            'connection' => [
-                'driver' => 'pdo_mysql',
-                'dbname' => null,
-                'host' => 'localhost',
-                'user' => 'root',
-                'password' => null,
-            ],
             'configuration' => [
-                'result_cache' => null,
-                'filter_schema_assets_expression' => null,
                 'auto_commit' => true,
+                'filter_schema_assets_expression' => null,
+                'result_cache' => null,
+            ],
+            'connection' => [
+                'charset' => 'utf8mb4',
+                'dbname' => null,
+                'driver' => 'pdo_mysql',
+                'host' => 'localhost',
+                'password' => null,
+                'path' => null,
+                'port' => 3306,
+                'user' => 'root',
             ],
         ];
     }
@@ -62,34 +113,13 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      *
      * @return callable
      */
-    private function getDbsOptionsInitializerDefinition(Container $container): callable
+    private function getDbEventManagerDefinition(Container $container): callable
     {
-        return $container->protect(function () use ($container) {
-            static $initialized = false;
+        return function () use ($container) {
+            $dbs = $container['doctrine.dbal.dbs.event_manager'];
 
-            if ($initialized) {
-                return;
-            }
-
-            $initialized = true;
-
-            if (!isset($container['doctrine.dbal.dbs.options'])) {
-                $container['doctrine.dbal.dbs.options'] = [
-                    'default' => $container['doctrine.dbal.db.options'] ?? [],
-                ];
-            }
-
-            $tmp = $container['doctrine.dbal.dbs.options'];
-            foreach ($tmp as $name => &$options) {
-                $options = array_replace_recursive($container['doctrine.dbal.db.default_options'], $options);
-
-                if (!isset($container['doctrine.dbal.dbs.default'])) {
-                    $container['doctrine.dbal.dbs.default'] = $name;
-                }
-            }
-
-            $container['doctrine.dbal.dbs.options'] = $tmp;
-        });
+            return $dbs[$container['doctrine.dbal.dbs.default']];
+        };
     }
 
     /**
@@ -183,66 +213,38 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
         };
     }
 
-    /***
-     * @param Container $container
-     * @return callable
-     */
-    private function getDbDefinition(Container $container): callable
-    {
-        return function () use ($container) {
-            $dbs = $container['doctrine.dbal.dbs'];
-
-            return $dbs[$container['doctrine.dbal.dbs.default']];
-        };
-    }
-
-    /***
-     * @param Container $container
-     * @return callable
-     */
-    private function getDbConfigDefinition(Container $container): callable
-    {
-        return function () use ($container) {
-            $dbs = $container['doctrine.dbal.dbs.config'];
-
-            return $dbs[$container['doctrine.dbal.dbs.default']];
-        };
-    }
-
-    /***
-     * @param Container $container
-     * @return callable
-     */
-    private function getDbEventManagerDefinition(Container $container): callable
-    {
-        return function () use ($container) {
-            $dbs = $container['doctrine.dbal.dbs.event_manager'];
-
-            return $dbs[$container['doctrine.dbal.dbs.default']];
-        };
-    }
-
     /**
      * @param Container $container
      *
      * @return callable
      */
-    private function getDbArrayCacheFactoryDefinition(Container $container): callable
+    private function getDbsOptionsInitializerDefinition(Container $container): callable
     {
-        return $container->factory(function () use ($container) {
-            return new ArrayCache();
-        });
-    }
+        return $container->protect(function () use ($container) {
+            static $initialized = false;
 
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getDbApcuCacheFactoryDefinition(Container $container): callable
-    {
-        return $container->factory(function () use ($container) {
-            return new ApcuCache();
+            if ($initialized) {
+                return;
+            }
+
+            $initialized = true;
+
+            if (!isset($container['doctrine.dbal.dbs.options'])) {
+                $container['doctrine.dbal.dbs.options'] = [
+                    'default' => $container['doctrine.dbal.db.options'] ?? [],
+                ];
+            }
+
+            $tmp = $container['doctrine.dbal.dbs.options'];
+            foreach ($tmp as $name => &$options) {
+                $options = array_replace_recursive($container['doctrine.dbal.db.default_options'], $options);
+
+                if (!isset($container['doctrine.dbal.dbs.default'])) {
+                    $container['doctrine.dbal.dbs.default'] = $name;
+                }
+            }
+
+            $container['doctrine.dbal.dbs.options'] = $tmp;
         });
     }
 }

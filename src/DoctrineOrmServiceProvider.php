@@ -341,7 +341,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     private function getOrmMappingDriverFactoryAnnotation(Container $container): callable
     {
         return $container->protect(function (array $mapping, Configuration $config) {
-            return $config->newDefaultAnnotationDriver((array) $mapping['path'], $false);
+            return $config->newDefaultAnnotationDriver((array) $mapping['path'], false);
         });
     }
 

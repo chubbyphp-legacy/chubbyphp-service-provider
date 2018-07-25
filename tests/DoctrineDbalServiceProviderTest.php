@@ -126,9 +126,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
         };
 
         $container['doctrine.dbal.db.options'] = [
-            'configuration' => [
-                'cache.result' => 'array',
-            ],
             'connection' => [
                 'dbname' => 'my_database',
                 'host' => 'mysql.someplace.tld',
@@ -150,14 +147,6 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'port' => 3306,
             'user' => 'my_username',
         ], $db->getParams());
-
-        /** @var Configuration $configuration */
-        $configuration = $container['doctrine.dbal.db.config'];
-
-        self::assertInstanceOf(DoctrineDbalLogger::class, $configuration->getSQLLogger());
-        self::assertInstanceOf(ArrayCache::class, $configuration->getResultCacheImpl());
-        self::assertNull($configuration->getFilterSchemaAssetsExpression());
-        self::assertTrue($configuration->getAutoCommit());
     }
 
     public function testRegisterWithMultipleConnetions()

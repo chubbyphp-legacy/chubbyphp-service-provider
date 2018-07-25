@@ -2,8 +2,13 @@
 
 namespace Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity;
 
-class Model
+class Three
 {
+    /**
+     * @var string
+     */
+    private $id;
+
     /**
      * @var string
      */

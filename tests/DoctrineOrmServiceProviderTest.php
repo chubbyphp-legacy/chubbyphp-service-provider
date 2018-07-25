@@ -23,6 +23,8 @@ use Doctrine\ORM\Proxy\ProxyFactory;
 use Doctrine\ORM\Repository\DefaultRepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
+use Psr\Log\LoggerInterface;
+use Chubbyphp\Tests\ServiceProvider\Resources\One\Entity\One;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider
@@ -199,5 +201,35 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame($config->getRepositoryFactory(), $container['doctrine.orm.repository.factory.default']);
         self::assertSame($config->getNamingStrategy(), $container['doctrine.orm.strategy.naming.default']);
         self::assertSame($config->getQuoteStrategy(), $container['doctrine.orm.strategy.quote.default']);
+    }
+
+    public function testRegisterWithOneManager()
+    {
+        $container = new Container();
+
+        $dbalServiceProvider = new DoctrineDbalServiceProvider();
+        $dbalServiceProvider->register($container);
+
+        $ormServiceProvider = new DoctrineOrmServiceProvider();
+        $ormServiceProvider->register($container);
+
+        $container['logger'] = function () {
+            return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+        };
+
+        $container['doctrine.orm.em.options'] = [
+            'mappings' => [
+                [
+                    'type' => 'annotation',
+                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\One\Entity',
+                    'path' => __DIR__.'/Resources/One/Entity',
+                ],
+            ],
+        ];
+
+        /** @var EntityManager $em */
+        $em = $container['doctrine.orm.em'];
+
+        self::assertInstanceOf(EntityRepository::class, $em->getRepository(One::class));
     }
 }

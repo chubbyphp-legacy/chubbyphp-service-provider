@@ -79,7 +79,6 @@ $container['doctrine.orm.em.options'] = [
             'type' => 'annotation',
             'namespace' => 'One\Entity',
             'path' => __DIR__.'/src/One/Entity',
-            'use_simple_annotation_reader' => false
         ]
     ]
 ];

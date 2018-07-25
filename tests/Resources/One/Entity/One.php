@@ -6,13 +6,19 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="model")
  */
-class Model
+class One
 {
     /**
      * @var string
-     * @ORM\Column(name="name", type="string", nullable=false)
+     * @ORM\Id
+     * @ORM\Column(type="string")
+     */
+    private $id;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string")
      */
     private $name;
 }

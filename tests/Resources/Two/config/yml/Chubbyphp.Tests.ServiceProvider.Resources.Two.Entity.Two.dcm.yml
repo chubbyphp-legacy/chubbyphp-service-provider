@@ -1,0 +1,9 @@
+Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity\Two:
+  type: entity
+  table: two
+  id:
+    id:
+      type: string
+  fields:
+    name:
+      type: string

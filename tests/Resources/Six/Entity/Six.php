@@ -4,8 +4,13 @@ namespace Chubbyphp\Tests\ServiceProvider\Resources\Six\Entity;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 
-class Model
+class Six
 {
+    /**
+     * @var string
+     */
+    private $id;
+
     /**
      * @var string
      */
@@ -18,12 +23,17 @@ class Model
      */
     public static function loadMetadata(ClassMetadata $metadata)
     {
-        $metadata->setPrimaryTable(['name' => 'model']);
+        $metadata->setPrimaryTable(['name' => 'six']);
 
-        $metadata->mapField(array(
+        $metadata->mapField([
+            'id' => true,
+            'fieldName' => 'id',
+            'type' => 'string'
+        ]);
+
+        $metadata->mapField([
             'fieldName' => 'string',
             'type' => 'string',
-            'nullable' => true,
-        ));
+        ]);
     }
 }

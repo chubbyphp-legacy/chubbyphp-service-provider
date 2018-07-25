@@ -82,11 +82,11 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     {
         $this->loadConnections();
 
-        $name = $this->validateName(
-            $this->connections,
-            $name,
-            $this->getDefaultConnectionName())
-        ;
+        $name = $name ?? $this->getDefaultConnectionName();
+
+        if (!isset($this->connections[$name])) {
+            throw new \InvalidArgumentException(sprintf('Missing connection with name "%s".', $name));
+        }
 
         return $this->connections[$name];
     }
@@ -98,15 +98,12 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     {
         $this->loadConnections();
 
-        if ($this->connections instanceof Container) {
-            $connections = array();
-            foreach ($this->getConnectionNames() as $name) {
-                $connections[$name] = $this->connections[$name];
-            }
-            $this->connections = $connections;
+        $connections = array();
+        foreach ($this->connections->keys() as $connectionName) {
+            $connections[$connectionName] = $this->connections[$connectionName];
         }
 
-        return $this->connections;
+        return $connections;
     }
 
     /**
@@ -116,19 +113,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     {
         $this->loadConnections();
 
-        if ($this->connections instanceof Container) {
-            return $this->connections->keys();
-        } else {
-            return array_keys($this->connections);
-        }
-    }
-
-    private function loadConnections()
-    {
-        if (is_null($this->connections)) {
-            $this->connections = $this->container['doctrine.dbal.dbs'];
-            $this->defaultConnectionName = $this->container['doctrine.dbal.dbs.default'];
-        }
+        return $this->connections->keys();
     }
 
     /**
@@ -149,45 +134,14 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     public function getManager($name = null): ObjectManager
     {
         $this->loadManagers();
-        $name = $this->validateManagerName($name);
+
+        $name = $name ?? $this->getDefaultManagerName();
+
+        if (!isset($this->originalManagers[$name])) {
+            throw new \InvalidArgumentException(sprintf('Missing manager with name "%s".', $name));
+        }
 
         return $this->resetManagers[$name] ?? $this->originalManagers[$name];
-    }
-
-    /**
-     * @param string|null $name
-     *
-     * @return string
-     */
-    private function validateManagerName($name): string
-    {
-        return $this->validateName(
-            $this->originalManagers,
-            $name,
-            $this->getDefaultManagerName())
-        ;
-    }
-
-    /**
-     * @param array       $data
-     * @param string|null $name
-     * @param string      $default
-     *
-     * @return string
-     *
-     * @throws \InvalidArgumentException
-     */
-    private function validateName($data, $name, $default): string
-    {
-        if (null === $name) {
-            $name = $default;
-        }
-
-        if (!isset($data[$name])) {
-            throw new \InvalidArgumentException(sprintf('Element named "%s" does not exist.', $name));
-        }
-
-        return $name;
     }
 
     /**
@@ -197,15 +151,12 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     {
         $this->loadManagers();
 
-        if ($this->originalManagers instanceof Container) {
-            $managers = array();
-            foreach ($this->getManagerNames() as $name) {
-                $managers[$name] = $this->originalManagers[$name];
-            }
-            $this->originalManagers = $managers;
+        $managers = array();
+        foreach ($this->originalManagers->keys() as $managerName) {
+            $managers[$managerName] = $this->resetManagers[$managerName] ?? $this->originalManagers[$managerName];
         }
 
-        return array_replace($this->originalManagers, $this->resetManagers);
+        return $managers;
     }
 
     /**
@@ -215,11 +166,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     {
         $this->loadManagers();
 
-        if ($this->originalManagers instanceof Container) {
-            return $this->originalManagers->keys();
-        } else {
-            return array_keys($this->originalManagers);
-        }
+        return $this->originalManagers->keys();
     }
 
     /**
@@ -230,7 +177,12 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     public function resetManager($name = null)
     {
         $this->loadManagers();
-        $name = $this->validateManagerName($name);
+
+        $name = $name ?? $this->getDefaultManagerName();
+
+        if (!isset($this->originalManagers[$name])) {
+            throw new \InvalidArgumentException(sprintf('Missing manager with name "%s".', $name));
+        }
 
         $originalManager = $this->originalManagers[$name];
 
@@ -241,14 +193,6 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
         );
 
         return $this->resetManagers[$name];
-    }
-
-    private function loadManagers()
-    {
-        if (is_null($this->originalManagers)) {
-            $this->originalManagers = $this->container['doctrine.orm.ems'];
-            $this->defaultManagerName = $this->container['doctrine.orm.ems.default'];
-        }
     }
 
     /**
@@ -297,6 +241,22 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
             if (!$this->getManager($managerName)->getMetadataFactory()->isTransient($class)) {
                 return $this->getManager($managerName);
             }
+        }
+    }
+
+    private function loadConnections()
+    {
+        if (null === $this->connections) {
+            $this->connections = $this->container['doctrine.dbal.dbs'];
+            $this->defaultConnectionName = $this->container['doctrine.dbal.dbs.default'];
+        }
+    }
+
+    private function loadManagers()
+    {
+        if (null === $this->originalManagers) {
+            $this->originalManagers = $this->container['doctrine.orm.ems'];
+            $this->defaultManagerName = $this->container['doctrine.orm.ems.default'];
         }
     }
 }

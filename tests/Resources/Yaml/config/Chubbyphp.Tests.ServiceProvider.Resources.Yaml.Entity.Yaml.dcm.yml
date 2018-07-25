@@ -1,6 +1,6 @@
-Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity\Two:
+Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity\Yaml:
   type: entity
-  table: two
+  table: yaml
   id:
     id:
       type: string

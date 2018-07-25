@@ -50,9 +50,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['doctrine.orm.mapping_driver.factory.annotation'] = $this->getOrmMappingDriverFactoryAnnotation($container);
         $container['doctrine.orm.mapping_driver.factory.php'] = $this->getOrmMappingDriverFactoryPhp($container);
         $container['doctrine.orm.mapping_driver.factory.simple_xml'] = $this->getOrmMappingDriverFactorySimpleXml($container);
-        $container['doctrine.orm.mapping_driver.factory.simple_yml'] = $this->getOrmMappingDriverFactorySimpleYaml($container);
+        $container['doctrine.orm.mapping_driver.factory.simple_yaml'] = $this->getOrmMappingDriverFactorySimpleYaml($container);
         $container['doctrine.orm.mapping_driver.factory.xml'] = $this->getOrmMappingDriverFactoryXml($container);
-        $container['doctrine.orm.mapping_driver.factory.yml'] = $this->getOrmMappingDriverFactoryYaml($container);
+        $container['doctrine.orm.mapping_driver.factory.yaml'] = $this->getOrmMappingDriverFactoryYaml($container);
         $container['doctrine.orm.mapping_driver_chain'] = $this->getOrmMappingDriverChainDefinition($container);
         $container['doctrine.orm.repository.factory.default'] = $this->getOrmRepositoryFactoryDefinition($container);
         $container['doctrine.orm.strategy.naming.default'] = $this->getOrmNamingStrategyDefinition($container);

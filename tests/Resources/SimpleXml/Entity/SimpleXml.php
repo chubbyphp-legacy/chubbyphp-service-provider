@@ -1,8 +1,8 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider\Resources\Two\Entity;
+namespace Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity;
 
-class Two
+class SimpleXml
 {
     /**
      * @var string

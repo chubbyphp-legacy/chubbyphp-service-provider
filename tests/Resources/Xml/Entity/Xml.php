@@ -1,8 +1,8 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity;
+namespace Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity;
 
-class Five
+class Xml
 {
     /**
      * @var string

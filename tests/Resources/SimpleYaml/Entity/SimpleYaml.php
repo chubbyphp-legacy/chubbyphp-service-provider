@@ -1,8 +1,8 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider\Resources\Three\Entity;
+namespace Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity;
 
-class Three
+class SimpleYaml
 {
     /**
      * @var string

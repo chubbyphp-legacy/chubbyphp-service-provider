@@ -24,7 +24,11 @@ use Doctrine\ORM\Repository\DefaultRepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
-use Chubbyphp\Tests\ServiceProvider\Resources\One\Entity\One;
+use Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity\Annotation;
+use Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity\SimpleYaml;
+use Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity\SimpleXml;
+use Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity\Xml;
+use Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity\Yaml;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider
@@ -54,9 +58,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.annotation', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.php', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_xml', $container);
-        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_yml', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_yaml', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.xml', $container);
-        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.yml', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.yaml', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver_chain', $container);
         self::assertArrayHasKey('doctrine.orm.repository.factory.default', $container);
         self::assertArrayHasKey('doctrine.orm.strategy.naming.default', $container);
@@ -193,9 +197,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.annotation']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.php']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_xml']);
-        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_yml']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_yaml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.xml']);
-        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.yml']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.yaml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver_chain']);
 
         self::assertSame($config->getRepositoryFactory(), $container['doctrine.orm.repository.factory.default']);
@@ -221,8 +225,8 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'mappings' => [
                 [
                     'type' => 'annotation',
-                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\One\Entity',
-                    'path' => __DIR__.'/Resources/One/Entity',
+                    'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity',
+                    'path' => __DIR__.'/Resources/Annotation/Entity',
                 ],
             ],
         ];
@@ -230,6 +234,108 @@ class DoctrineOrmServiceProviderTest extends TestCase
         /** @var EntityManager $em */
         $em = $container['doctrine.orm.em'];
 
-        self::assertInstanceOf(EntityRepository::class, $em->getRepository(One::class));
+        self::assertInstanceOf(EntityRepository::class, $em->getRepository(Annotation::class));
+    }
+
+    public function testRegisterWithMultipleManager()
+    {
+        $container = new Container();
+
+        $dbalServiceProvider = new DoctrineDbalServiceProvider();
+        $dbalServiceProvider->register($container);
+
+        $ormServiceProvider = new DoctrineOrmServiceProvider();
+        $ormServiceProvider->register($container);
+
+        $container['logger'] = function () {
+            return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+        };
+
+        $container['doctrine.dbal.dbs.options'] = [
+            'annotation' => [],
+            'simpleYaml' => [],
+            'simpleXml' => [],
+            'yaml' => [],
+            'xml' => [],
+            'php' => [],
+        ];
+
+        $container['doctrine.orm.ems.options'] = [
+            'annotation' => [
+                'connection' => 'annotation',
+                'mappings' => [
+                    [
+                        'type' => 'annotation',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity',
+                        'path' => __DIR__.'/Resources/Annotation/Entity',
+                    ],
+                ],
+            ],
+            'simpleYaml' => [
+                'connection' => 'simpleYaml',
+                'mappings' => [
+                    [
+                        'type' => 'simple_yaml',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity',
+                        'path' => __DIR__.'/Resources/SimpleYaml/config',
+                    ],
+                ],
+            ],
+            'simpleXml' => [
+                'connection' => 'simpleXml',
+                'mappings' => [
+                    [
+                        'type' => 'simple_xml',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity',
+                        'path' => __DIR__.'/Resources/SimpleXml/config',
+                    ],
+                ],
+            ],
+            'yaml' => [
+                'connection' => 'yaml',
+                'mappings' => [
+                    [
+                        'type' => 'yaml',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity',
+                        'path' => __DIR__.'/Resources/Yaml/config',
+                    ],
+                ],
+            ],
+            'xml' => [
+                'connection' => 'xml',
+                'mappings' => [
+                    [
+                        'type' => 'xml',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity',
+                        'path' => __DIR__.'/Resources/Xml/config',
+                    ],
+                ],
+            ],
+        ];
+
+        /** @var EntityManager $annotationEm */
+        $annotationEm = $container['doctrine.orm.ems']['annotation'];
+
+        self::assertInstanceOf(EntityRepository::class, $annotationEm->getRepository(Annotation::class));
+
+        /** @var EntityManager $simpleYamlEm */
+        $simpleYamlEm = $container['doctrine.orm.ems']['simpleYaml'];
+
+        self::assertInstanceOf(EntityRepository::class, $simpleYamlEm->getRepository(SimpleYaml::class));
+
+        /** @var EntityManager $simpleXmlEm */
+        $simpleXmlEm = $container['doctrine.orm.ems']['simpleXml'];
+
+        self::assertInstanceOf(EntityRepository::class, $simpleXmlEm->getRepository(SimpleXml::class));
+
+        /** @var EntityManager $yamlEm */
+        $yamlEm = $container['doctrine.orm.ems']['yaml'];
+
+        self::assertInstanceOf(EntityRepository::class, $yamlEm->getRepository(Yaml::class));
+
+        /** @var EntityManager $xmlEm */
+        $xmlEm = $container['doctrine.orm.ems']['xml'];
+
+        self::assertInstanceOf(EntityRepository::class, $xmlEm->getRepository(Xml::class));
     }
 }

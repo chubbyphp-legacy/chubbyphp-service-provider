@@ -1,13 +1,13 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider\Resources\One\Entity;
+namespace Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
  */
-class One
+class Annotation
 {
     /**
      * @var string

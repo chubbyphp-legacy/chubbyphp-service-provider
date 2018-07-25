@@ -3,7 +3,7 @@
       xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                           http://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
 
-    <entity name="Chubbyphp\Tests\ServiceProvider\Resources\Five\Entity\Five" table="four">
+    <entity name="Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity\Xml" table="xml">
         <id name="id" type="string" column="id" />
         <field name="name" column="name" type="string" nullable="true" />
     </entity>

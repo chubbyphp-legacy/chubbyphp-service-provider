@@ -27,7 +27,8 @@
         "doctrine/orm": "^2.5",
         "doctrine/mongodb": "~1.1",
         "monolog/monolog": "^1.4.1",
-        "pimple/pimple": "^3.0"
+        "pimple/pimple": "^3.0",
+        "symfony/yaml": "~2.7|~3.0|~4.0"
     },
     "provide" : {
       "ext-mongo": "*"

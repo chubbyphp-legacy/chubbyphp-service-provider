@@ -1,10 +1,10 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider\Resources\Six\Entity;
+namespace Chubbyphp\Tests\ServiceProvider\Resources\Php\Entity;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 
-class Six
+class Php
 {
     /**
      * @var string
@@ -23,12 +23,12 @@ class Six
      */
     public static function loadMetadata(ClassMetadata $metadata)
     {
-        $metadata->setPrimaryTable(['name' => 'six']);
+        $metadata->setPrimaryTable(['name' => 'php']);
 
         $metadata->mapField([
             'id' => true,
             'fieldName' => 'id',
-            'type' => 'string'
+            'type' => 'string',
         ]);
 
         $metadata->mapField([

@@ -177,8 +177,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'mysql_write' => [
                 'configuration' => [
                     'cache.result' => 'apcu',
-                ],
-                'connection' => [
+                ],                'connection' => [
                     'dbname' => 'my_database',
                     'host' => 'mysql_write.someplace.tld',
                     'password' => 'my_password',

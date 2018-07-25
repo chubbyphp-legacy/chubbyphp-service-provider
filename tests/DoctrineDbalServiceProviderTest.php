@@ -37,6 +37,11 @@ class DoctrineDbalServiceProviderTest extends TestCase
         // start: doctrine.dbal.db
         self::assertInstanceOf(Connection::class, $container['doctrine.dbal.db']);
 
+        self::assertSame($container['doctrine.dbal.db'], $container['doctrine.dbal.dbs']['default']);
+
+        /** @var Connection $connection */
+        $connection = $container['doctrine.dbal.db'];
+
         self::assertEquals([
             'charset' => 'utf8mb4',
             'dbname' => null,
@@ -46,13 +51,13 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'path' => null,
             'port' => 3306,
             'user' => 'root',
-        ], $container['doctrine.dbal.db']->getParams());
-
-        self::assertSame($container['doctrine.dbal.db'], $container['doctrine.dbal.dbs']['default']);
+        ], $connection->getParams());
         // end: doctrine.dbal.db
 
         // start: doctrine.dbal.db.config
         self::assertInstanceOf(Configuration::class, $container['doctrine.dbal.db.config']);
+
+        self::assertSame($container['doctrine.dbal.db.config'], $container['doctrine.dbal.dbs.config']['default']);
 
         /** @var Configuration $configuration */
         $configuration = $container['doctrine.dbal.db.config'];
@@ -61,16 +66,14 @@ class DoctrineDbalServiceProviderTest extends TestCase
         self::assertInstanceOf(ArrayCache::class, $configuration->getResultCacheImpl());
         self::assertNull($configuration->getFilterSchemaAssetsExpression());
         self::assertTrue($configuration->getAutoCommit());
-
-        self::assertSame($container['doctrine.dbal.db.config'], $container['doctrine.dbal.dbs.config']['default']);
         // end: doctrine.dbal.db.config
 
         // start: doctrine.dbal.db.default_options
         self::assertEquals([
             'configuration' => [
                 'auto_commit' => true,
+                'cache.result' => 'array',
                 'filter_schema_assets_expression' => null,
-                'result_cache' => 'array',
             ],
             'connection' => [
                 'charset' => 'utf8mb4',
@@ -96,35 +99,14 @@ class DoctrineDbalServiceProviderTest extends TestCase
 
         // start: doctrine.dbal.dbs
         self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs']);
-
-        /** @var Container $dbs */
-        $dbs = $container['doctrine.dbal.dbs'];
-
-        self::assertTrue($dbs->offsetExists('default'));
-
-        self::assertInstanceOf(Connection::class, $dbs['default']);
         // end: doctrine.dbal.dbs
 
-        // start: doctrine.dbal.dbs.confi
+        // start: doctrine.dbal.dbs.config
         self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.config']);
-
-        /** @var Container $dbsConfig */
-        $dbsConfig = $container['doctrine.dbal.dbs.config'];
-
-        self::assertTrue($dbsConfig->offsetExists('default'));
-
-        self::assertInstanceOf(Configuration::class, $dbsConfig['default']);
-        // end: doctrine.dbal.dbs.confi
+        // end: doctrine.dbal.dbs.config
 
         // start: doctrine.dbal.dbs.event_manager
         self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.event_manager']);
-
-        /** @var Container $dbsEventManager */
-        $dbsEventManager = $container['doctrine.dbal.dbs.event_manager'];
-
-        self::assertTrue($dbsEventManager->offsetExists('default'));
-
-        self::assertInstanceOf(EventManager::class, $dbsEventManager['default']);
         // end: doctrine.dbal.dbs.event_manager
 
         // start: doctrine.dbal.dbs.options.initializer
@@ -145,7 +127,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
 
         $container['doctrine.dbal.db.options'] = [
             'configuration' => [
-                'result_cache' => 'array',
+                'cache.result' => 'array',
             ],
             'connection' => [
                 'dbname' => 'my_database',
@@ -193,8 +175,8 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'mysql_read' => [
                 'configuration' => [
                     'auto_commit' => false,
+                    'cache.result' => 'apcu',
                     'filter_schema_assets_expression' => 'expression',
-                    'result_cache' => 'apcu',
                 ],
                 'connection' => [
                     'dbname' => 'my_database',
@@ -205,7 +187,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
             ],
             'mysql_write' => [
                 'configuration' => [
-                    'result_cache' => 'apcu',
+                    'cache.result' => 'apcu',
                 ],
                 'connection' => [
                     'dbname' => 'my_database',

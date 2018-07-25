@@ -29,6 +29,7 @@ use Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity\SimpleYaml;
 use Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity\SimpleXml;
 use Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity\Xml;
 use Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity\Yaml;
+use Chubbyphp\Tests\ServiceProvider\Resources\StaticPhp\Entity\StaticPhp;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider
@@ -56,7 +57,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertArrayHasKey('doctrine.orm.entity.listener_resolver.default', $container);
         self::assertArrayHasKey('doctrine.orm.manager_registry', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.annotation', $container);
-        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.php', $container);
+        self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.static_php', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_xml', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.simple_yaml', $container);
         self::assertArrayHasKey('doctrine.orm.mapping_driver.factory.xml', $container);
@@ -195,7 +196,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         // end: doctrine.orm.manager_registry
 
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.annotation']);
-        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.php']);
+        self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.static_php']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_xml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.simple_yaml']);
         self::assertInstanceOf(\Closure::class, $container['doctrine.orm.mapping_driver.factory.xml']);
@@ -257,7 +258,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'simpleXml' => [],
             'yaml' => [],
             'xml' => [],
-            'php' => [],
+            'staticPhp' => [],
         ];
 
         $container['doctrine.orm.ems.options'] = [
@@ -311,6 +312,16 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     ],
                 ],
             ],
+            'staticPhp' => [
+                'connection' => 'staticPhp',
+                'mappings' => [
+                    [
+                        'type' => 'static_php',
+                        'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\StaticPhp\Entity',
+                        'path' => __DIR__.'/Resources/StaticPhp/Entity',
+                    ],
+                ],
+            ],
         ];
 
         /** @var EntityManager $annotationEm */
@@ -337,5 +348,10 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $xmlEm = $container['doctrine.orm.ems']['xml'];
 
         self::assertInstanceOf(EntityRepository::class, $xmlEm->getRepository(Xml::class));
+
+        /** @var EntityManager $staticPhp */
+        $staticPhp = $container['doctrine.orm.ems']['staticPhp'];
+
+        self::assertInstanceOf(EntityRepository::class, $staticPhp->getRepository(StaticPhp::class));
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider\Resources\Php\Entity;
+namespace Chubbyphp\Tests\ServiceProvider\Resources\StaticPhp\Entity;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 
-class Php
+class StaticPhp
 {
     /**
      * @var string
@@ -32,7 +32,7 @@ class Php
         ]);
 
         $metadata->mapField([
-            'fieldName' => 'string',
+            'fieldName' => 'name',
             'type' => 'string',
         ]);
     }

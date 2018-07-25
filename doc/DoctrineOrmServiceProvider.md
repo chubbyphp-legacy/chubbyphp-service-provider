@@ -20,7 +20,7 @@ composer require doctrine/orm "^2.5"
 
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`
     * **mappings**: Array of Mappings.
-        * **type**: The mapping driver to use. Can be any of: `annotation`, `yaml`, `simple_yaml`, `xml`, `simple_xml`,  or `php`
+        * **type**: The mapping driver to use. Can be any of: `annotation`, `yaml`, `simple_yaml`, `xml`, `simple_xml`,  or `static_php`
         * **namespace**: The entity namespace. Example: `One\Entity`
         * **path**: The path to the entities. Example: `/path/to/project/One/Entity`
         * **alias**: The entity alias to the namespace. Example: `Alias\Entity`

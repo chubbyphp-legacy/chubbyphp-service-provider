@@ -48,7 +48,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $container['doctrine.orm.entity.listener_resolver.default'] = $this->getOrmEntityListenerResolverDefinition($container);
         $container['doctrine.orm.manager_registry'] = $this->getOrmManagerRegistryDefintion($container);
         $container['doctrine.orm.mapping_driver.factory.annotation'] = $this->getOrmMappingDriverFactoryAnnotation($container);
-        $container['doctrine.orm.mapping_driver.factory.php'] = $this->getOrmMappingDriverFactoryPhp($container);
+        $container['doctrine.orm.mapping_driver.factory.static_php'] = $this->getOrmMappingDriverFactoryStaticPhp($container);
         $container['doctrine.orm.mapping_driver.factory.simple_xml'] = $this->getOrmMappingDriverFactorySimpleXml($container);
         $container['doctrine.orm.mapping_driver.factory.simple_yaml'] = $this->getOrmMappingDriverFactorySimpleYaml($container);
         $container['doctrine.orm.mapping_driver.factory.xml'] = $this->getOrmMappingDriverFactoryXml($container);
@@ -350,7 +350,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      *
      * @return callable
      */
-    private function getOrmMappingDriverFactoryPhp(Container $container): callable
+    private function getOrmMappingDriverFactoryStaticPhp(Container $container): callable
     {
         return $container->protect(function (array $mapping, Configuration $config) {
             return new StaticPHPDriver($mapping['path']);

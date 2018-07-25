@@ -58,7 +58,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $configuration = $container['doctrine.dbal.db.config'];
 
         self::assertNull($configuration->getSQLLogger());
-        self::assertNull($configuration->getResultCacheImpl());
+        self::assertInstanceOf(ArrayCache::class, $configuration->getResultCacheImpl());
         self::assertNull($configuration->getFilterSchemaAssetsExpression());
         self::assertTrue($configuration->getAutoCommit());
 
@@ -70,7 +70,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'configuration' => [
                 'auto_commit' => true,
                 'filter_schema_assets_expression' => null,
-                'result_cache' => null,
+                'result_cache' => 'array',
             ],
             'connection' => [
                 'charset' => 'utf8mb4',

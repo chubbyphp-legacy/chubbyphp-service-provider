@@ -135,7 +135,6 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
             $dbs = new Container();
             foreach ($container['doctrine.dbal.dbs.options'] as $name => $options) {
                 if ($container['doctrine.dbal.dbs.default'] === $name) {
-                    // we use shortcuts here in case the default has been overridden
                     $config = $container['doctrine.dbal.db.config'];
                     $manager = $container['doctrine.dbal.db.event_manager'];
                 } else {
@@ -203,7 +202,6 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
             foreach ($container['doctrine.dbal.dbs.options'] as $name => $options) {
                 $managers[$name] = function () {
                     return new EventManager();
-                    // todo: check for set/add methods to implement
                 };
             }
 

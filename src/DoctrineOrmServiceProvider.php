@@ -154,7 +154,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             $ems = new Container();
             foreach ($container['doctrine.orm.ems.options'] as $name => $options) {
                 if ($container['doctrine.orm.ems.default'] === $name) {
-                    // we use shortcuts here in case the default has been overridden
                     $config = $container['doctrine.orm.em.config'];
                 } else {
                     $config = $container['doctrine.orm.ems.config'][$name];
@@ -185,9 +184,11 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             $configs = new Container();
             foreach ($container['doctrine.orm.ems.options'] as $name => $options) {
+                $connectionName = $options['connection'];
+
                 $config = new Configuration();
 
-                $config->setSQLLogger($container['doctrine.dbal.dbs.config'][$name]->getSQLLogger());
+                $config->setSQLLogger($container['doctrine.dbal.dbs.config'][$connectionName]->getSQLLogger());
 
                 $config->setQueryCacheImpl(
                     $container[sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.query'])]
@@ -198,7 +199,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                 $config->setMetadataCacheImpl(
                     $container[sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.metadata'])]
                 );
-                $config->setResultCacheImpl($container['doctrine.dbal.dbs.config'][$name]->getResultCacheImpl());
+                $config->setResultCacheImpl(
+                    $container['doctrine.dbal.dbs.config'][$connectionName]->getResultCacheImpl()
+                );
 
                 $config->setClassMetadataFactoryName($options['class_metadata.factory.name']);
 
@@ -214,7 +217,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                 );
 
                 $config->setMetadataDriverImpl(
-                    $container['doctrine.orm.mapping_driver_chain']($name, $config, (array) $options['mappings'])
+                    $container['doctrine.orm.mapping_driver_chain']($config, $options['mappings'])
                 );
 
                 $config->setAutoGenerateProxyClasses($options['proxies.auto_generate']);
@@ -418,7 +421,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function getOrmMappingDriverChainDefinition(Container $container): callable
     {
-        return $container->protect(function (string $name, Configuration $config, array $mappings) use ($container) {
+        return $container->protect(function (Configuration $config, array $mappings) use ($container) {
             $chain = new MappingDriverChain();
             foreach ($mappings as $mapping) {
                 if (isset($mapping['alias'])) {

@@ -37,8 +37,6 @@ composer require doctrine/dbal "^2.5"
         * **port**: Only relevant for `pdo_mysql`, `pdo_pgsql`, and `pdo_oci/oci8`,
         * **user**: The user of the database to connect to. Defaults to root.
 
-        specifies the port of the database to connect to.
-
   These and additional options are described in detail in [Doctrine Dbal Configuration][2].
 
 * **doctrine.dbal.types**: Array of dbal types (additional and/or override)

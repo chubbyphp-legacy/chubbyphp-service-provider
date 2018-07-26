@@ -5,7 +5,6 @@ The *DoctrineOrmServiceProvider* provides integration with the [Doctrine ORM][1]
 ## Install
 
 ```sh
-composer require doctrine/cache "^1.6"
 composer require doctrine/orm "^2.5"
 ```
 
@@ -22,14 +21,10 @@ composer require doctrine/orm "^2.5"
         `$container['doctrine.orm.em.cache_factory.<type>']`
     * **class_metadata.factory.name**: String with class, defaults to `Doctrine\ORM\Mapping\ClassMetadataFactory`.
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`.
-    * **custom.functions.datetime**: Array of datetime related custom functions. Example: `['name' => 'CustomFunction::class]`.
-        Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Documentation][2]
-    * **custom.functions.numeric**: Array of numeric related custom functions.  Example: `['name' => 'CustomFunction::class]`.
-        Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Documentation][2]
-    * **custom.functions.string**: Array of string related custom functions. Example: `['name' => 'CustomFunction::class]`.
-        Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Documentation][2]
-    * **custom.hydration_modes**: Array of hydration modes. Example: `['name' => 'CustomHydrationMode::class]`.
-        Hydration mode classes need to extend `Doctrine\ORM\Internal\Hydration\AbstractHydrator`. [Documentation][3]
+    * **custom.functions.datetime**: Array of datetime related custom functions. Example: `['name' => 'CustomFunction::class]`. [Documentation][2]
+    * **custom.functions.numeric**: Array of numeric related custom functions.  Example: `['name' => 'CustomFunction::class]`.  [Documentation][2]
+    * **custom.functions.string**: Array of string related custom functions. Example: `['name' => 'CustomFunction::class]`. [Documentation][2]
+    * **custom.hydration_modes**: Array of hydration modes. Example: `['name' => 'CustomHydrationMode::class]`. [Documentation][3]
     * **entity.listener_resolver**: String with the resolver type, defaults to `default`.
         Add additional resolvers by adding new service:
         `$container['doctrine.orm.entity.listener_resolver.<type>']`.
@@ -42,7 +37,7 @@ composer require doctrine/orm "^2.5"
     * **proxies.auto_generate**: Enable or disable the auto generation of proxies. Defaults to `true`.
     * **proxies.dir**: The directory where generated proxies get saved. Example: `var/cache/doctrine/orm/proxies`.
     * **proxies.namespace**: The namespace of generated proxies. Defaults to `DoctrineProxy`.
-    * **query_hints**: Array of query hints. Example: `['hint' => 'CustomHint::class]`.
+    * **query_hints**: Array of query hints. Example: `['hint' => 'doctrine.<name>']`. [Documentation][4]
     * **repository.default.class**: String with class, defaults to `Doctrine\ORM\EntityRepository`.
     * **repository.factory**: String with the repository factory type, defaults to `default`.
         Add additional repository factories by adding new service: `$container['doctrine.orm.repository.factory.<type>']`.

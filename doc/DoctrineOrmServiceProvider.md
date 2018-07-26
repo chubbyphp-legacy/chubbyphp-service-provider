@@ -21,10 +21,10 @@ composer require doctrine/orm "^2.5"
         `$container['doctrine.orm.em.cache_factory.<type>']`
     * **class_metadata.factory.name**: String with class, defaults to `Doctrine\ORM\Mapping\ClassMetadataFactory`.
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`.
-    * **custom.functions.datetime**: Array of datetime related custom functions. Example: `['name' => 'CustomFunction::class]`. [Documentation][2]
-    * **custom.functions.numeric**: Array of numeric related custom functions.  Example: `['name' => 'CustomFunction::class]`.  [Documentation][2]
-    * **custom.functions.string**: Array of string related custom functions. Example: `['name' => 'CustomFunction::class]`. [Documentation][2]
-    * **custom.hydration_modes**: Array of hydration modes. Example: `['name' => 'CustomHydrationMode::class]`. [Documentation][3]
+    * **custom.functions.datetime**: Array of datetime related [custom functions][2].
+    * **custom.functions.numeric**: Array of numeric related [custom functions][2].
+    * **custom.functions.string**: Array of string related [custom functions][2].
+    * **custom.hydration_modes**: Array of [hydration modes][3].
     * **entity.listener_resolver**: String with the resolver type, defaults to `default`.
         Add additional resolvers by adding new service:
         `$container['doctrine.orm.entity.listener_resolver.<type>']`.

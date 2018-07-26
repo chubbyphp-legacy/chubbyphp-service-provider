@@ -37,7 +37,7 @@ composer require doctrine/orm "^2.5"
     * **proxies.auto_generate**: Enable or disable the auto generation of proxies. Defaults to `true`.
     * **proxies.dir**: The directory where generated proxies get saved. Example: `var/cache/doctrine/orm/proxies`.
     * **proxies.namespace**: The namespace of generated proxies. Defaults to `DoctrineProxy`.
-    * **query_hints**: Array of query hints. Example: `['hint' => 'doctrine.<name>']`. [Documentation][4]
+    * **query_hints**: Array of [query hints][4].
     * **repository.default.class**: String with class, defaults to `Doctrine\ORM\EntityRepository`.
     * **repository.factory**: String with the repository factory type, defaults to `default`.
         Add additional repository factories by adding new service: `$container['doctrine.orm.repository.factory.<type>']`.

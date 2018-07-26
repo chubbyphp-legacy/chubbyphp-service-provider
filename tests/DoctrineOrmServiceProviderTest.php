@@ -15,7 +15,10 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\MappingException;
+use Doctrine\Common\Proxy\AbstractProxyFactory;
+use Doctrine\ORM\Cache\CacheConfiguration;
 use Doctrine\ORM\Cache\DefaultCache;
+use Doctrine\ORM\Cache\DefaultCacheFactory;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -28,6 +31,7 @@ use Doctrine\ORM\Repository\DefaultRepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Validator\Mapping\Cache\ApcCache;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider
@@ -108,8 +112,8 @@ class DoctrineOrmServiceProviderTest extends TestCase
         /** @var Configuration $config */
         $config = $container['doctrine.orm.em.config'];
 
+        self::assertSame(AbstractProxyFactory::AUTOGENERATE_ALWAYS, $config->getAutoGenerateProxyClasses());
         self::assertSame(sys_get_temp_dir().'/doctrine/orm/proxies', $config->getProxyDir());
-        self::assertSame(1, $config->getAutoGenerateProxyClasses());
         self::assertSame('DoctrineProxy', $config->getProxyNamespace());
         self::assertInstanceOf(MappingDriverChain::class, $config->getMetadataDriverImpl());
         self::assertInstanceOf(ArrayCache::class, $config->getQueryCacheImpl());
@@ -220,8 +224,55 @@ class DoctrineOrmServiceProviderTest extends TestCase
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
         };
 
+        $container['doctrine.orm.entity.listener_resolver.other'] = function () {
+            return new DefaultEntityListenerResolver();
+        };
+
+        $container['doctrine.orm.repository.factory.other'] = function () {
+            return new DefaultRepositoryFactory();
+        };
+
+        $container['doctrine.orm.strategy.naming.other'] = function () {
+            return new DefaultNamingStrategy();
+        };
+
+        $container['doctrine.orm.strategy.quote.other'] = function () {
+            return new DefaultQuoteStrategy();
+        };
+
+        $classMetadataFactory = new class() extends ClassMetadataFactory
+        {
+        };
+
+        $classMetadataFactoryClass = get_class($classMetadataFactory);
+
+        $repository = new class() extends EntityRepository
+        {
+            public function __construct()
+            {
+            }
+        };
+
+        $repositoryClass = get_class($repository);
+
         $container['doctrine.orm.em.options'] = [
-            'second_level_cache.enabled' => true,
+            'cache.hydration' => 'apcu',
+            'cache.metadata' => 'apcu',
+            'cache.query' => 'apcu',
+            'class_metadata.factory.name' => $classMetadataFactoryClass,
+            'custom.datetime.functions' => [
+                'date' => \stdClass::class,
+            ],
+            'custom.hydration_modes' => [
+                'hydrator' => \stdClass::class,
+            ],
+            'custom.numeric.functions' => [
+                'numeric' => \stdClass::class,
+            ],
+            'custom.string.functions' => [
+                'string' => \stdClass::class,
+            ],
+            'entity.listener_resolver' => 'other',
             'mappings' => [
                 [
                     'type' => 'annotation',
@@ -229,13 +280,69 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     'path' => __DIR__.'/Resources/Annotation/Entity',
                 ],
             ],
+            'proxies.auto_generate' => false,
+            'proxies.dir' => sys_get_temp_dir().'/doctrine/orm/otherproxies',
+            'proxies.namespace' => 'DoctrineOtherProxy',
+            'query_hints' => [
+                'hint' => \stdClass::class,
+            ],
+            'repository.default.class' => $repositoryClass,
+            'repository.factory' => 'other',
+            'second_level_cache.enabled' => true,
+            'second_level_cache.type' => 'apcu',
+            'strategy.naming' => 'other',
+            'strategy.quote' => 'other',
         ];
 
         /** @var EntityManager $em */
         $em = $container['doctrine.orm.em'];
 
-        self::assertInstanceOf(EntityRepository::class, $em->getRepository(Annotation::class));
         self::assertInstanceOf(DefaultCache::class, $em->getCache());
+
+        $config = $em->getConfiguration();
+
+        self::assertInstanceOf(ApcuCache::class, $config->getHydrationCacheImpl());
+        self::assertInstanceOf(ApcuCache::class, $config->getMetadataCacheImpl());
+        self::assertInstanceOf(ApcuCache::class, $config->getQueryCacheImpl());
+        self::assertSame($classMetadataFactoryClass, $config->getClassMetadataFactoryName());
+        self::assertSame(\stdClass::class, $config->getCustomDatetimeFunction('date'));
+        self::assertSame(\stdClass::class, $config->getCustomHydrationMode('hydrator'));
+        self::assertSame(\stdClass::class, $config->getCustomNumericFunction('numeric'));
+        self::assertSame(\stdClass::class, $config->getCustomStringFunction('string'));
+        self::assertSame(
+            $container['doctrine.orm.entity.listener_resolver.other'],
+            $config->getEntityListenerResolver()
+        );
+        self::assertInstanceOf(EntityRepository::class, $em->getRepository(Annotation::class));
+        self::assertSame(AbstractProxyFactory::AUTOGENERATE_NEVER, $config->getAutoGenerateProxyClasses());
+        self::assertSame(sys_get_temp_dir().'/doctrine/orm/otherproxies', $config->getProxyDir());
+        self::assertSame('DoctrineOtherProxy', $config->getProxyNamespace());
+        self::assertSame(\stdClass::class, $config->getDefaultQueryHint('hint'));
+        self::assertSame($repositoryClass, $config->getDefaultRepositoryClassName());
+        self::assertSame(
+            $container['doctrine.orm.repository.factory.other'],
+            $config->getRepositoryFactory()
+        );
+        self::assertInstanceOf(CacheConfiguration::class, $config->getSecondLevelCacheConfiguration());
+
+        $cacheFactory = $config->getSecondLevelCacheConfiguration()->getCacheFactory();
+
+        self::assertInstanceOf(DefaultCacheFactory::class, $cacheFactory);
+
+        $reflectionProperty = new \ReflectionProperty(DefaultCacheFactory::class, 'cache');
+        $reflectionProperty->setAccessible(true);
+
+        self::assertInstanceOf(ApcuCache::class, $reflectionProperty->getValue($cacheFactory));
+
+        self::assertSame(
+            $container['doctrine.orm.strategy.naming.other'],
+            $config->getNamingStrategy()
+        );
+
+        self::assertSame(
+            $container['doctrine.orm.strategy.quote.other'],
+            $config->getQuoteStrategy()
+        );
     }
 
     public function testRegisterWithMultipleManager()
@@ -253,17 +360,13 @@ class DoctrineOrmServiceProviderTest extends TestCase
         };
 
         $container['doctrine.dbal.dbs.options'] = [
-            'annotation' => [],
-            'simpleYaml' => [],
-            'simpleXml' => [],
-            'yaml' => [],
-            'xml' => [],
-            'staticPhp' => [],
+            'one' => [],
+            'two' => [],
         ];
 
         $container['doctrine.orm.ems.options'] = [
             'annotation' => [
-                'connection' => 'annotation',
+                'connection' => 'one',
                 'mappings' => [
                     [
                         'type' => 'annotation',
@@ -274,7 +377,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                 ],
             ],
             'simpleYaml' => [
-                'connection' => 'simpleYaml',
+                'connection' => 'one',
                 'mappings' => [
                     [
                         'type' => 'simple_yaml',
@@ -285,7 +388,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                 ],
             ],
             'simpleXml' => [
-                'connection' => 'simpleXml',
+                'connection' => 'one',
                 'mappings' => [
                     [
                         'type' => 'simple_xml',
@@ -296,7 +399,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                 ],
             ],
             'yaml' => [
-                'connection' => 'yaml',
+                'connection' => 'two',
                 'mappings' => [
                     [
                         'type' => 'yaml',
@@ -307,7 +410,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                 ],
             ],
             'xml' => [
-                'connection' => 'xml',
+                'connection' => 'two',
                 'mappings' => [
                     [
                         'type' => 'xml',
@@ -318,7 +421,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                 ],
             ],
             'staticPhp' => [
-                'connection' => 'staticPhp',
+                'connection' => 'two',
                 'mappings' => [
                     [
                         'type' => 'static_php',
@@ -333,31 +436,61 @@ class DoctrineOrmServiceProviderTest extends TestCase
         /** @var EntityManager $annotationEm */
         $annotationEm = $container['doctrine.orm.ems']['annotation'];
 
+        self::assertSame($container['doctrine.dbal.dbs']['one'], $annotationEm->getConnection());
         self::assertInstanceOf(EntityRepository::class, $annotationEm->getRepository(Annotation::class));
+        self::assertSame(
+            'Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity',
+            $annotationEm->getConfiguration()->getEntityNamespace('Entity\Annotation')
+        );
 
         /** @var EntityManager $simpleYamlEm */
         $simpleYamlEm = $container['doctrine.orm.ems']['simpleYaml'];
 
+        self::assertSame($container['doctrine.dbal.dbs']['one'], $simpleYamlEm->getConnection());
         self::assertInstanceOf(EntityRepository::class, $simpleYamlEm->getRepository(SimpleYaml::class));
+        self::assertSame(
+            'Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity',
+            $simpleYamlEm->getConfiguration()->getEntityNamespace('Entity\SimpleYaml')
+        );
 
         /** @var EntityManager $simpleXmlEm */
         $simpleXmlEm = $container['doctrine.orm.ems']['simpleXml'];
 
+        self::assertSame($container['doctrine.dbal.dbs']['one'], $simpleXmlEm->getConnection());
         self::assertInstanceOf(EntityRepository::class, $simpleXmlEm->getRepository(SimpleXml::class));
+        self::assertSame(
+            'Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity',
+            $simpleXmlEm->getConfiguration()->getEntityNamespace('Entity\SimpleXml')
+        );
 
         /** @var EntityManager $yamlEm */
         $yamlEm = $container['doctrine.orm.ems']['yaml'];
 
+        self::assertSame($container['doctrine.dbal.dbs']['two'], $yamlEm->getConnection());
         self::assertInstanceOf(EntityRepository::class, $yamlEm->getRepository(Yaml::class));
+        self::assertSame(
+            'Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity',
+            $yamlEm->getConfiguration()->getEntityNamespace('Entity\Yaml')
+        );
 
         /** @var EntityManager $xmlEm */
         $xmlEm = $container['doctrine.orm.ems']['xml'];
 
+        self::assertSame($container['doctrine.dbal.dbs']['two'], $xmlEm->getConnection());
         self::assertInstanceOf(EntityRepository::class, $xmlEm->getRepository(Xml::class));
+        self::assertSame(
+            'Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity',
+            $xmlEm->getConfiguration()->getEntityNamespace('Entity\Xml')
+        );
 
         /** @var EntityManager $staticPhp */
         $staticPhp = $container['doctrine.orm.ems']['staticPhp'];
 
+        self::assertSame($container['doctrine.dbal.dbs']['two'], $staticPhp->getConnection());
         self::assertInstanceOf(EntityRepository::class, $staticPhp->getRepository(StaticPhp::class));
+        self::assertSame(
+            'Chubbyphp\Tests\ServiceProvider\Resources\StaticPhp\Entity',
+            $staticPhp->getConfiguration()->getEntityNamespace('Entity\StaticPhp')
+        );
     }
 }

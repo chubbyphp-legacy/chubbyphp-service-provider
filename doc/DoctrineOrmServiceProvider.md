@@ -19,19 +19,23 @@ composer require doctrine/orm "^2.5"
     * **cache.metadata**: String with the cache type, defaults to `array`.
     * **cache.query**: String with the cache type, defaults to `array`.
 
-    Add additional cache provider factories by adding new service: `$container['doctrine.orm.em.cache_factory.<type>']`.
+    Add additional cache provider factories by adding new service:
+    `$container['doctrine.orm.em.cache_factory.<type>']`
 
     * **class_metadata.factory.name**: String with class, defaults to `Doctrine\ORM\Mapping\ClassMetadataFactory`.
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`.
-    * **custom.functions.datetime**: Array of datetime related custom functions. Example: `['name' => 'MyCustomFunction::class]`.
-    * **custom.functions.numeric**: Array of numeric related custom functions. Example: `['name' => 'MyCustomFunction::class]`.
-    * **custom.functions.string**: Array of string related custom functions. Example: `['name' => 'MyCustomFunction::class]`.
+    * **custom.functions.datetime**: Array of datetime related custom functions.
+    Example: `['name' => 'MyCustomFunction::class]`.
+    * **custom.functions.numeric**: Array of numeric related custom functions.
+    Example: `['name' => 'MyCustomFunction::class]`.
+    * **custom.functions.string**: Array of string related custom functions.
+    Example: `['name' => 'MyCustomFunction::class]`.
 
-    Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Reference][2]
+    Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Documentation][2]
 
     * **custom.hydration_modes**: Array of hydration modes. Example: `['name' => 'MyCustomHydrationMode::class]`.
 
-    Hydration mode classes need to extend `Doctrine\ORM\Internal\Hydration\AbstractHydrator`. [Reference][3]
+    Hydration mode classes need to extend `Doctrine\ORM\Internal\Hydration\AbstractHydrator`. [Documentation][3]
 
     * **entity.listener_resolver**: String with the resolver type, defaults to `default`.
 

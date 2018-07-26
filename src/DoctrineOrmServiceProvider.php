@@ -9,7 +9,6 @@ use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Cache\CacheConfiguration;
 use Doctrine\ORM\Cache\DefaultCacheFactory;
 use Doctrine\ORM\Cache\RegionsConfiguration;
@@ -138,7 +137,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             'second_level_cache.type' => 'array',
             'strategy.naming' => 'default',
             'strategy.quote' => 'default',
-            'types' => [],
         ];
     }
 
@@ -240,14 +238,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                 $config->setQuoteStrategy(
                     $container[sprintf('doctrine.orm.strategy.quote.%s', $options['strategy.quote'])]
                 );
-
-                foreach ((array) $options['types'] as $typeName => $typeClass) {
-                    if (Type::hasType($typeName)) {
-                        Type::overrideType($typeName, $typeClass);
-                    } else {
-                        Type::addType($typeName, $typeClass);
-                    }
-                }
 
                 $configs[$name] = $config;
             }

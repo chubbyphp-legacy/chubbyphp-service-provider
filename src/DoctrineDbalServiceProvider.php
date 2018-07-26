@@ -12,6 +12,7 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\DriverManager;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Doctrine\DBAL\Types\Type;
 
 final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 {
@@ -30,6 +31,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
         $container['doctrine.dbal.dbs.config'] = $this->getDbsConfigDefinition($container);
         $container['doctrine.dbal.dbs.event_manager'] = $this->getDbsEventManagerDefinition($container);
         $container['doctrine.dbal.dbs.options.initializer'] = $this->getDbsOptionsInitializerDefinition($container);
+        $container['doctrine.dbal.types'] = [];
     }
 
     /**
@@ -224,6 +226,14 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
             }
 
             $initialized = true;
+
+            foreach ((array) $container['doctrine.dbal.types'] as $typeName => $typeClass) {
+                if (Type::hasType($typeName)) {
+                    Type::overrideType($typeName, $typeClass);
+                } else {
+                    Type::addType($typeName, $typeClass);
+                }
+            }
 
             if (!isset($container['doctrine.dbal.dbs.options'])) {
                 $container['doctrine.dbal.dbs.options'] = [

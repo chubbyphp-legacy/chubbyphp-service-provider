@@ -15,8 +15,7 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\MappingException;
-use Doctrine\DBAL\Types\StringType;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Cache\DefaultCache;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -162,7 +161,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'second_level_cache.type' => 'array',
             'strategy.naming' => 'default',
             'strategy.quote' => 'default',
-            'types' => [],
         ], $container['doctrine.orm.em.default_options']);
         // end: doctrine.orm.em.default_options
 
@@ -231,16 +229,13 @@ class DoctrineOrmServiceProviderTest extends TestCase
                     'path' => __DIR__.'/Resources/Annotation/Entity',
                 ],
             ],
-            'types' => [
-                Type::STRING => StringType::class,
-                'anotherType' => StringType::class,
-            ],
         ];
 
         /** @var EntityManager $em */
         $em = $container['doctrine.orm.em'];
 
         self::assertInstanceOf(EntityRepository::class, $em->getRepository(Annotation::class));
+        self::assertInstanceOf(DefaultCache::class, $em->getCache());
     }
 
     public function testRegisterWithMultipleManager()

@@ -9,6 +9,9 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\IntegerType;
+use Doctrine\DBAL\Types\StringType;
+use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
@@ -33,6 +36,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.config'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.event_manager'));
         self::assertTrue($container->offsetExists('doctrine.dbal.dbs.options.initializer'));
+        self::assertTrue($container->offsetExists('doctrine.dbal.types'));
 
         // start: doctrine.dbal.db
         self::assertInstanceOf(Connection::class, $container['doctrine.dbal.db']);
@@ -97,21 +101,11 @@ class DoctrineDbalServiceProviderTest extends TestCase
         );
         // end: doctrine.dbal.db.event_manager
 
-        // start: doctrine.dbal.dbs
         self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs']);
-        // end: doctrine.dbal.dbs
-
-        // start: doctrine.dbal.dbs.config
         self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.config']);
-        // end: doctrine.dbal.dbs.config
-
-        // start: doctrine.dbal.dbs.event_manager
         self::assertInstanceOf(Container::class, $container['doctrine.dbal.dbs.event_manager']);
-        // end: doctrine.dbal.dbs.event_manager
-
-        // start: doctrine.dbal.dbs.options.initializer
         self::assertInstanceOf(\Closure::class, $container['doctrine.dbal.dbs.options.initializer']);
-        // end: doctrine.dbal.dbs.options.initializer
+        self::assertSame([], $container['doctrine.dbal.types']);
     }
 
     public function testRegisterWithOneConnetion()
@@ -124,6 +118,11 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $container['logger'] = function () {
             return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
         };
+
+        $container['doctrine.dbal.types'] = [
+            Type::STRING => IntegerType::class,
+            'anotherType' => StringType::class,
+        ];
 
         $container['doctrine.dbal.db.options'] = [
             'connection' => [

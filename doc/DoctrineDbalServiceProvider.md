@@ -41,6 +41,9 @@ composer require doctrine/dbal "^2.5"
 
   These and additional options are described in detail in [Doctrine Dbal Configuration][2].
 
+* **doctrine.dbal.types**: Array of dbal types (additional and/or override)
+Example: [Type::STRING => StringType::class]
+
 ## Services
 
 * **doctrine.dbal.db**: The database connection, instance of `Doctrine\DBAL\Connection`.

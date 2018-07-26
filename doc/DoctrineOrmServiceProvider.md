@@ -18,54 +18,40 @@ composer require doctrine/orm "^2.5"
     * **cache.hydration**: String with the cache type, defaults to `array`.
     * **cache.metadata**: String with the cache type, defaults to `array`.
     * **cache.query**: String with the cache type, defaults to `array`.
-
-    Add additional cache provider factories by adding new service:
-    `$container['doctrine.orm.em.cache_factory.<type>']`
-
+        Add additional cache provider factories by adding new service:
+        `$container['doctrine.orm.em.cache_factory.<type>']`
     * **class_metadata.factory.name**: String with class, defaults to `Doctrine\ORM\Mapping\ClassMetadataFactory`.
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`.
-    * **custom.functions.datetime**: Array of datetime related custom functions.
-    Example: `['name' => 'MyCustomFunction::class]`.
-    * **custom.functions.numeric**: Array of numeric related custom functions.
-    Example: `['name' => 'MyCustomFunction::class]`.
-    * **custom.functions.string**: Array of string related custom functions.
-    Example: `['name' => 'MyCustomFunction::class]`.
-
-    Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Documentation][2]
-
-    * **custom.hydration_modes**: Array of hydration modes. Example: `['name' => 'MyCustomHydrationMode::class]`.
-
-    Hydration mode classes need to extend `Doctrine\ORM\Internal\Hydration\AbstractHydrator`. [Documentation][3]
-
+    * **custom.functions.datetime**: Array of datetime related custom functions. Example: `['name' => 'CustomFunction::class]`.
+        Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Documentation][2]
+    * **custom.functions.numeric**: Array of numeric related custom functions.  Example: `['name' => 'CustomFunction::class]`.
+        Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Documentation][2]
+    * **custom.functions.string**: Array of string related custom functions. Example: `['name' => 'CustomFunction::class]`.
+        Function classes need to extend `Doctrine\ORM\Query\AST\Functions\FunctionNode`. [Documentation][2]
+    * **custom.hydration_modes**: Array of hydration modes. Example: `['name' => 'CustomHydrationMode::class]`.
+        Hydration mode classes need to extend `Doctrine\ORM\Internal\Hydration\AbstractHydrator`. [Documentation][3]
     * **entity.listener_resolver**: String with the resolver type, defaults to `default`.
-
-    Add additional resolvers by adding new service: `$container['doctrine.orm.entity.listener_resolver.<type>']`.
-
+        Add additional resolvers by adding new service:
+        `$container['doctrine.orm.entity.listener_resolver.<type>']`.
     * **mappings**: Array of Mappings.
         * **type**: The mapping driver to use. Can be any of: `annotation`, `yaml`, `simple_yaml`, `xml`, `simple_xml`,  or `static_php`.
         * **namespace**: The entity namespace. Example: `One\Entity`
         * **path**: The path to the entities. Example: `/path/to/project/One/Entity`
         * **alias**: The entity alias to the namespace. Example: `Alias\Entity`
         * **extension**: The file extension to search for mappings. Example: `.dcm.xml`
-
     * **proxies.auto_generate**: Enable or disable the auto generation of proxies. Defaults to `true`.
     * **proxies.dir**: The directory where generated proxies get saved. Example: `var/cache/doctrine/orm/proxies`.
     * **proxies.namespace**: The namespace of generated proxies. Defaults to `DoctrineProxy`.
-    * **query_hints**: Array of query hints. Example: `['hint' => 'MyCustomHint::class]`.
+    * **query_hints**: Array of query hints. Example: `['hint' => 'CustomHint::class]`.
     * **repository.default.class**: String with class, defaults to `Doctrine\ORM\EntityRepository`.
     * **repository.factory**: String with the repository factory type, defaults to `default`.
-
-    Add additional repository factories by adding new service: `$container['doctrine.orm.repository.factory.<type>']`.
-
+        Add additional repository factories by adding new service: `$container['doctrine.orm.repository.factory.<type>']`.
     * **second_level_cache.enabled**: Enable or disable second level cache, defaults to `false`.
     * **second_level_cache.type**: String with the cache type, defaults to `array`, see other caches `cache.hydration`).
     * **strategy.naming**: String with the naming strategy type, defaults to `default`.
-
-    Add additional naming stratigies by adding new service: `$container['doctrine.orm.strategy.naming.<type>']`.
-
+        Add additional naming stratigies by adding new service: `$container['doctrine.orm.strategy.naming.<type>']`.
     * **strategy.quote**: String with the quote strategy type, defaults to `default`.
-
-    Add additional quote stratigies by adding new service: `$container['doctrine.orm.strategy.quote.<type>']`.
+        Add additional quote stratigies by adding new service: `$container['doctrine.orm.strategy.quote.<type>']`.
 
 ## Services
 

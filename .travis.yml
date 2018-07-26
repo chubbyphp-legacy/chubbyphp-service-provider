@@ -21,6 +21,7 @@ matrix:
       env: dependencies=highest
 
 before_script:
+  - echo 'extension=apcu.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/apcu.ini
   - echo 'extension=memcached.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/memcached.ini
   - echo 'extension=mongodb.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/mongodb.ini
   - echo 'extension=redis.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/redis.ini

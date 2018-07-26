@@ -121,10 +121,10 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             'cache.query' => 'array',
             'class_metadata.factory.name' => ClassMetadataFactory::class,
             'connection' => 'default',
-            'custom.datetime.functions' => [],
+            'custom.functions.datetime' => [],
+            'custom.functions.numeric' => [],
+            'custom.functions.string' => [],
             'custom.hydration_modes' => [],
-            'custom.numeric.functions' => [],
-            'custom.string.functions' => [],
             'entity.listener_resolver' => 'default',
             'mappings' => [],
             'proxies.auto_generate' => true,
@@ -204,10 +204,10 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
                 $config->setClassMetadataFactoryName($options['class_metadata.factory.name']);
 
-                $config->setCustomDatetimeFunctions($options['custom.datetime.functions']);
+                $config->setCustomDatetimeFunctions($options['custom.functions.datetime']);
                 $config->setCustomHydrationModes($options['custom.hydration_modes']);
-                $config->setCustomNumericFunctions($options['custom.numeric.functions']);
-                $config->setCustomStringFunctions($options['custom.string.functions']);
+                $config->setCustomNumericFunctions($options['custom.functions.numeric']);
+                $config->setCustomStringFunctions($options['custom.functions.string']);
 
                 $config->setEntityListenerResolver(
                     $container[

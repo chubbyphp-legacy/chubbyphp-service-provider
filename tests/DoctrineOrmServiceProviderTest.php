@@ -149,10 +149,10 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'cache.query' => 'array',
             'class_metadata.factory.name' => ClassMetadataFactory::class,
             'connection' => 'default',
-            'custom.datetime.functions' => [],
+            'custom.functions.datetime' => [],
+            'custom.functions.numeric' => [],
+            'custom.functions.string' => [],
             'custom.hydration_modes' => [],
-            'custom.numeric.functions' => [],
-            'custom.string.functions' => [],
             'entity.listener_resolver' => 'default',
             'mappings' => [],
             'proxies.auto_generate' => true,
@@ -260,17 +260,17 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'cache.metadata' => 'apcu',
             'cache.query' => 'apcu',
             'class_metadata.factory.name' => $classMetadataFactoryClass,
-            'custom.datetime.functions' => [
+            'custom.functions.datetime' => [
                 'date' => \stdClass::class,
+            ],
+            'custom.functions.numeric' => [
+                'numeric' => \stdClass::class,
+            ],
+            'custom.functions.string' => [
+                'string' => \stdClass::class,
             ],
             'custom.hydration_modes' => [
                 'hydrator' => \stdClass::class,
-            ],
-            'custom.numeric.functions' => [
-                'numeric' => \stdClass::class,
-            ],
-            'custom.string.functions' => [
-                'string' => \stdClass::class,
             ],
             'entity.listener_resolver' => 'other',
             'mappings' => [
@@ -306,9 +306,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(ApcuCache::class, $config->getQueryCacheImpl());
         self::assertSame($classMetadataFactoryClass, $config->getClassMetadataFactoryName());
         self::assertSame(\stdClass::class, $config->getCustomDatetimeFunction('date'));
-        self::assertSame(\stdClass::class, $config->getCustomHydrationMode('hydrator'));
         self::assertSame(\stdClass::class, $config->getCustomNumericFunction('numeric'));
         self::assertSame(\stdClass::class, $config->getCustomStringFunction('string'));
+        self::assertSame(\stdClass::class, $config->getCustomHydrationMode('hydrator'));
         self::assertSame(
             $container['doctrine.orm.entity.listener_resolver.other'],
             $config->getEntityListenerResolver()

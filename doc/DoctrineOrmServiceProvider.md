@@ -30,6 +30,8 @@ composer require doctrine/orm "^2.5"
         `$container['doctrine.orm.entity.listener_resolver.<type>']`.
     * **mappings**: Array of Mappings.
         * **type**: The mapping driver to use. Can be any of: `annotation`, `yaml`, `simple_yaml`, `xml`, `simple_xml`,  or `static_php`.
+            Add additional mapping driver factories by adding new service:
+            `$container['doctrine.orm.mapping_driver.factory.<type>']`
         * **namespace**: The entity namespace. Example: `One\Entity`
         * **path**: The path to the entities. Example: `/path/to/project/One/Entity`
         * **alias**: The entity alias to the namespace. Example: `Alias\Entity`

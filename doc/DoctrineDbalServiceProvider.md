@@ -122,8 +122,10 @@ $container['doctrine.dbal.dbs']['name']
     ->fetch(\PDO::FETCH_ASSOC);
 ```
 
-(c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)
-(c) Dominik Zogg
+## Copyright
+
+* Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)
+* Dominik Zogg <dominik.zogg@gmail.com>
 
 [1]: https://www.doctrine-project.org/projects/dbal
 [2]: https://www.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/configuration.html

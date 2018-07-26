@@ -164,7 +164,10 @@ $container['doctrine.orm.ems']['name']
     ->findOneBy(['username' => 'john.doe@domain.com']);
 ```
 
-(c) Beau Simensen <beau@dflydev.com> (https://github.com/dflydev/dflydev-doctrine-orm-service-provider)
+## Copyright
+
+* Beau Simensen <beau@dflydev.com> (https://github.com/dflydev/dflydev-doctrine-orm-service-provider)
+* Dominik Zogg <dominik.zogg@gmail.com>
 
 [1]: https://www.doctrine-project.org/projects/orm
 [2]: https://www.doctrine-project.org/projects/doctrine-orm/en/latest/cookbook/dql-user-defined-functions.html

@@ -120,7 +120,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             'cache.hydration' => 'array',
             'cache.metadata' => 'array',
             'cache.query' => 'array',
-            'cache.second_level' => 'array',
             'class_metadata.factory.name' => ClassMetadataFactory::class,
             'connection' => 'default',
             'custom.datetime.functions' => [],
@@ -135,6 +134,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             'query_hints' => [],
             'repository.default.class' => EntityRepository::class,
             'repository.factory' => 'default',
+            'second_level_cache.enabled' => false,
+            'second_level_cache.type' => 'array',
             'strategy.naming' => 'default',
             'strategy.quote' => 'default',
             'types' => [],
@@ -262,7 +263,13 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
      */
     private function assignSecondLevelCache(Container $container, Configuration $config, array $options)
     {
-        $cacheFactoryKey = sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.second_level']);
+        if (!$options['second_level_cache.enabled']) {
+            $config->setSecondLevelCacheEnabled(false);
+
+            return;
+        }
+
+        $cacheFactoryKey = sprintf('doctrine.orm.em.cache_factory.%s', $options['second_level_cache.type']);
         $secondLevelCacheAdapter = $container[$cacheFactoryKey];
 
         $regionsCacheConfiguration = new RegionsConfiguration();
@@ -294,8 +301,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             if (!isset($container['doctrine.orm.ems.options'])) {
                 $container['doctrine.orm.ems.options'] = [
-                    'default' => isset($container['doctrine.orm.em.options'])
-                        ? $container['doctrine.orm.em.options'] : [],
+                    'default' => isset($container['doctrine.orm.em.options']) ?
+                        $container['doctrine.orm.em.options'] : [],
                 ];
             }
 

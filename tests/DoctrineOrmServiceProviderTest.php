@@ -15,11 +15,8 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\MappingException;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\StringType;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Cache\CacheConfiguration;
-use Doctrine\ORM\Cache\DefaultCache;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -78,7 +75,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(EntityManager::class, $em);
         self::assertSame($container['doctrine.dbal.db'], $em->getConnection());
         self::assertInstanceOf(ClassMetadataFactory::class, $em->getMetadataFactory());
-        self::assertInstanceOf(DefaultCache::class, $em->getCache());
+        self::assertNull($em->getCache());
 
         try {
             $hasMappingException = false;
@@ -133,8 +130,8 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertInstanceOf(DefaultQuoteStrategy::class, $config->getQuoteStrategy());
         self::assertInstanceOf(DefaultEntityListenerResolver::class, $config->getEntityListenerResolver());
         self::assertInstanceOf(DefaultRepositoryFactory::class, $config->getRepositoryFactory());
-        self::assertTrue($config->isSecondLevelCacheEnabled());
-        self::assertInstanceOf(CacheConfiguration::class, $config->getSecondLevelCacheConfiguration());
+        self::assertFalse($config->isSecondLevelCacheEnabled());
+        self::assertNull($config->getSecondLevelCacheConfiguration());
         self::assertSame([], $config->getDefaultQueryHints());
         self::assertNull($config->getSQLLogger());
         self::assertSame($container['doctrine.dbal.db.config']->getResultCacheImpl(), $config->getResultCacheImpl());
@@ -147,7 +144,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'cache.hydration' => 'array',
             'cache.metadata' => 'array',
             'cache.query' => 'array',
-            'cache.second_level' => 'array',
             'class_metadata.factory.name' => ClassMetadataFactory::class,
             'connection' => 'default',
             'custom.datetime.functions' => [],
@@ -162,6 +158,8 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'query_hints' => [],
             'repository.default.class' => EntityRepository::class,
             'repository.factory' => 'default',
+            'second_level_cache.enabled' => false,
+            'second_level_cache.type' => 'array',
             'strategy.naming' => 'default',
             'strategy.quote' => 'default',
             'types' => [],
@@ -225,6 +223,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         };
 
         $container['doctrine.orm.em.options'] = [
+            'second_level_cache.enabled' => true,
             'mappings' => [
                 [
                     'type' => 'annotation',

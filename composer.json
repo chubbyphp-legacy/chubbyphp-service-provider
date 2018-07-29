@@ -21,6 +21,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^6.5.8",
+        "chubbyphp/chubbyphp-mock": "~1.0@dev",
         "alcaeus/mongo-php-adapter": "^1.1.5",
         "doctrine/cache": "^1.6",
         "doctrine/dbal": "^2.5",

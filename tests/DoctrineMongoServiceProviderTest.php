@@ -2,6 +2,7 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
+use Chubbyphp\Mock\MockByCallsTrait;
 use Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider;
 use Doctrine\Common\EventManager;
 use Doctrine\MongoDB\Configuration;
@@ -15,6 +16,8 @@ use Psr\Log\LoggerInterface;
  */
 class DoctrineMongoServiceProviderTest extends TestCase
 {
+    use MockByCallsTrait;
+
     public function testRegisterWithDefaults()
     {
         $container = new Container();
@@ -101,7 +104,7 @@ class DoctrineMongoServiceProviderTest extends TestCase
         $serviceProvider->register($container);
 
         $container['logger'] = function () {
-            return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+            return $this->getMockByCalls(LoggerInterface::class);
         };
 
         $container['doctrine.mongo.db.options'] = [
@@ -126,7 +129,7 @@ class DoctrineMongoServiceProviderTest extends TestCase
         $serviceProvider->register($container);
 
         $container['logger'] = function () {
-            return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+            return $this->getMockByCalls(LoggerInterface::class);
         };
 
         $container['doctrine.mongo.dbs.options'] = [

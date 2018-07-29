@@ -2,6 +2,7 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
+use Chubbyphp\Mock\MockByCallsTrait;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\Logger\DoctrineDbalLogger;
 use Doctrine\Common\Cache\ApcuCache;
@@ -21,6 +22,8 @@ use Psr\Log\LoggerInterface;
  */
 class DoctrineDbalServiceProviderTest extends TestCase
 {
+    use MockByCallsTrait;
+
     public function testRegisterWithDefaults()
     {
         $container = new Container();
@@ -116,7 +119,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $dbalServiceProvider->register($container);
 
         $container['logger'] = function () {
-            return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+            return $this->getMockByCalls(LoggerInterface::class);
         };
 
         $container['doctrine.dbal.types'] = [
@@ -156,7 +159,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
         $dbalServiceProvider->register($container);
 
         $container['logger'] = function () {
-            return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+            return $this->getMockByCalls(LoggerInterface::class);
         };
 
         $container['doctrine.dbal.dbs.options'] = [

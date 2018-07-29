@@ -2,6 +2,8 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
+use Chubbyphp\Mock\Call;
+use Chubbyphp\Mock\MockByCallsTrait;
 use Chubbyphp\ServiceProvider\Logger\DoctrineMongoLogger;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -12,13 +14,18 @@ use Psr\Log\LoggerInterface;
  */
 class DoctrineMongoDbLoggerTest extends TestCase
 {
+    use MockByCallsTrait;
+
     public function testLogQuerySingle()
     {
         /** @var LoggerInterface|MockObject $logger */
-        $logger = $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
-        $logger->expects(self::once())
-            ->method('debug')
-            ->with('Alternative prefix: {"data":[{"binary":"YWJjZGVmZ2g=","posInfinite":"Infinity","negInfinite":"-Infinity"}]}');
+        $logger = $this->getMockByCalls(LoggerInterface::class, [
+            Call::create('debug')
+                ->with(
+                    'Alternative prefix: {"data":[{"binary":"YWJjZGVmZ2g=","posInfinite":"Infinity","negInfinite":"-Infinity"}]}',
+                    []
+                ),
+        ]);
 
         /** @var \MongoBinData $binary */
         $binary = $this->getMockBuilder(\MongoBinData::class)->disableOriginalConstructor()->getMock();
@@ -35,10 +42,9 @@ class DoctrineMongoDbLoggerTest extends TestCase
     public function testLogQueryWithSmallBatch()
     {
         /** @var LoggerInterface|MockObject $logger */
-        $logger = $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
-        $logger->expects(self::once())
-            ->method('debug')
-            ->with('Alternative prefix: {"batchInsert":true,"num":1,"data":[{"key":"value"}]}');
+        $logger = $this->getMockByCalls(LoggerInterface::class, [
+            Call::create('debug')->with('Alternative prefix: {"batchInsert":true,"num":1,"data":[{"key":"value"}]}', []),
+        ]);
 
         $doctrineLogger = new DoctrineMongoLogger($logger, 2, 'Alternative prefix: ');
         $doctrineLogger->logQuery([
@@ -53,10 +59,9 @@ class DoctrineMongoDbLoggerTest extends TestCase
     public function testLogQueryWithLargeBatch()
     {
         /** @var LoggerInterface|MockObject $logger */
-        $logger = $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
-        $logger->expects(self::once())
-            ->method('debug')
-            ->with('Alternative prefix: {"batchInsert":true,"num":2,"data":"**2 item(s)**"}');
+        $logger = $this->getMockByCalls(LoggerInterface::class, [
+            Call::create('debug')->with('Alternative prefix: {"batchInsert":true,"num":2,"data":"**2 item(s)**"}', [])
+        ]);
 
         $doctrineLogger = new DoctrineMongoLogger($logger, 1, 'Alternative prefix: ');
         $doctrineLogger->logQuery([

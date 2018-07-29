@@ -2,6 +2,7 @@
 
 namespace Chubbyphp\Tests\ServiceProvider;
 
+use Chubbyphp\Mock\MockByCallsTrait;
 use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
 use Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity\Annotation;
@@ -38,6 +39,8 @@ use Symfony\Component\Validator\Mapping\Cache\ApcCache;
  */
 class DoctrineOrmServiceProviderTest extends TestCase
 {
+    use MockByCallsTrait;
+
     public function testRegisterWithDefaults()
     {
         $container = new Container();
@@ -221,7 +224,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider->register($container);
 
         $container['logger'] = function () {
-            return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+            return $this->getMockByCalls(LoggerInterface::class);
         };
 
         $container['doctrine.orm.entity.listener_resolver.other'] = function () {
@@ -356,7 +359,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider->register($container);
 
         $container['logger'] = function () {
-            return $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+            return $this->getMockByCalls(LoggerInterface::class);
         };
 
         $container['doctrine.dbal.dbs.options'] = [

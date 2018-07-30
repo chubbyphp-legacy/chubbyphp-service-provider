@@ -99,8 +99,8 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
         $this->loadConnections();
 
         $connections = array();
-        foreach ($this->connections->keys() as $connectionName) {
-            $connections[$connectionName] = $this->connections[$connectionName];
+        foreach ($this->connections->keys() as $name) {
+            $connections[$name] = $this->connections[$name];
         }
 
         return $connections;
@@ -141,7 +141,11 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
             throw new \InvalidArgumentException(sprintf('Missing manager with name "%s".', $name));
         }
 
-        return $this->resetManagers[$name] ?? $this->originalManagers[$name];
+        if (isset($this->resetManagers[$name])) {
+            return $this->resetManagers[$name];
+        }
+
+        return $this->originalManagers[$name];
     }
 
     /**
@@ -152,8 +156,14 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
         $this->loadManagers();
 
         $managers = array();
-        foreach ($this->originalManagers->keys() as $managerName) {
-            $managers[$managerName] = $this->resetManagers[$managerName] ?? $this->originalManagers[$managerName];
+        foreach ($this->originalManagers->keys() as $name) {
+            if (isset($this->resetManagers[$name])) {
+                $manager = $this->resetManagers[$name];
+            } else {
+                $manager = $this->originalManagers[$name];
+            }
+
+            $managers[$name] = $manager;
         }
 
         return $managers;
@@ -237,9 +247,9 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
             $class = $proxyClass->getParentClass()->getName();
         }
 
-        foreach ($this->getManagerNames() as $managerName) {
-            if (!$this->getManager($managerName)->getMetadataFactory()->isTransient($class)) {
-                return $this->getManager($managerName);
+        foreach ($this->getManagerNames() as $name) {
+            if (!$this->getManager($name)->getMetadataFactory()->isTransient($class)) {
+                return $this->getManager($name);
             }
         }
     }

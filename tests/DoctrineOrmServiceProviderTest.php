@@ -32,7 +32,6 @@ use Doctrine\ORM\Repository\DefaultRepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Validator\Mapping\Cache\ApcCache;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider
@@ -243,14 +242,12 @@ class DoctrineOrmServiceProviderTest extends TestCase
             return new DefaultQuoteStrategy();
         };
 
-        $classMetadataFactory = new class() extends ClassMetadataFactory
-        {
+        $classMetadataFactory = new class() extends ClassMetadataFactory {
         };
 
         $classMetadataFactoryClass = get_class($classMetadataFactory);
 
-        $repository = new class() extends EntityRepository
-        {
+        $repository = new class() extends EntityRepository {
             public function __construct()
             {
             }

@@ -28,7 +28,7 @@ class DoctrineDbalLoggerTest extends TestCase
                         'picture' => '(binary value)',
                         'active' => true,
                     ]
-                )
+                ),
         ]);
 
         $dbalLogger = new DoctrineDbalLogger($logger);

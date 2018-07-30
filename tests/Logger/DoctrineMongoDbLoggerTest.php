@@ -60,7 +60,7 @@ class DoctrineMongoDbLoggerTest extends TestCase
     {
         /** @var LoggerInterface|MockObject $logger */
         $logger = $this->getMockByCalls(LoggerInterface::class, [
-            Call::create('debug')->with('Alternative prefix: {"batchInsert":true,"num":2,"data":"**2 item(s)**"}', [])
+            Call::create('debug')->with('Alternative prefix: {"batchInsert":true,"num":2,"data":"**2 item(s)**"}', []),
         ]);
 
         $doctrineLogger = new DoctrineMongoLogger($logger, 1, 'Alternative prefix: ');

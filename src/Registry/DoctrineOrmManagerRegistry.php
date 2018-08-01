@@ -7,11 +7,11 @@ namespace Chubbyphp\ServiceProvider\Registry;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\Persistence\ObjectRepository;
+use Doctrine\Common\Persistence\Proxy;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\ORMException;
-use Doctrine\ORM\Proxy\Proxy;
 use Pimple\Container;
 
 final class DoctrineOrmManagerRegistry implements ManagerRegistry
@@ -39,7 +39,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     /**
      * @var EntityManager[]
      */
-    private $resetManagers = [];
+    private $resetedManagers = [];
 
     /**
      * @var string
@@ -47,18 +47,11 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     private $defaultManagerName;
 
     /**
-     * @var string
-     */
-    private $proxyInterfaceName;
-
-    /**
      * @param Container $container
-     * @param string    $proxyInterfaceName
      */
-    public function __construct(Container $container, $proxyInterfaceName = Proxy::class)
+    public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->proxyInterfaceName = $proxyInterfaceName;
     }
 
     /**
@@ -141,8 +134,8 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
             throw new \InvalidArgumentException(sprintf('Missing manager with name "%s".', $name));
         }
 
-        if (isset($this->resetManagers[$name])) {
-            return $this->resetManagers[$name];
+        if (isset($this->resetedManagers[$name])) {
+            return $this->resetedManagers[$name];
         }
 
         return $this->originalManagers[$name];
@@ -157,8 +150,8 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
 
         $managers = array();
         foreach ($this->originalManagers->keys() as $name) {
-            if (isset($this->resetManagers[$name])) {
-                $manager = $this->resetManagers[$name];
+            if (isset($this->resetedManagers[$name])) {
+                $manager = $this->resetedManagers[$name];
             } else {
                 $manager = $this->originalManagers[$name];
             }
@@ -196,13 +189,13 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
 
         $originalManager = $this->originalManagers[$name];
 
-        $this->resetManagers[$name] = EntityManager::create(
+        $this->resetedManagers[$name] = EntityManager::create(
             $originalManager->getConnection(),
             $originalManager->getConfiguration(),
             $originalManager->getEventManager()
         );
 
-        return $this->resetManagers[$name];
+        return $this->resetedManagers[$name];
     }
 
     /**
@@ -243,7 +236,7 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
     public function getManagerForClass($class)
     {
         $proxyClass = new \ReflectionClass($class);
-        if ($proxyClass->implementsInterface($this->proxyInterfaceName)) {
+        if ($proxyClass->implementsInterface(Proxy::class)) {
             $class = $proxyClass->getParentClass()->getName();
         }
 

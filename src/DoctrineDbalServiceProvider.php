@@ -7,12 +7,13 @@ namespace Chubbyphp\ServiceProvider;
 use Chubbyphp\ServiceProvider\Logger\DoctrineDbalLogger;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Types\Type;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Doctrine\DBAL\Types\Type;
 
 final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 {
@@ -55,7 +56,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      */
     private function getDbApcuCacheFactoryDefinition(Container $container): callable
     {
-        return $container->factory(function () use ($container) {
+        return $container->protect(function (array $options) use ($container) {
             return new ApcuCache();
         });
     }
@@ -67,7 +68,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
      */
     private function getDbArrayCacheFactoryDefinition(Container $container): callable
     {
-        return $container->factory(function () use ($container) {
+        return $container->protect(function (array $options) use ($container) {
             return new ArrayCache();
         });
     }
@@ -176,8 +177,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
                         $config->setSQLLogger(new DoctrineDbalLogger($container['logger']));
                     }
 
-                    $cacheFactoryKey = sprintf('doctrine.dbal.db.cache_factory.%s', $configOptions['cache.result']);
-                    $config->setResultCacheImpl($container[$cacheFactoryKey]);
+                    $config->setResultCacheImpl(static::getCache($container, $configOptions['cache.result']));
 
                     $config->setFilterSchemaAssetsExpression($configOptions['filter_schema_assets_expression']);
                     $config->setAutoCommit($configOptions['auto_commit']);
@@ -252,5 +252,32 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             $container['doctrine.dbal.dbs.options'] = $tmp;
         });
+    }
+
+    /**
+     * @param Container    $container
+     * @param string|array $cacheDefinition
+     *
+     * @return Cache
+     *
+     * @throws \InvalidArgumentException
+     */
+    public static function getCache(Container $container, $cacheDefinition): Cache
+    {
+        $cacheType = 'array';
+        $cacheOptions = [];
+
+        if (is_string($cacheDefinition)) {
+            $cacheType = $cacheDefinition;
+        } elseif (is_array($cacheDefinition)) {
+            $cacheType = $cacheDefinition['type'];
+            $cacheOptions = $cacheDefinition['options'] ?? [];
+        }
+
+        $cacheFactoryKey = sprintf('doctrine.dbal.db.cache_factory.%s', $cacheType);
+
+        $cacheFactory = $container[$cacheFactoryKey];
+
+        return $cacheFactory($cacheOptions);
     }
 }

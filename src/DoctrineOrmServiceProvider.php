@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Chubbyphp\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
-use Doctrine\Common\Cache\ApcuCache;
-use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\ORM\Cache\CacheConfiguration;
@@ -163,15 +161,14 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
                 $config->setSQLLogger($container['doctrine.dbal.dbs.config'][$connectionName]->getSQLLogger());
 
-                $config->setQueryCacheImpl(
-                    $container[sprintf('doctrine.dbal.db.cache_factory.%s', $options['cache.query'])]
-                );
+                $config->setQueryCacheImpl(DoctrineDbalServiceProvider::getCache($container, $options['cache.query']));
                 $config->setHydrationCacheImpl(
-                    $container[sprintf('doctrine.dbal.db.cache_factory.%s', $options['cache.hydration'])]
+                    DoctrineDbalServiceProvider::getCache($container, $options['cache.hydration'])
                 );
                 $config->setMetadataCacheImpl(
-                    $container[sprintf('doctrine.dbal.db.cache_factory.%s', $options['cache.metadata'])]
+                    DoctrineDbalServiceProvider::getCache($container, $options['cache.metadata'])
                 );
+
                 $config->setResultCacheImpl(
                     $container['doctrine.dbal.dbs.config'][$connectionName]->getResultCacheImpl()
                 );
@@ -233,11 +230,11 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             return;
         }
 
-        $cacheFactoryKey = sprintf('doctrine.dbal.db.cache_factory.%s', $options['second_level_cache.type']);
-        $secondLevelCacheAdapter = $container[$cacheFactoryKey];
-
         $regionsCacheConfiguration = new RegionsConfiguration();
-        $factory = new DefaultCacheFactory($regionsCacheConfiguration, $secondLevelCacheAdapter);
+        $factory = new DefaultCacheFactory(
+            $regionsCacheConfiguration,
+            DoctrineDbalServiceProvider::getCache($container, $options['second_level_cache.type'])
+        );
 
         $cacheConfiguration = new CacheConfiguration();
         $cacheConfiguration->setCacheFactory($factory);

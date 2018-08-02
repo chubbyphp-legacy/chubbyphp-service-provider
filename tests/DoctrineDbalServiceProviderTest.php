@@ -16,6 +16,7 @@ use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\TestCase;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
+use Doctrine\Common\Cache\FilesystemCache;
 
 /**
  * @covers \Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider
@@ -127,7 +128,19 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'anotherType' => StringType::class,
         ];
 
+        $container['doctrine.dbal.db.cache_factory.filesystem'] = $container->protect(
+            function (array $options) use ($container) {
+                return new FilesystemCache($options['directory']);
+            }
+        );
+
+        $directory = sys_get_temp_dir();
+
         $container['doctrine.dbal.db.options'] = [
+            'configuration' => [
+                'auto_commit' => true,
+                'cache.result' => ['type' => 'filesystem', 'options' => ['directory' => $directory]],
+            ],
             'connection' => [
                 'dbname' => 'my_database',
                 'host' => 'mysql.someplace.tld',
@@ -149,6 +162,16 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'port' => 3306,
             'user' => 'my_username',
         ], $db->getParams());
+
+        /** @var Configuration $config */
+        $config = $container['doctrine.dbal.db.config'];
+
+        /** @var FilesystemCache $resultCache */
+        $resultCache = $config->getResultCacheImpl();
+
+        self::assertInstanceOf(FilesystemCache::class, $resultCache);
+
+        self::assertSame($directory, $resultCache->getDirectory());
     }
 
     public function testRegisterWithMultipleConnetions()

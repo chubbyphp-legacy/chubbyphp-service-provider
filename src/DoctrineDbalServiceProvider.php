@@ -95,7 +95,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
         return [
             'configuration' => [
                 'auto_commit' => true,
-                'cache.result' => 'array',
+                'cache.result' => ['type' => 'array'],
                 'filter_schema_assets_expression' => null,
             ],
             'connection' => [
@@ -177,7 +177,7 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
                         $config->setSQLLogger(new DoctrineDbalLogger($container['logger']));
                     }
 
-                    $config->setResultCacheImpl(static::getCache($container, $configOptions['cache.result']));
+                    $config->setResultCacheImpl($this->getCache($container, $configOptions['cache.result']));
 
                     $config->setFilterSchemaAssetsExpression($configOptions['filter_schema_assets_expression']);
                     $config->setAutoCommit($configOptions['auto_commit']);
@@ -188,6 +188,22 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             return $configs;
         };
+    }
+
+    /**
+     * @param Container    $container
+     * @param string|array $cacheDefinition
+     *
+     * @return Cache
+     */
+    private function getCache(Container $container, $cacheDefinition): Cache
+    {
+        $cacheType = $cacheDefinition['type'];
+        $cacheOptions = $cacheDefinition['options'] ?? [];
+
+        $cacheFactory = $container[sprintf('doctrine.dbal.db.cache_factory.%s', $cacheType)];
+
+        return $cacheFactory($cacheOptions);
     }
 
     /**
@@ -252,32 +268,5 @@ final class DoctrineDbalServiceProvider implements ServiceProviderInterface
 
             $container['doctrine.dbal.dbs.options'] = $tmp;
         });
-    }
-
-    /**
-     * @param Container    $container
-     * @param string|array $cacheDefinition
-     *
-     * @return Cache
-     *
-     * @throws \InvalidArgumentException
-     */
-    public static function getCache(Container $container, $cacheDefinition): Cache
-    {
-        $cacheType = 'array';
-        $cacheOptions = [];
-
-        if (is_string($cacheDefinition)) {
-            $cacheType = $cacheDefinition;
-        } elseif (is_array($cacheDefinition)) {
-            $cacheType = $cacheDefinition['type'];
-            $cacheOptions = $cacheDefinition['options'] ?? [];
-        }
-
-        $cacheFactoryKey = sprintf('doctrine.dbal.db.cache_factory.%s', $cacheType);
-
-        $cacheFactory = $container[$cacheFactoryKey];
-
-        return $cacheFactory($cacheOptions);
     }
 }

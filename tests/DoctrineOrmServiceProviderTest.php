@@ -141,9 +141,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
 
         // start: doctrine.orm.em.default_options
         self::assertEquals([
-            'cache.hydration' => 'array',
-            'cache.metadata' => 'array',
-            'cache.query' => 'array',
+            'cache.hydration' => ['type' => 'array'],
+            'cache.metadata' => ['type' => 'array'],
+            'cache.query' => ['type' => 'array'],
             'class_metadata.factory.name' => ClassMetadataFactory::class,
             'connection' => 'default',
             'custom.functions.datetime' => [],
@@ -158,8 +158,8 @@ class DoctrineOrmServiceProviderTest extends TestCase
             'query_hints' => [],
             'repository.default.class' => EntityRepository::class,
             'repository.factory' => 'default',
+            'second_level_cache' => ['type' => 'array'],
             'second_level_cache.enabled' => false,
-            'second_level_cache.type' => 'array',
             'strategy.naming' => 'default',
             'strategy.quote' => 'default',
         ], $container['doctrine.orm.em.default_options']);
@@ -251,9 +251,9 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $repositoryClass = get_class($repository);
 
         $container['doctrine.orm.em.options'] = [
-            'cache.hydration' => 'apcu',
-            'cache.metadata' => 'apcu',
-            'cache.query' => 'apcu',
+            'cache.hydration' => ['type' => 'apcu'],
+            'cache.metadata' => ['type' => 'apcu'],
+            'cache.query' => ['type' => 'apcu'],
             'class_metadata.factory.name' => $classMetadataFactoryClass,
             'custom.functions.datetime' => [
                 'date' => \stdClass::class,
@@ -283,8 +283,8 @@ class DoctrineOrmServiceProviderTest extends TestCase
             ],
             'repository.default.class' => $repositoryClass,
             'repository.factory' => 'other',
+            'second_level_cache' => ['type' => 'apcu'],
             'second_level_cache.enabled' => true,
-            'second_level_cache.type' => 'apcu',
             'strategy.naming' => 'other',
             'strategy.quote' => 'other',
         ];

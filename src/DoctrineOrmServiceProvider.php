@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Chubbyphp\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
+use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
 use Doctrine\ORM\Cache\CacheConfiguration;
@@ -88,9 +89,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     private function getOrmEmDefaultOptions(): array
     {
         return [
-            'cache.hydration' => 'array',
-            'cache.metadata' => 'array',
-            'cache.query' => 'array',
+            'cache.hydration' => ['type' => 'array'],
+            'cache.metadata' => ['type' => 'array'],
+            'cache.query' => ['type' => 'array'],
             'class_metadata.factory.name' => ClassMetadataFactory::class,
             'connection' => 'default',
             'custom.functions.datetime' => [],
@@ -105,8 +106,8 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             'query_hints' => [],
             'repository.default.class' => EntityRepository::class,
             'repository.factory' => 'default',
+            'second_level_cache' => ['type' => 'array'],
             'second_level_cache.enabled' => false,
-            'second_level_cache.type' => 'array',
             'strategy.naming' => 'default',
             'strategy.quote' => 'default',
         ];
@@ -161,13 +162,9 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
                 $config->setSQLLogger($container['doctrine.dbal.dbs.config'][$connectionName]->getSQLLogger());
 
-                $config->setQueryCacheImpl(DoctrineDbalServiceProvider::getCache($container, $options['cache.query']));
-                $config->setHydrationCacheImpl(
-                    DoctrineDbalServiceProvider::getCache($container, $options['cache.hydration'])
-                );
-                $config->setMetadataCacheImpl(
-                    DoctrineDbalServiceProvider::getCache($container, $options['cache.metadata'])
-                );
+                $config->setQueryCacheImpl($this->getCache($container, $options['cache.query']));
+                $config->setHydrationCacheImpl($this->getCache($container, $options['cache.hydration']));
+                $config->setMetadataCacheImpl($this->getCache($container, $options['cache.metadata']));
 
                 $config->setResultCacheImpl(
                     $container['doctrine.dbal.dbs.config'][$connectionName]->getResultCacheImpl()
@@ -218,6 +215,22 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     }
 
     /**
+     * @param Container    $container
+     * @param string|array $cacheDefinition
+     *
+     * @return Cache
+     */
+    private function getCache(Container $container, $cacheDefinition): Cache
+    {
+        $cacheType = $cacheDefinition['type'];
+        $cacheOptions = $cacheDefinition['options'] ?? [];
+
+        $cacheFactory = $container[sprintf('doctrine.dbal.db.cache_factory.%s', $cacheType)];
+
+        return $cacheFactory($cacheOptions);
+    }
+
+    /**
      * @param Container     $container
      * @param Configuration $config
      * @param array         $options
@@ -233,7 +246,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
         $regionsCacheConfiguration = new RegionsConfiguration();
         $factory = new DefaultCacheFactory(
             $regionsCacheConfiguration,
-            DoctrineDbalServiceProvider::getCache($container, $options['second_level_cache.type'])
+            $this->getCache($container, $options['second_level_cache'])
         );
 
         $cacheConfiguration = new CacheConfiguration();

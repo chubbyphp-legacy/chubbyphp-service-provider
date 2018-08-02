@@ -80,7 +80,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
         self::assertEquals([
             'configuration' => [
                 'auto_commit' => true,
-                'cache.result' => 'array',
+                'cache.result' => ['type' => 'array'],
                 'filter_schema_assets_expression' => null,
             ],
             'connection' => [
@@ -189,7 +189,7 @@ class DoctrineDbalServiceProviderTest extends TestCase
             'mysql_read' => [
                 'configuration' => [
                     'auto_commit' => false,
-                    'cache.result' => 'apcu',
+                    'cache.result' => ['type' => 'apcu'],
                     'filter_schema_assets_expression' => 'expression',
                 ],
                 'connection' => [
@@ -201,8 +201,9 @@ class DoctrineDbalServiceProviderTest extends TestCase
             ],
             'mysql_write' => [
                 'configuration' => [
-                    'cache.result' => 'apcu',
-                ],                'connection' => [
+                    'cache.result' => ['type' => 'apcu'],
+                ],
+                'connection' => [
                     'dbname' => 'my_database',
                     'host' => 'mysql_write.someplace.tld',
                     'password' => 'my_password',

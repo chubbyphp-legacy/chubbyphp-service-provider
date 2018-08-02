@@ -18,7 +18,7 @@ composer require doctrine/dbal "^2.5"
     * **configuration**
 
         * **auto_commit**: Auto commit. Defaults to `true`
-        * **cache.result**: String with the cache type, defaults to `array`.
+        * **cache.result**: Array with the cache settings, defaults to `['type' => 'array']`.
             Can be any of: `apcu`, `array`. Add additional cache provider factories by adding new service:
             `$container['doctrine.dbal.db.cache_factory.<type>']`
         * **filter_schema_assets_expression**: An expression to filter for schema (tables)

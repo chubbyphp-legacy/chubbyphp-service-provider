@@ -7,6 +7,7 @@ use Chubbyphp\Mock\MockByCallsTrait;
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
+use Doctrine\Common\Persistence\Proxy;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
@@ -420,5 +421,82 @@ class DoctrineOrmManagerRegistryTest extends TestCase
         $registry = new DoctrineOrmManagerRegistry($container);
 
         self::assertSame($repository, $registry->getRepository(\stdClass::class, 'default'));
+    }
+
+    public function testGetManagerForClassFound()
+    {
+        /** @var ClassMetadataFactory|MockObject $classMetadataFactory */
+        $classMetadataFactory = $this->getMockByCalls(ClassMetadataFactory::class, [
+            Call::create('isTransient')->with(Sample::class)->willReturn(false),
+        ]);
+
+        /** @var EntityManager|MockObject $manager */
+        $manager = $this->getMockByCalls(EntityManager::class, [
+            Call::create('getMetadataFactory')->with()->willReturn($classMetadataFactory),
+        ]);
+
+        /** @var Container|MockObject $container */
+        $container = $this->getMockByCalls(Container::class, [
+            Call::create('offsetGet')->with('doctrine.orm.ems')->willReturn(
+                $this->getMockByCalls(Container::class, [
+                    Call::create('keys')->with()->willReturn(['default']),
+                    Call::create('offsetExists')->with('default')->willReturn(true),
+                    Call::create('offsetGet')->with('default')->willReturn($manager),
+                ])
+            ),
+            Call::create('offsetGet')->with('doctrine.orm.ems.default')->willReturn('default'),
+        ]);
+
+        $registry = new DoctrineOrmManagerRegistry($container);
+
+        self::assertSame($manager, $registry->getManagerForClass(SampleProxy::class));
+    }
+
+    public function testGetManagerForClassNotFound()
+    {
+        /** @var ClassMetadataFactory|MockObject $classMetadataFactory */
+        $classMetadataFactory = $this->getMockByCalls(ClassMetadataFactory::class, [
+            Call::create('isTransient')->with(Sample::class)->willReturn(true),
+        ]);
+
+        /** @var EntityManager|MockObject $manager */
+        $manager = $this->getMockByCalls(EntityManager::class, [
+            Call::create('getMetadataFactory')->with()->willReturn($classMetadataFactory),
+        ]);
+
+        /** @var Container|MockObject $container */
+        $container = $this->getMockByCalls(Container::class, [
+            Call::create('offsetGet')->with('doctrine.orm.ems')->willReturn(
+                $this->getMockByCalls(Container::class, [
+                    Call::create('keys')->with()->willReturn(['default']),
+                    Call::create('offsetExists')->with('default')->willReturn(true),
+                    Call::create('offsetGet')->with('default')->willReturn($manager),
+                ])
+            ),
+            Call::create('offsetGet')->with('doctrine.orm.ems.default')->willReturn('default'),
+        ]);
+
+        $registry = new DoctrineOrmManagerRegistry($container);
+
+        self::assertNull($registry->getManagerForClass(SampleProxy::class));
+    }
+}
+
+class Sample
+{
+}
+
+class SampleProxy extends Sample implements Proxy
+{
+    public function __load()
+    {
+    }
+
+    /**
+     * @return bool
+     */
+    public function __isInitialized()
+    {
+        return false;
     }
 }

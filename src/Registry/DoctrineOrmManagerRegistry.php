@@ -235,14 +235,15 @@ final class DoctrineOrmManagerRegistry implements ManagerRegistry
      */
     public function getManagerForClass($class)
     {
-        $proxyClass = new \ReflectionClass($class);
-        if ($proxyClass->implementsInterface(Proxy::class)) {
-            $class = $proxyClass->getParentClass()->getName();
+        $reflectionClass = new \ReflectionClass($class);
+        if ($reflectionClass->implementsInterface(Proxy::class)) {
+            $class = $reflectionClass->getParentClass()->name;
         }
 
         foreach ($this->getManagerNames() as $name) {
-            if (!$this->getManager($name)->getMetadataFactory()->isTransient($class)) {
-                return $this->getManager($name);
+            $manager = $this->getManager($name);
+            if (!$manager->getMetadataFactory()->isTransient($class)) {
+                return $manager;
             }
         }
     }

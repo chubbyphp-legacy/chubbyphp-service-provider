@@ -37,8 +37,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
     public function register(Container $container)
     {
         $container['doctrine.orm.em'] = $this->getOrmEmDefinition($container);
-        $container['doctrine.orm.em.cache_factory.apcu'] = $this->getOrmApcuCacheFactoryDefinition($container);
-        $container['doctrine.orm.em.cache_factory.array'] = $this->getOrmArrayCacheFactoryDefinition($container);
         $container['doctrine.orm.em.config'] = $this->getOrmEmConfigDefinition($container);
         $container['doctrine.orm.em.default_options'] = $this->getOrmEmDefaultOptions();
         $container['doctrine.orm.ems'] = $this->getOrmEmsDefinition($container);
@@ -70,30 +68,6 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
 
             return $ems[$container['doctrine.orm.ems.default']];
         };
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmApcuCacheFactoryDefinition(Container $container): callable
-    {
-        return $container->factory(function () use ($container) {
-            return new ApcuCache();
-        });
-    }
-
-    /**
-     * @param Container $container
-     *
-     * @return callable
-     */
-    private function getOrmArrayCacheFactoryDefinition(Container $container): callable
-    {
-        return $container->factory(function () use ($container) {
-            return new ArrayCache();
-        });
     }
 
     /**
@@ -190,13 +164,13 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
                 $config->setSQLLogger($container['doctrine.dbal.dbs.config'][$connectionName]->getSQLLogger());
 
                 $config->setQueryCacheImpl(
-                    $container[sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.query'])]
+                    $container[sprintf('doctrine.dbal.db.cache_factory.%s', $options['cache.query'])]
                 );
                 $config->setHydrationCacheImpl(
-                    $container[sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.hydration'])]
+                    $container[sprintf('doctrine.dbal.db.cache_factory.%s', $options['cache.hydration'])]
                 );
                 $config->setMetadataCacheImpl(
-                    $container[sprintf('doctrine.orm.em.cache_factory.%s', $options['cache.metadata'])]
+                    $container[sprintf('doctrine.dbal.db.cache_factory.%s', $options['cache.metadata'])]
                 );
                 $config->setResultCacheImpl(
                     $container['doctrine.dbal.dbs.config'][$connectionName]->getResultCacheImpl()
@@ -259,7 +233,7 @@ final class DoctrineOrmServiceProvider implements ServiceProviderInterface
             return;
         }
 
-        $cacheFactoryKey = sprintf('doctrine.orm.em.cache_factory.%s', $options['second_level_cache.type']);
+        $cacheFactoryKey = sprintf('doctrine.dbal.db.cache_factory.%s', $options['second_level_cache.type']);
         $secondLevelCacheAdapter = $container[$cacheFactoryKey];
 
         $regionsCacheConfiguration = new RegionsConfiguration();

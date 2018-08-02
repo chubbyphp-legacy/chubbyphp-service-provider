@@ -19,18 +19,18 @@ composer require doctrine/dbal "^2.5"
 
         * **auto_commit**: Auto commit. Defaults to `true`
         * **cache.result**: String with the cache type, defaults to `array`.
-        Can be any of: `apcu`, `array`.
-        Define your own cache adapters by adding `doctrine.dbal.db.cache_factory.%s` to the container
+            Can be any of: `apcu`, `array`. Add additional cache provider factories by adding new service:
+            `$container['doctrine.dbal.db.cache_factory.<type>']`
         * **filter_schema_assets_expression**: An expression to filter for schema (tables)
 
     * **connection**:
 
         * **charset**: Specifies the charset used when connecting to the database.
-        Only relevant for `pdo_mysql`, and `pdo_oci/oci8`,
+            Only relevant for `pdo_mysql`, and `pdo_oci/oci8`,
         * **dbname**: The name of the database to connect to.
         * **driver**: The database driver to use, defaults to `pdo_mysql`.
-        Can be any of: `pdo_mysql`, `pdo_sqlite`, `pdo_pgsql`,
-        `pdo_oci`, `oci8`, `ibm_db2`, `pdo_ibm`, `pdo_sqlsrv`.
+            Can be any of: `pdo_mysql`, `pdo_sqlite`, `pdo_pgsql`,
+            `pdo_oci`, `oci8`, `ibm_db2`, `pdo_ibm`, `pdo_sqlsrv`.
         * **host**: The host of the database to connect to. Defaults to localhost.
         * **password**: The password of the database to connect to.
         * **path**: Only relevant for `pdo_sqlite`, specifies the path to the SQLite database.

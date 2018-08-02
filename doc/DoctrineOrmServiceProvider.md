@@ -18,7 +18,7 @@ composer require doctrine/orm "^2.5"
     * **cache.metadata**: String with the cache type, defaults to `array`.
     * **cache.query**: String with the cache type, defaults to `array`.
         Add additional cache provider factories by adding new service:
-        `$container['doctrine.orm.em.cache_factory.<type>']`
+        `$container['doctrine.dbal.db.cache_factory.<type>']`
     * **class_metadata.factory.name**: String with class, defaults to `Doctrine\ORM\Mapping\ClassMetadataFactory`.
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`.
     * **custom.functions.datetime**: Array of datetime related [custom functions][2].

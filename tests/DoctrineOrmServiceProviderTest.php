@@ -51,8 +51,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         $ormServiceProvider->register($container);
 
         self::assertArrayHasKey('doctrine.orm.em', $container);
-        self::assertArrayHasKey('doctrine.orm.em.cache_factory.apcu', $container);
-        self::assertArrayHasKey('doctrine.orm.em.cache_factory.array', $container);
         self::assertArrayHasKey('doctrine.orm.em.config', $container);
         self::assertArrayHasKey('doctrine.orm.em.default_options', $container);
         self::assertArrayHasKey('doctrine.orm.ems', $container);
@@ -104,9 +102,6 @@ class DoctrineOrmServiceProviderTest extends TestCase
         self::assertSame($container['doctrine.orm.em.config'], $em->getConfiguration());
         self::assertInstanceOf(ProxyFactory::class, $em->getProxyFactory());
         // end: doctrine.orm.em
-
-        self::assertInstanceOf(ApcuCache::class, $container['doctrine.orm.em.cache_factory.apcu']);
-        self::assertInstanceOf(ArrayCache::class, $container['doctrine.orm.em.cache_factory.array']);
 
         // start: doctrine.orm.em.config
         self::assertSame($container['doctrine.orm.em.config'], $container['doctrine.orm.ems.config']['default']);

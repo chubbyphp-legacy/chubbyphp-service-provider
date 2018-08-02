@@ -1,9 +1,9 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider;
+namespace Chubbyphp\Tests\ServiceProvider\ServiceProvider;
 
 use Chubbyphp\Mock\MockByCallsTrait;
-use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
+use Chubbyphp\ServiceProvider\ServiceProvider\DoctrineDbalServiceProvider;
 use Chubbyphp\ServiceProvider\Logger\DoctrineDbalLogger;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 use Doctrine\Common\Cache\FilesystemCache;
 
 /**
- * @covers \Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider
+ * @covers \Chubbyphp\ServiceProvider\ServiceProvider\DoctrineDbalServiceProvider
  */
 class DoctrineDbalServiceProviderTest extends TestCase
 {

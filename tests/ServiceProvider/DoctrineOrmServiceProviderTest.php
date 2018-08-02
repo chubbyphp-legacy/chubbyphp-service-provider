@@ -1,10 +1,10 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider;
+namespace Chubbyphp\Tests\ServiceProvider\ServiceProvider;
 
 use Chubbyphp\Mock\MockByCallsTrait;
-use Chubbyphp\ServiceProvider\DoctrineDbalServiceProvider;
-use Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider;
+use Chubbyphp\ServiceProvider\ServiceProvider\DoctrineDbalServiceProvider;
+use Chubbyphp\ServiceProvider\ServiceProvider\DoctrineOrmServiceProvider;
 use Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity\Annotation;
 use Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity\SimpleXml;
 use Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity\SimpleYaml;
@@ -34,7 +34,7 @@ use Pimple\Container;
 use Psr\Log\LoggerInterface;
 
 /**
- * @covers \Chubbyphp\ServiceProvider\DoctrineOrmServiceProvider
+ * @covers \Chubbyphp\ServiceProvider\ServiceProvider\DoctrineOrmServiceProvider
  */
 class DoctrineOrmServiceProviderTest extends TestCase
 {
@@ -272,7 +272,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                 [
                     'type' => 'annotation',
                     'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity',
-                    'path' => __DIR__.'/Resources/Annotation/Entity',
+                    'path' => __DIR__.'/../Resources/Annotation/Entity',
                 ],
             ],
             'proxies.auto_generate' => false,
@@ -367,7 +367,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                         'type' => 'annotation',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Annotation\Entity',
                         'alias' => 'Entity\Annotation',
-                        'path' => __DIR__.'/Resources/Annotation/Entity',
+                        'path' => __DIR__.'/../Resources/Annotation/Entity',
                     ],
                 ],
             ],
@@ -378,7 +378,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                         'type' => 'simple_yaml',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity',
                         'alias' => 'Entity\SimpleYaml',
-                        'path' => __DIR__.'/Resources/SimpleYaml/config',
+                        'path' => __DIR__.'/../Resources/SimpleYaml/config',
                     ],
                 ],
             ],
@@ -389,7 +389,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                         'type' => 'simple_xml',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\SimpleXml\Entity',
                         'alias' => 'Entity\SimpleXml',
-                        'path' => __DIR__.'/Resources/SimpleXml/config',
+                        'path' => __DIR__.'/../Resources/SimpleXml/config',
                     ],
                 ],
             ],
@@ -400,7 +400,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                         'type' => 'yaml',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Yaml\Entity',
                         'alias' => 'Entity\Yaml',
-                        'path' => __DIR__.'/Resources/Yaml/config',
+                        'path' => __DIR__.'/../Resources/Yaml/config',
                     ],
                 ],
             ],
@@ -411,7 +411,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                         'type' => 'xml',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\Xml\Entity',
                         'alias' => 'Entity\Xml',
-                        'path' => __DIR__.'/Resources/Xml/config',
+                        'path' => __DIR__.'/../Resources/Xml/config',
                     ],
                 ],
             ],
@@ -422,7 +422,7 @@ class DoctrineOrmServiceProviderTest extends TestCase
                         'type' => 'static_php',
                         'namespace' => 'Chubbyphp\Tests\ServiceProvider\Resources\StaticPhp\Entity',
                         'alias' => 'Entity\StaticPhp',
-                        'path' => __DIR__.'/Resources/StaticPhp/Entity',
+                        'path' => __DIR__.'/../Resources/StaticPhp/Entity',
                     ],
                 ],
             ],

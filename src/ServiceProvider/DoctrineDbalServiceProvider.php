@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chubbyphp\ServiceProvider;
+namespace Chubbyphp\ServiceProvider\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\Logger\DoctrineDbalLogger;
 use Doctrine\Common\Cache\ApcuCache;

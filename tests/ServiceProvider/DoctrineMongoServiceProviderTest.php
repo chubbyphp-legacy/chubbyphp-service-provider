@@ -1,9 +1,9 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider;
+namespace Chubbyphp\Tests\ServiceProvider\ServiceProvider;
 
 use Chubbyphp\Mock\MockByCallsTrait;
-use Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider;
+use Chubbyphp\ServiceProvider\ServiceProvider\DoctrineMongoServiceProvider;
 use Doctrine\Common\EventManager;
 use Doctrine\MongoDB\Configuration;
 use Doctrine\MongoDB\Connection;
@@ -12,7 +12,7 @@ use Pimple\Container;
 use Psr\Log\LoggerInterface;
 
 /**
- * @covers \Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider
+ * @covers \Chubbyphp\ServiceProvider\ServiceProvider\DoctrineMongoServiceProvider
  */
 class DoctrineMongoServiceProviderTest extends TestCase
 {

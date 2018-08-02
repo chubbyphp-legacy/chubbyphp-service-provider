@@ -1,8 +1,8 @@
 <?php
 
-namespace Chubbyphp\Tests\ServiceProvider;
+namespace Chubbyphp\Tests\ServiceProvider\ServiceProvider;
 
-use Chubbyphp\ServiceProvider\MonologServiceProvider;
+use Chubbyphp\ServiceProvider\ServiceProvider\MonologServiceProvider;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 /**
- * @covers \Chubbyphp\ServiceProvider\MonologServiceProvider
+ * @covers \Chubbyphp\ServiceProvider\ServiceProvider\MonologServiceProvider
  */
 class MonologServiceProviderTest extends TestCase
 {

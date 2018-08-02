@@ -34,7 +34,7 @@ composer require "monolog/monolog": "^1.4.1"
 ```php
 $container['monolog.logfile'] = __DIR__.'/development.log';
 
-$container->register(new Chubbyphp\ServiceProvider\MonologServiceProvider());
+$container->register(new Chubbyphp\ServiceProvider\ServiceProvider\MonologServiceProvider());
 ```
 
 ## Usage

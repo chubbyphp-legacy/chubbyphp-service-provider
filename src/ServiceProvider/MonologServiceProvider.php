@@ -2,11 +2,7 @@
 
 declare(strict_types=1);
 
-/*
- * (c) Fabien Potencier <fabien@symfony.com> (https://github.com/silexphp/Silex-Providers)
- */
-
-namespace Chubbyphp\ServiceProvider;
+namespace Chubbyphp\ServiceProvider\ServiceProvider;
 
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\GroupHandler;

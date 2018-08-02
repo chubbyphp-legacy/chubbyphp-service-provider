@@ -40,7 +40,7 @@ composer require doctrine/mongodb "^1.1"
 ```php
 $container = new Container():
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider()));
+$container->register(new Chubbyphp\ServiceProvider\ServiceProvider\DoctrineMongoServiceProvider()));
 
 $container['doctrine.mongo.db.options'] = [
     'server' => 'mongodb://localhost:27017',
@@ -57,7 +57,7 @@ $container['doctrine.mongo.db.options'] = [
 ```php
 $container = new Container():
 
-$container->register(new Chubbyphp\ServiceProvider\DoctrineMongoServiceProvider());
+$container->register(new Chubbyphp\ServiceProvider\ServiceProvider\DoctrineMongoServiceProvider());
 
 $container['doctrine.mongo.dbs.options'] = [
     'doctrine.mongo.db_read' => [

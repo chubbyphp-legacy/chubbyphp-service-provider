@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chubbyphp\ServiceProvider;
+namespace Chubbyphp\ServiceProvider\ServiceProvider;
 
 use Chubbyphp\ServiceProvider\Registry\DoctrineOrmManagerRegistry;
 use Doctrine\Common\Cache\Cache;

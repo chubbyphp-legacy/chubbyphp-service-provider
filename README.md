@@ -40,7 +40,7 @@ Dominik Zogg 2018
 
 [1]: https://packagist.org/packages/chubbyphp/chubbyphp-service-provider
 
-[2]: doc/DoctrineDbalServiceProvider.md
-[3]: doc/DoctrineOrmServiceProvider.md
-[4]: doc/DoctrineMongoServiceProvider.md
-[5]: doc/MonologServiceProvider.md
+[2]: doc/ServiceProvider/DoctrineDbalServiceProvider.md
+[3]: doc/ServiceProvider/DoctrineOrmServiceProvider.md
+[4]: doc/ServiceProvider/DoctrineMongoServiceProvider.md
+[5]: doc/ServiceProvider/MonologServiceProvider.md

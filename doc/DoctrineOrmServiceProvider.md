@@ -17,6 +17,7 @@ composer require doctrine/orm "^2.5"
     * **cache.hydration**: Array with the cache settings, defaults to `['type' => 'array']`.
     * **cache.metadata**: Array with the cache settings, defaults to `['type' => 'array']`.
     * **cache.query**: Array with the cache settings, defaults to `['type' => 'array']`.
+
         Add additional cache provider factories by adding new service:
         `$container['doctrine.dbal.db.cache_factory.<type>']`
     * **class_metadata.factory.name**: String with class, defaults to `Doctrine\ORM\Mapping\ClassMetadataFactory`.

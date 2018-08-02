@@ -1,10 +1,5 @@
 language: php
 
-php:
-  - 7.0
-  - 7.1
-  - 7.2
-
 matrix:
   include:
     - php: 7.0
@@ -24,7 +19,6 @@ before_script:
   - echo 'extension=apcu.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/apcu.ini
   - echo 'extension=memcached.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/memcached.ini
   - echo 'extension=mongodb.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/mongodb.ini
-  - echo 'extension=redis.so' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/redis.ini
   - echo 'Europe/Zurich' | sudo tee /etc/timezone
   - echo 'date.timezone = "Europe/Zurich"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - composer self-update -q

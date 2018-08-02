@@ -1,9 +1,0 @@
-Chubbyphp\Tests\ServiceProvider\Resources\SimpleYaml\Entity\SimpleYaml:
-  type: entity
-  table: simple_yaml
-  id:
-    id:
-      type: string
-  fields:
-    name:
-      type: string

@@ -15,10 +15,13 @@ composer require doctrine/orm "^2.5"
     These options are available:
 
     * **cache.hydration**: Array with the cache settings, defaults to `['type' => 'array']`.
+        Can be any of: `apcu`, `array`. Add additional cache provider factories by adding new service:
+        `$container['doctrine.dbal.db.cache_factory.<type>']`
     * **cache.metadata**: Array with the cache settings, defaults to `['type' => 'array']`.
+        Can be any of: `apcu`, `array`. Add additional cache provider factories by adding new service:
+        `$container['doctrine.dbal.db.cache_factory.<type>']`
     * **cache.query**: Array with the cache settings, defaults to `['type' => 'array']`.
-
-        Add additional cache provider factories by adding new service:
+        Can be any of: `apcu`, `array`. Add additional cache provider factories by adding new service:
         `$container['doctrine.dbal.db.cache_factory.<type>']`
     * **class_metadata.factory.name**: String with class, defaults to `Doctrine\ORM\Mapping\ClassMetadataFactory`.
     * **connection**: The connection name of the Doctrine DBAL configuration. Defaults to `default`.
@@ -45,7 +48,9 @@ composer require doctrine/orm "^2.5"
     * **repository.factory**: String with the repository factory type, defaults to `default`.
         Add additional repository factories by adding new service: `$container['doctrine.orm.repository.factory.<type>']`.
     * **second_level_cache.enabled**: Enable or disable second level cache, defaults to `false`.
-    * **second_level_cache**: String with the cache type, defaults to `array`, see other caches `cache.hydration`).
+    * **second_level_cache**: Array with the cache settings, defaults to `['type' => 'array']`.
+        Can be any of: `apcu`, `array`. Add additional cache provider factories by adding new service:
+        `$container['doctrine.dbal.db.cache_factory.<type>']`
     * **strategy.naming**: String with the naming strategy type, defaults to `default`.
         Add additional naming stratigies by adding new service: `$container['doctrine.orm.strategy.naming.<type>']`.
     * **strategy.quote**: String with the quote strategy type, defaults to `default`.
